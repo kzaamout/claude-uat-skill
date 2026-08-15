@@ -1,5 +1,11 @@
 # Decker UAT Skill — Requirements (v2)
 
+> **Status note (2026-08-14):** D3 below ("Generalizing beyond Decker") is now being
+> executed — the skill was renamed `webapp-uat` and made config-driven; see the
+> current `.claude/skills/webapp-uat/` files. This document is kept as-is for design
+> history; its references to "Decker" and `decker-uat` reflect the original context
+> this skill was built in, not the current state of the skill.
+
 Extends the existing `.claude/skills/decker-uat/SKILL.md` (phases 0–5, scenario-driven,
 Chrome-native, Spec Kit bug workflow). Informed by reviewing `tsilverberg/webapp-uat`,
 a full critical review pass, and a round of raw notes. Does not replace the existing

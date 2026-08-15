@@ -1,6 +1,6 @@
-# Decker UAT Skill — Usage Reference
+# webapp-uat — Usage Reference
 
-The full reference for `/decker-uat`. Also what `/decker-uat --help` prints —
+The full reference for `/webapp-uat`. Also what `/webapp-uat --help` prints —
 read from this file each time, not regenerated, so wording is exact and consistent.
 
 ---
@@ -9,12 +9,13 @@ read from this file each time, not regenerated, so wording is exact and consiste
 
 | Command | What it does |
 |---|---|
-| `/decker-uat` | Run all scenarios in `uat/scenarios/` |
-| `/decker-uat <path>` | Run one scenario file, or all scenarios in a directory |
-| `/decker-uat --help` | Print this reference |
-| `/decker-uat generate` | Draft scenarios from specs + schema + route gaps |
-| `/decker-uat generate <spec-path>` | Same, scoped to one feature |
-| `/decker-uat generate --priority <tiers>` | Same, scoped by priority |
+| `/webapp-uat setup` | Discovery-assisted wizard — proposes `config.md`/`scripts/dev.sh` values from the repo, asks before writing |
+| `/webapp-uat` | Run all scenarios in `uat/scenarios/` |
+| `/webapp-uat <path>` | Run one scenario file, or all scenarios in a directory |
+| `/webapp-uat --help` | Print this reference |
+| `/webapp-uat generate` | Draft scenarios from specs + schema + route gaps |
+| `/webapp-uat generate <spec-path>` | Same, scoped to one feature |
+| `/webapp-uat generate --priority <tiers>` | Same, scoped by priority |
 | `--review-before-fix` / `--no-review-before-fix` | Override the pre-fix review setting for this run |
 | `--silent` | Skip routine approvals; hard safety stops are never skipped |
 
@@ -22,42 +23,55 @@ read from this file each time, not regenerated, so wording is exact and consiste
 
 ## Commands in detail
 
-### `/decker-uat` — no arguments
+### `/webapp-uat setup`
 
-Runs every scenario file under `uat/scenarios/`. Equivalent to `/decker-uat uat/scenarios/`.
+Discovery-assisted config wizard — inspects this repo (start/stop commands, port,
+whether Spec Kit's bug-workflow is installed, a `specs/` convention) and proposes
+`config.md`/`scripts/dev.sh` values instead of requiring you to find them by hand.
+Every proposed value is labeled **detected** / **guessed** / **needs your input** —
+never presented as uniformly reliable. Nothing is written until you approve; runs
+safely even if `config.md` already exists (shows current vs. proposed, asks before
+replacing). Full behavior: `SKILL.md`'s Setup mode section. Walkthrough with an
+example transcript: `README.md`.
 
-### `/decker-uat <path>`
+### `/webapp-uat` — no arguments
+
+Runs every scenario file under `uat/scenarios/`. Equivalent to `/webapp-uat uat/scenarios/`.
+
+### `/webapp-uat <path>`
 
 `<path>` is a single scenario file, or a directory (every scenario file directly inside it).
 
-### `/decker-uat --help`
+### `/webapp-uat --help`
 
-Prints this file and stops. No git check, no Chrome connection attempt, no Decker
+Prints this file and stops. No git check, no Chrome connection attempt, no app
 start — safe to run anytime.
 
-### `/decker-uat generate [scope] [--priority tiers]`
+### `/webapp-uat generate [scope] [--priority tiers]`
 
-Drafts new scenarios instead of running existing ones, from three sources:
+Drafts new scenarios instead of running existing ones, from up to three sources
+(spec-derived and boundary-derived require `config.md`'s `spec-dir` to be set):
 
-- **spec-derived** — one candidate per acceptance criterion in `spec.md`/`tasks.md`,
-  including persona variants where a flow plausibly behaves differently per role.
-  Personas aren't separately defined anywhere — derived from whatever roles the specs
-  and use cases already reference.
+- **spec-derived** — one candidate per acceptance criterion in `spec.md`/`tasks.md`
+  under `spec-dir`, including persona variants where a flow plausibly behaves
+  differently per role. Personas aren't separately defined anywhere — derived from
+  whatever roles the specs and use cases already reference.
 - **boundary-derived** — Critical/High priority flows only. Real validation
   rules (field limits, required fields, enums) read from the actual code per flow,
   not guessed.
-- **route-gap-derived** — screens with no scenario coverage at all, found via
-  Decker's actual routing setup (discovered once, see Environment discovery below).
+- **route-gap-derived** — screens with no scenario coverage at all, found via the
+  app's actual routing setup (discovered once, see Environment discovery below). Runs
+  regardless of whether `spec-dir` is set.
 
 *(A fourth source, `review-derived`, isn't produced by `generate` — it comes from
 Phase 1's own review step noticing a gap, on any invocation, generated scenarios or
 hand-written ones alike. See the walkthrough below.)*
 
 ```
-/decker-uat generate                          → whole spec set
-/decker-uat generate specs/003-document-upload → scoped to one feature
-/decker-uat generate --priority critical,high  → scoped by priority tier
-/decker-uat generate specs/003-document-upload --priority critical  → both, combined
+/webapp-uat generate                          → whole spec set
+/webapp-uat generate specs/003-document-upload → scoped to one feature
+/webapp-uat generate --priority critical,high  → scoped by priority tier
+/webapp-uat generate specs/003-document-upload --priority critical  → both, combined
 ```
 
 Every draft is tagged with its source in the scenario's `Source:` field. All drafts —
@@ -72,7 +86,7 @@ hand-written scenarios, as one consolidated decision, not one round-trip per ite
 
 Overrides the project default (see Configuration) for this invocation only.
 
-- **On** (the built-in default): after Spec Kit's bug-assessment step, pause and show
+- **On** (the built-in default): after Phase 4's bug-assessment step, pause and show
   the assessment — summary, proposed fix, affected files — before the fix runs.
   Proceed / adjust / skip this bug.
 - **Off:** proceeds straight to the fix once assessed — except security, auth, data
@@ -98,16 +112,31 @@ under `--silent` rather than touching a spec file automatically).
 
 ## Configuration
 
-Project-level defaults live in `.claude/skills/decker-uat/config.md`:
+Every project-specific fact lives in `config.md` in this same folder (never in
+`SKILL.md` itself). Two ways to create it: `/webapp-uat setup` (recommended — proposes
+values from the repo) or copying `config.md.example` by hand. See `SETUP.md`.
 
 ```markdown
-# decker-uat config
+# webapp-uat config
+
+project-name: My App
+project-dir: /path/to/my-app
+
+bug-fix-mechanism: direct
+# bug-fix-mechanism: spec-kit
+# bug-assess-command: ...
+# bug-fix-command: ...
+# bug-test-command: ...
+
+spec-dir: specs/
 
 review-before-fix: on
+
+# backend-stores: postgres, qdrant
 ```
 
-Missing file → the built-in default (`on`) applies. A per-invocation flag always
-overrides this file for that one run.
+Missing `config.md` → the skill stops at Phase -1 and points here. A per-invocation
+flag always overrides `review-before-fix` from this file for that one run.
 
 ---
 
@@ -115,15 +144,14 @@ overrides this file for that one run.
 
 ### Phase 0 — Pre-flight
 
-- Git working tree clean — if not, asked to commit, stash, or cancel.
+- Git working tree (at `project-dir`) clean — if not, asked to commit, stash, or cancel.
 - `/chrome` connected.
-- `scripts/decker-dev.sh start` / `wait-ready` / `stop` sanity-checked once.
+- `scripts/dev.sh start` / `wait-ready` / `stop` sanity-checked once.
 - Every fixture an approved scenario needs exists under `uat/fixtures/` — missing
   ones get offered for synthesis (a genuinely valid file, not a placeholder).
 - **Resume check:** an incomplete previous run (`test-plan.md` with no
   `final-report.md`) prompts resume / abandon / start fresh.
-- **Environment discovery** runs once, ever, and is reused after —
-  see below.
+- **Environment discovery** runs once, ever, and is reused after — see below.
 - **Start-of-run cleanup:** any UAT-marked data left over from an earlier run gets
   purged. Always confirmed explicitly, `--silent` or not — this specific
   confirmation doesn't quietly go away over time; that's a manual edit to `SKILL.md`
@@ -131,11 +159,12 @@ overrides this file for that one run.
 
 ### Environment discovery (once, cached)
 
-The first run ever inspects Decker's codebase for how routing works, whether it's
-multi-locale, what test-data tooling exists, and how to verify backend state —
-writes findings to `.claude/skills/decker-uat/discovered-environment.md`, and every
-run after that just reads the file instead of re-discovering. Delete the file (or
-say so explicitly) to force a fresh look later.
+The first run ever inspects the app's codebase for how routing works, whether it's
+multi-locale, what test-data tooling exists, and what backend data stores are in play
+(zero, one, or several — whatever's actually present) — writes findings to
+`.claude/skills/webapp-uat/discovered-environment.md`, and every run after that just
+reads the file instead of re-discovering. Delete the file (or say so explicitly) to
+force a fresh look later.
 
 ### Phase 1 — Scenario review
 
@@ -147,7 +176,7 @@ review-derived. Full plan: uat/runs/2026-08-13-1430/test-plan.md
 Approve and begin / Adjust scenarios / Cancel?
 ```
 
-Nothing starts — no Decker, no browser — until you respond (or automatically, under
+Nothing starts — no app, no browser — until you respond (or automatically, under
 `--silent`, noted plainly in the final report either way).
 
 ### Phase 2 — Execution
@@ -157,11 +186,12 @@ One scenario at a time, in a visible Chrome window, at its declared viewport(s)
 account every time, rather than assuming the previous scenario left the right
 session state. Beyond console/network/screenshot capture: a real accessibility audit
 (axe-core, not visual guessing), a data-integrity check (`NaN`/`undefined`/stuck
-loading states), and a UI-conformance check against whatever the scenario's own
-`Related feature` spec actually requires. After the browser steps: a direct check
-against the backend (API where available, otherwise a direct read against the
-relational DB or vector store) confirming the data actually changed as expected —
-not just inferred from what the UI showed.
+loading states), and — when `spec-dir` is configured — a UI-conformance check against
+whatever the scenario's own `Related feature` spec actually requires. After the
+browser steps: a direct check against the backend (API where available, otherwise a
+direct read against whichever data store discovery identified) confirming the data
+actually changed as expected — not just inferred from what the UI showed. No backend
+store discoverable → this step is UI-only, noted in the finding.
 
 ```
 Scenario 3/8 done — 1 bug found and fixed.
@@ -174,11 +204,14 @@ severity (P0–P3). Only `BUG` triggers Phase 4.
 
 ### Phase 4 — Bug fix cycle
 
-Stop Decker → assess (Spec Kit) → pause for sign-off if `review-before-fix` is on →
-fix → test → restart → **retest every fix in the browser, once** → commit each bug
-separately. Multiple bugs from one scenario share a single restart/retest rather than
-paying that cost per bug. Two restarts failing in a row stops the whole run — treated
-as the environment breaking, not a hard bug.
+Stop the app → assess → pause for sign-off if `review-before-fix` is on → fix → test
+→ restart → **retest every fix in the browser, once** → commit each bug separately.
+Assessment and fix run through whichever mechanism `config.md`'s
+`bug-fix-mechanism` names — `direct` (Claude assesses and fixes in-session, the
+default) or `spec-kit` (delegates to Spec Kit's assess/fix/test commands, if this
+repo has that extension installed). Multiple bugs from one scenario share a single
+restart/retest rather than paying that cost per bug. Two restarts failing in a row
+stops the whole run — treated as the environment breaking, not a hard bug.
 
 ### Phase 5 — Final report
 
@@ -199,10 +232,11 @@ explicit confirmation as the start-of-run purge.
 ## File & directory reference
 
 ```
-.claude/skills/decker-uat/
-  SKILL.md                        the skill itself
+.claude/skills/webapp-uat/
+  SKILL.md                        the skill itself — never hand-edited per project
   USAGE.md                        this file
-  config.md                       project defaults (optional)
+  config.md.example               template — copy to config.md and fill in
+  config.md                       your project's settings (you create this)
   discovered-environment.md       cached environment facts (auto-created)
 
 uat/
@@ -218,9 +252,7 @@ uat/
     screenshots, evidence
 
 scripts/
-  decker-dev.sh                   start / stop / wait-ready wrapper
-
-.specify/bugs/<slug>/             Spec Kit's own bug-workflow records
+  dev.sh                           start / stop / wait-ready wrapper for your app
 ```
 
 ---
@@ -251,10 +283,10 @@ between runs structurally unlikely, rather than something handled by a policy fo
 
 Whether bug severity (P0–P3) should gate auto-fix eligibility — e.g. only P0/P1
 auto-fixed, P2/P3 batched into the report instead — is unresolved. Every `BUG`
-currently attempts a fix regardless of severity. See `decker-uat-v2-requirements.md`
-for this and a handful of deferred ideas not built in this version (environment
-setup/teardown beyond test-data cleanup, chat-app approval, generalizing beyond
-Decker, batch/parallel bug-fixing).
+currently attempts a fix regardless of severity. See `docs/design-history.md` (in
+the skill's source repo) for this and a handful of deferred ideas not built in this
+version (environment setup/teardown beyond test-data cleanup, chat-app approval,
+batch/parallel bug-fixing).
 
 ---
 

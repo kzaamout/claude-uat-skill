@@ -14,7 +14,7 @@ What the end user is trying to accomplish.
 
 ## Preconditions
 
-- Decker state
+- App state
 - Existing data
 - Authentication: which account this scenario logs in as (a fixed test account from
   seed data — re-established explicitly at the start of this scenario, not assumed
