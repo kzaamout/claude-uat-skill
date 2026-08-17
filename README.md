@@ -14,6 +14,7 @@ project, tech stack, or bug-tracking tool is assumed — see [Configuration](#co
 - [Prerequisites](#prerequisites)
 - [Installation & setup](#installation--setup)
 - [Quick start](#quick-start)
+- [Try it with the bundled demo app](#try-it-with-the-bundled-demo-app)
 - [Commands](#commands)
 - [Flags](#flags)
 - [Configuration](#configuration)
@@ -176,6 +177,53 @@ it finds. Every run after that reuses the cache instead of re-discovering.
 
 ---
 
+## Try it with the bundled demo app
+
+Don't have a project to point this at yet, or just want to see it run before wiring it
+into your own app? This repo includes a real, working demo app —
+[`demo-app`](demo-app) — a Next.js + Postgres "Team Documents" app with roles,
+uploads, comments, and three seeded, off-by-default bugs (a permission bypass, a
+missing-label accessibility violation, and a silent backend-write failure) purpose-built
+to exercise every phase of this skill, including the parts a UI-only check would miss.
+
+`demo-app` is a **git submodule** — its own independent repo
+([`webapp-uat-demo`](https://github.com/kzaamout/webapp-uat-demo)), not plain files
+in this one. It needs its own start/stop commands and its own `config.md`, and keeping
+it separate means this skill's own root-detection (`git rev-parse --show-toplevel`)
+resolves correctly against the demo app's actual repo root instead of this one's — see
+[`docs/design-history.md`](docs/design-history.md) D6 for why a plain subdirectory
+didn't work here.
+
+### Get it
+
+If you're cloning this repo fresh, pull the submodule in the same step:
+
+```bash
+git clone --recurse-submodules https://github.com/kzaamout/claude-uat-skill.git
+```
+
+Already have a local clone without it?
+
+```bash
+git submodule update --init
+```
+
+### Run it, then test it
+
+```bash
+cd demo-app
+/webapp-uat setup          # proposes config.md from what's actually in demo-app/
+./run.sh                   # brings up Postgres, migrates, seeds, starts the dev server
+```
+
+From there, `demo-app`'s own [`README.md`](https://github.com/kzaamout/webapp-uat-demo#readme)
+has the full walkthrough: seeded accounts, what the app is built to exercise, and a
+step-by-step testing guide — one section per command/scenario (setup, running one
+scenario, running all of them, `generate`, each of the three seeded bugs, `--silent`
+mode, fixture auto-synthesis) with the steps, the expected outcome, and why, for each.
+
+---
+
 ## Commands
 
 | Command | What it does |
@@ -316,6 +364,9 @@ uat/
 
 scripts/
   dev.sh                           start / stop / wait-ready wrapper for your app
+
+demo-app/                          git submodule — a separate repo (webapp-uat-demo),
+                                    see "Try it with the bundled demo app" above
 ```
 
 ---
@@ -353,3 +404,5 @@ scripts/
   decisions, still-open questions, and deferred ideas
 - [`uat/scenarios/_template.md`](uat/scenarios/_template.md) — the shape every
   scenario follows
+- [`demo-app`](demo-app) / [`webapp-uat-demo`](https://github.com/kzaamout/webapp-uat-demo) —
+  the bundled demo app (submodule) and its own setup/testing walkthrough

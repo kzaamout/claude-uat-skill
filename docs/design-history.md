@@ -416,6 +416,39 @@ entry specifically (the actual signal a `Procfile` exists to provide), as its ow
 distinct rule — not folding it back into the `Makefile`-shaped-target check it was
 never a good fit for.
 
+### D6 — `demo-app` as a git submodule, not a plain subdirectory
+
+Found while running `/webapp-uat setup` against the first build of the demo app
+(2026-08-16): Setup mode's root-detection (`git rev-parse --show-toplevel`, run from
+this skill's own installed location) resolved to `claude-uat-skill`'s root, not
+`demo-app`'s — because a plain subdirectory shares its parent repo's `.git`, it has no
+root of its own. Start/stop detection came back empty even though `demo-app/run.sh` +
+`docker-compose.yml` existed one level down, and `bug-fix-mechanism` was proposed as
+`spec-kit` by matching `claude-uat-skill`'s own `.specify/` directory — evidence that
+belonged to the wrong project entirely.
+
+Two fixes were considered: give `demo-app` its own repo entirely, with a separate
+install script in `claude-uat-skill` to clone and wire it up; or a git submodule. Went
+with the submodule — a submodule has its own `.git` (a gitlink, not a subdirectory), so
+`git rev-parse --show-toplevel` run from inside it correctly resolves to its own root
+once the skill is installed there, and setup's detection now works exactly as designed
+against `demo-app`'s actual root. It also keeps the "one clone, try it immediately"
+quickstart intact (`git clone --recurse-submodules ...`), which a fully separate
+repo + manual install script would have cost.
+
+`demo-app` now lives at its own remote,
+[`kzaamout/webapp-uat-demo`](https://github.com/kzaamout/webapp-uat-demo), referenced
+from `claude-uat-skill` by `.gitmodules`. Its own `scripts/dev.sh` resolves
+`PROJECT_DIR` relative to its own location (not a hardcoded absolute path) for the same
+underlying reason — the same repo may be checked out standalone or as a submodule at
+any parent path, and only self-relative resolution is correct in both cases.
+
+**If revisited**: this only fixes the *scope* of root-detection, not the underlying
+`bug-fix-mechanism: spec-kit` false-positive risk when `specify` happens to be globally
+on `PATH` without a project-local `.specify/` directory — Setup mode still proposes
+`spec-kit` from that global-`PATH` evidence alone. Worth tightening later to require a
+project-local `.specify/` directory as well, not `PATH` presence on its own.
+
 ---
 
 ## Open questions summary (resolve before building)
