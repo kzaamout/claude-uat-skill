@@ -300,7 +300,9 @@ fully implemented and converged (zero convergence findings).
 ---
 
 ### UAT-11 — One-Command Install
-**Status: In progress** (approved plan, Phase 2).
+**Status: Done (specified, text-traced; live `/plugin` verification blocked as
+anticipated).** Formalized via Spec Kit (`specs/010-one-command-install/`), fully
+implemented and converged (zero convergence findings).
 
 - **User outcome**: A stranger installs the skill in a project with two native Claude
   Code commands (`/plugin marketplace add` + `/webapp-uat setup`), no manual
@@ -313,9 +315,17 @@ fully implemented and converged (zero convergence findings).
   `config.md`.
 - **Scope explicitly deferred**: a separate `curl | sh` install script.
 - **Dependencies**: UAT-01 (extends Setup mode).
-- **Completion evidence** (target): from a scratch clone, `/plugin marketplace add` +
-  `/plugin install` + `/webapp-uat setup` lands `config.md`, `scripts/dev.sh`, and
-  `uat/scenarios/_template.md` correctly with zero manual file copying.
+- **Completion evidence**: unlike every other slice this session, all 8 FRs
+  already matched existing, already-committed text exactly — this feature
+  retroactively formalizes work built directly in a prior session. Zero
+  `SKILL.md`/`marketplace.json` edits were needed; `/speckit-analyze` confirmed
+  zero drift and `/speckit-implement` ran as a genuine no-op. Text-traced
+  against all 8 FRs and 9 acceptance criteria, zero `/speckit-converge`
+  findings. **Live verification of the actual `/plugin marketplace add` +
+  `/plugin install` flow remains explicitly blocked** — `/plugin` is an
+  interactive CLI meta-command with no tool access available in this session;
+  tracked in `specs/010-one-command-install/quickstart.md`'s "Done when"
+  section as an open item for the user or a fresh session with real access.
 
 ---
 
@@ -343,14 +353,16 @@ bug on), and shipped as its own repo/submodule
 
 ---
 
-**Build order followed so far**: `UAT-01 → UAT-03 → UAT-02 → UAT-06 → UAT-12 → UAT-05
-→ UAT-04 → UAT-07 → UAT-08 → UAT-10 → UAT-09`, ahead of the original suggested
-order in places (`UAT-12` pulled forward once its architecture was approved,
-since later slices' completion evidence depends on it existing).
+**Build order followed**: `UAT-01 → UAT-03 → UAT-02 → UAT-06 → UAT-12 → UAT-05
+→ UAT-04 → UAT-07 → UAT-08 → UAT-10 → UAT-09 → UAT-11`, ahead of the original
+suggested order in places (`UAT-12` pulled forward once its architecture was
+approved, since later slices' completion evidence depends on it existing).
 
-**Remaining**: `UAT-11` only — one-command install, continuing independently (no
-hard dependency on the others beyond UAT-01). Every other slice (`UAT-01`
-through `UAT-10`) is now **Done**. `UAT-09` landed specified-but-not-
-live-verified as anticipated — that verification stays an open item pending a
-Spec-Kit bug-workflow extension being installed somewhere to demonstrate
-against.
+**All 12 roadmap slices are now Done.** Two land specified-but-not-
+live-verified, both for the same structural reason — no tool access in this
+session to the external system each depends on: `UAT-09` needs an installed
+Spec-Kit bug-workflow extension; `UAT-11` needs real `/plugin` CLI access. Both
+are tracked as explicit open items in their own `quickstart.md`, not silently
+treated as done. Remaining, non-roadmap work: item 5 from the session's
+standing "proceed with all of them" authorization (demo recording + LinkedIn
+draft) has not yet been started.
