@@ -425,7 +425,10 @@ not one restart per bug:
    alone doesn't close anything out.
 5. Any individual bug whose retest still fails: up to 2 more diagnose/fix cycles for
    that bug specifically, then mark it unresolved and continue with independent
-   scenarios.
+   scenarios. **Each retry cycle re-applies step 2's pause gates in full** — the
+   unconditional high-risk pause, and the routine `REVIEW_BEFORE_FIX` pause where
+   applicable — exactly as the original attempt. Approval given for one fix attempt
+   is never carried forward as approval for a retry of that same bug.
 6. Once verified, commit **each bug separately** — fix + regression test (if any) +
    bug-workflow records (if `spec-kit`) + finding file per commit, even though the
    restart/retest was shared.
@@ -439,7 +442,12 @@ Write `uat/runs/<run-id>/final-report.md`:
 - Scenarios: proposed / approved / run / passed / failed / blocked. If this run used
   `generate`, break down by source: N spec-derived, N boundary-derived, N
   route-gap-derived, N review-derived.
-- Bugs: fixed & browser-verified / unresolved, **sorted by severity** within each group.
+- Bugs: fixed & browser-verified / unresolved, **sorted by severity** within each
+  group. **An unresolved bug names why**: retry budget exhausted (that bug's own 2
+  additional diagnose/fix cycles all failed retest) vs. run stopped by the
+  two-consecutive-restart-failure threshold (the environment itself became
+  unstable) — these are two different failure modes and must not be reported under
+  one undivided "unresolved" label.
 - Unexpected behaviour, UX friction, spec gaps — each with a recommendation: no action
   / update the existing feature spec / new feature spec / needs more research.
 - Evidence paths and commits made this run.
