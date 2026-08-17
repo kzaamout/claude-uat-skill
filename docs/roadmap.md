@@ -219,10 +219,13 @@ fully implemented and converged (zero convergence findings).
 ---
 
 ### UAT-09 — Bug-Fix Cycle (Spec-Kit Mechanism)
-**Status: Not yet formalized. Live-verification blocked** — needs a target repo with
-Spec Kit's bug-workflow extension actually installed and its three commands
+**Status: Done (specified, text-traced; live-verification blocked as anticipated).**
+Formalized via Spec Kit (`specs/009-bug-fix-cycle-speckit/`), fully implemented and
+converged (zero convergence findings). Live invocation still needs a target repo
+with Spec Kit's bug-workflow extension actually installed and its three commands
 configured; `demo-app` uses `bug-fix-mechanism: direct` deliberately (see D6), so it
-cannot supply completion evidence for this slice as-is.
+cannot supply live completion evidence for this slice as-is — tracked explicitly as
+an open item, not silently treated as done.
 
 - **User outcome**: Same fix cycle as UAT-04, but delegated to an installed Spec Kit
   bug-workflow extension's assess/fix/test commands instead of Claude fixing
@@ -234,6 +237,26 @@ cannot supply completion evidence for this slice as-is.
   Kit's bug-workflow extension actually installed.
 - **Relevant specification sources**: `SKILL.md` Phase 4 (`bug-fix-mechanism:
   spec-kit` branch); `config.md.example` "Bug-fix mechanism" section.
+- **Completion evidence**: re-reading the current text against every FR found it
+  more complete than initially assumed — most of the cycle's structure
+  (batching, restart threshold, retry budget, pause-gate re-triggering, commit
+  granularity) already lives in Phase 4's *shared* steps, reused unmodified from
+  `UAT-04`, and already applies identically to both mechanisms. Four real gaps
+  closed: the spec-kit branch's review-pause bullet no longer assumes the
+  external tool's assessment output matches the direct mechanism's specific
+  shape; a retry now explicitly reuses the existing assessment slug rather than
+  re-running `<bug-assess-command>`; a configured command failing to execute is
+  now a distinct, explicitly-reported "tool-invocation failure" that pauses the
+  run unconditionally (a `--silent`-skippability ambiguity here was caught by
+  `/speckit-analyze` and fixed — this pause is never skipped, matching the
+  restart-failure threshold's treatment); Phase 5's final report now
+  distinguishes three failure modes instead of two. Text-traced against all 13
+  FRs and 12 acceptance criteria, one `/speckit-analyze` finding resolved
+  inline, zero `/speckit-converge` findings. **Live verification remains
+  explicitly blocked** — tracked in
+  `specs/009-bug-fix-cycle-speckit/quickstart.md`'s "Done when" section as an
+  open item for whoever next has access to a project with a real installed Spec
+  Kit bug-workflow extension.
 
 ---
 
@@ -321,11 +344,13 @@ bug on), and shipped as its own repo/submodule
 ---
 
 **Build order followed so far**: `UAT-01 → UAT-03 → UAT-02 → UAT-06 → UAT-12 → UAT-05
-→ UAT-04 → UAT-07 → UAT-08 → UAT-10`, ahead of the original suggested order in
-places (`UAT-12` pulled forward once its architecture was approved, since later
-slices' completion evidence depends on it existing).
+→ UAT-04 → UAT-07 → UAT-08 → UAT-10 → UAT-09`, ahead of the original suggested
+order in places (`UAT-12` pulled forward once its architecture was approved,
+since later slices' completion evidence depends on it existing).
 
-**Remaining order**: `UAT-09 → UAT-11`
-(`UAT-11` continues in parallel — no hard dependency on the others beyond UAT-01).
-`UAT-09` is expected to land specified-but-not-live-verified, pending a Spec-Kit
-bug-workflow extension being installed somewhere to demonstrate against.
+**Remaining**: `UAT-11` only — one-command install, continuing independently (no
+hard dependency on the others beyond UAT-01). Every other slice (`UAT-01`
+through `UAT-10`) is now **Done**. `UAT-09` landed specified-but-not-
+live-verified as anticipated — that verification stays an open item pending a
+Spec-Kit bug-workflow extension being installed somewhere to demonstrate
+against.

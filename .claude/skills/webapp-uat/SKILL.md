@@ -434,13 +434,27 @@ not one restart per bug:
 
    **`bug-fix-mechanism: spec-kit`** (config also supplies the exact command names):
    - Run `<bug-assess-command>` against the finding file → get a slug.
+   - Any of `<bug-assess-command>`, `<bug-fix-command>`, or `<bug-test-command>`
+     failing to execute (not found, non-zero exit, output that can't be parsed
+     into what the next step needs) → report this explicitly as a
+     **tool-invocation failure**, distinct from the bug itself being unfixable,
+     and pause the run to flag it. **This pause is never skipped by `--silent`**
+     — same treatment as the restart-failure threshold below, since this is the
+     bug-workflow tool breaking, not a routine decision `--silent` streamlines.
    - Security, auth, data deletion/migration, or broad architectural impact →
      **always stop and ask, regardless of `REVIEW_BEFORE_FIX` or `--silent`.**
-   - Otherwise, if `REVIEW_BEFORE_FIX` is on for this run: pause, present the
-     assessment (summary, proposed fix, affected files), ask **proceed / adjust /
-     skip this bug**. Under `--silent` this pause is skipped (but the high-risk pause
+   - Otherwise, if `REVIEW_BEFORE_FIX` is on for this run: pause, present
+     `<bug-assess-command>`'s own resulting assessment artifact as-is — its
+     shape isn't standardized by this skill, so present whatever the configured
+     tool actually produced, not assumed to match the direct mechanism's
+     summary/proposed-fix/affected-files shape — ask **proceed / adjust / skip
+     this bug**. Under `--silent` this pause is skipped (but the high-risk pause
      above never is).
-   - Run `<bug-fix-command>` with that slug, then `<bug-test-command>` with that slug.
+   - Run `<bug-fix-command>` with that slug, then `<bug-test-command>` with that
+     slug. If `<bug-test-command>`'s result disagrees with the browser retest in
+     step 4, note the discrepancy as additional context in the commit/report —
+     the browser retest is still what closes the bug out, not this command's
+     result on its own.
 
    **`bug-fix-mechanism: direct`** (the default — no external bug-workflow tool):
    - Assess in-session: read the finding, trace the root cause, write up a summary,
@@ -468,7 +482,10 @@ not one restart per bug:
    scenarios. **Each retry cycle re-applies step 2's pause gates in full** — the
    unconditional high-risk pause, and the routine `REVIEW_BEFORE_FIX` pause where
    applicable — exactly as the original attempt. Approval given for one fix attempt
-   is never carried forward as approval for a retry of that same bug.
+   is never carried forward as approval for a retry of that same bug. Under
+   `bug-fix-mechanism: spec-kit`, a retry reuses the existing assessment slug and
+   re-runs `<bug-fix-command>`/`<bug-test-command>` against it — it does not
+   re-run `<bug-assess-command>` for a finding that hasn't changed.
 6. Once verified, commit **each bug separately** — fix + regression test (if any) +
    bug-workflow records (if `spec-kit`) + finding file per commit, even though the
    restart/retest was shared.
@@ -486,8 +503,9 @@ Write `uat/runs/<run-id>/final-report.md`:
   group. **An unresolved bug names why**: retry budget exhausted (that bug's own 2
   additional diagnose/fix cycles all failed retest) vs. run stopped by the
   two-consecutive-restart-failure threshold (the environment itself became
-  unstable) — these are two different failure modes and must not be reported under
-  one undivided "unresolved" label.
+  unstable) vs. a `bug-fix-mechanism: spec-kit` tool-invocation failure (the
+  configured bug-workflow command itself didn't run) — these are three different
+  failure modes and must not be reported under one undivided "unresolved" label.
 - Unexpected behaviour, UX friction, spec gaps — each with a recommendation: no action
   / update the existing feature spec / new feature spec / needs more research.
 - Evidence paths and commits made this run.
