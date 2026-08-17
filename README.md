@@ -477,11 +477,20 @@ demo-app/                          git submodule — a separate repo (webapp-uat
   *records* from colliding, but nothing stops both from trying to start/stop the app
   or write `discovered-environment.md` at once. Treat this as single-run-at-a-time per
   project for now.
-- **Multi-store backend verification is UAT-05's open question, not yet resolved.**
-  When a scenario's outcome plausibly spans more than one discovered data store (e.g.
-  a relational DB and a search index that should both reflect the same write), the
-  skill doesn't yet have a defined strategy for verifying across both — only for
-  picking one primary store.
+- **Multi-store backend verification checks one primary store, by design, not every
+  plausibly relevant one.** When a scenario's outcome plausibly spans more than one
+  discovered data store (e.g. a relational DB and a search index that should both
+  reflect the same write), the skill verifies against the single primary store
+  discovery identified and discloses that scope explicitly in the finding — it does
+  not verify across all of them. Formalized as `UAT-05`'s FR-009; genuinely spanning
+  multiple stores for one outcome remains an open architecture question.
+- **Invoking `/webapp-uat` from a session rooted above a nested project (e.g. a
+  submodule) always loads that outer repo's copy of the skill, not the nested
+  project's own installed copy** — there's no way to point the `Skill` tool at a
+  specific installed instance. Two copies with identical content (as with this repo
+  and its `demo-app` submodule) behave identically regardless, but this is worth
+  knowing before assuming which `config.md` is actually in effect. See
+  [`docs/design-history.md`](docs/design-history.md) D8.
 - A handful of other ideas were deliberately **recorded but not built**: chat-app-based
   approval (Slack, etc.), and collecting all bugs before deciding what to fix in
   parallel vs. sequence. Details and the reasoning behind holding off on each:

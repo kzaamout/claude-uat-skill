@@ -470,6 +470,31 @@ by necessity (they need to exist standalone at the repo root too, for the manual
 path and for this repo's own dogfooding) — worth a periodic diff check that the two
 haven't silently drifted, since nothing currently enforces they stay identical.
 
+### D8 — `Skill` invocation always resolves to the outer repo's copy, not a nested project's
+
+Found during live-verification of `UAT-02`/`UAT-06` against `demo-app` (2026-08-16):
+invoking the `webapp-uat` skill from a session rooted at `claude-uat-skill` (with
+`demo-app` as a submodule beneath it) always loads `claude-uat-skill`'s own
+`.claude/skills/webapp-uat/SKILL.md` — there's no mechanism to target `demo-app`'s
+own separately-installed copy at `demo-app/.claude/skills/webapp-uat/SKILL.md`
+instead. This is a constraint of the `Skill` tool itself (it resolves once per
+session, not per invocation path), not something `SKILL.md`'s own instructions can
+work around.
+
+In this specific case it didn't corrupt the verification pass — `diff` confirmed the
+two `SKILL.md` copies were byte-identical at the time, so the printed instructions
+were executed by hand against `demo-app` with the same effect a real per-project
+invocation would have had. But this only worked because the copies happened to
+match; it would silently produce misleading results if they'd diverged (e.g. after
+an `UAT-04`/`UAT-05`-style edit landed in one copy but not the other).
+
+**If revisited**: no fix within `webapp-uat`'s own control — this would need a
+Claude Code platform capability to scope a `Skill` invocation to a specific
+installed path, or to run a nested session rooted at the target project. Worth
+re-checking whether that capability exists next time this kind of nested-project
+testing comes up, rather than assuming the workaround (verify copies match, execute
+by hand) is the permanent answer.
+
 **If revisited**: this only fixes the *scope* of root-detection, not the underlying
 `bug-fix-mechanism: spec-kit` false-positive risk when `specify` happens to be globally
 on `PATH` without a project-local `.specify/` directory — Setup mode still proposes

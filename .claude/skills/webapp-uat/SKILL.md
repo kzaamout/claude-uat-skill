@@ -280,6 +280,14 @@ For each approved scenario:
    if none declared). Any file a step requires must be an exact path under
    `uat/fixtures/` as stated in Preconditions — never substitute a real/personal file
    found elsewhere on the machine.
+   - **Client-side validation blocking a server-side check:** if a scenario's steps
+     are meant to exercise server-side enforcement (a boundary/negative-path case)
+     but the app's own client-side validation prevents the form from ever
+     submitting, don't treat this as impossible to test — issue the equivalent
+     request directly (e.g. `fetch` in the authenticated browser session's own
+     context, same cookies/headers a real submission would carry) to reach the
+     server path, and note in the finding that client-side validation was bypassed
+     deliberately to test the server boundary, not encountered as an app failure.
 4. Note actual vs. expected result.
 5. **Expanded checks**, every scenario:
    - **Accessibility:** inject axe-core via CDN through the JS-execution tool and run
