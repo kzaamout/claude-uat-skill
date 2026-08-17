@@ -146,9 +146,27 @@ propose → confirm → write pattern `generate` already uses for scenarios.
   with the right extension), through the same batched-approval mechanism generation
   uses. Under `--silent`, synthesize automatically and note it in the final report.
 - **Resume check:** scan `uat/runs/` for a directory with `test-plan.md` but no
-  `final-report.md`. Found → ask resume / abandon / start fresh. Under `--silent`,
-  default to *abandon, start fresh* automatically (resuming blind, unsupervised, is the
-  riskier default) — note this choice in the final report, don't hide it.
+  `final-report.md`. Multiple found → act on the most recent by `run-id` only;
+  leave the others exactly as they are, no auto-purge, no auto-merge. Found → ask
+  resume / abandon / start fresh:
+  - **resume** — reuse the existing `test-plan.md` as-is, no regenerating or
+    re-reviewing it. Skip re-executing any scenario that already has a recorded
+    result from before the interruption; carry that result into the final report
+    unchanged. Execute every scenario with no recorded result, in the plan's
+    original order. The final report covers the whole original set as one
+    document, not separate pre-/post-interruption reports. If `test-plan.md`
+    references a scenario file that's since been deleted, report it explicitly as
+    unable to resume/execute — don't silently drop it from the count or abort the
+    whole resume over it.
+  - **abandon** — stop this invocation entirely. Nothing runs; the interrupted
+    run's directory is left exactly as it was, still unresolved.
+  - **start fresh** — begin a new run under a new `run-id`. The interrupted run's
+    directory is left untouched either way — not deleted, not merged.
+
+  Under `--silent`, default to *abandon, start fresh* automatically (resuming
+  blind, unsupervised, is the riskier default) — note this choice in the final
+  report, don't hide it. No interrupted run found → nothing about resumability
+  appears in the final report at all.
 - **Environment discovery:** if
   `.claude/skills/webapp-uat/discovered-environment.md` doesn't exist, run Phase 0.5
   now and write it. Otherwise read and reuse it — don't re-discover every run.
@@ -274,6 +292,10 @@ lives in one place, not duplicated here.
   boundary/recovery case in prose, draft the actual scenario file now, using the
   template, tagged `Source: review-derived`. Include it in this same approval
   decision — don't leave it as a line item someone has to separately ask for later.
+  Scoped to the scenarios that existed when this review pass began — a
+  newly-promoted scenario is not itself re-reviewed for further gaps within the
+  same pass; a genuinely deeper gap is available to be noticed on the next run's
+  review instead.
 - Write the reviewed plan (including any structured fixture/data list from generation
   or from newly promoted gaps) to `uat/runs/<run-id>/test-plan.md`.
   `<run-id>` format: `YYYY-MM-DD-HHmm`.

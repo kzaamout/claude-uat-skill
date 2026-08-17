@@ -238,7 +238,8 @@ cannot supply completion evidence for this slice as-is.
 ---
 
 ### UAT-10 — Resumability & In-Run Gap Promotion
-**Status: Not yet formalized.**
+**Status: Done.** Formalized via Spec Kit (`specs/008-resumability-gap-promotion/`),
+fully implemented and converged (zero convergence findings).
 
 - **User outcome**: An interrupted run can be resumed or deliberately abandoned rather
   than silently colliding with a fresh start; a gap Phase 1 review notices becomes a
@@ -251,6 +252,27 @@ cannot supply completion evidence for this slice as-is.
 - **Dependencies**: UAT-02.
 - **Relevant specification sources**: `SKILL.md` Phase 0 "Resume check"; Phase 1 "Gap
   promotion (R9)"; `docs/design-history.md` R8, R9.
+- **Completion evidence**: `SKILL.md`'s Phase 0 "Resume check" now specifies
+  resume mechanics that were never previously written down — confirmed against
+  `docs/design-history.md` R8, which only ever specified detection, not what
+  "resume" does once chosen. Resume now reuses the existing `test-plan.md`,
+  skips scenarios with a pre-interruption recorded result, executes the rest in
+  original order, and produces one coherent final report; "abandon" and "start
+  fresh" are now explicitly distinct (a real ambiguity in the initial spec draft
+  caught during `/speckit-checklist` and fixed before implementation); multiple
+  simultaneous interruptions now resolve to the most-recent-by-`run-id` deterministically.
+  Phase 1's "Gap promotion (R9)" now bounds itself to one pass (no recursive
+  re-review of a newly-promoted scenario). One coverage gap (FR-009's
+  directory-untouched guarantee, initially miscategorized as already-specified)
+  was caught by `/speckit-analyze` and fixed before convergence. Text-traced
+  against all 17 FRs and 14 acceptance criteria, zero `/speckit-converge`
+  findings. Fully live-verifiable against `demo-app` — both a deliberately
+  interrupted CLI session and a deliberately gap-containing review batch are
+  straightforward to construct; tracked in
+  `specs/008-resumability-gap-promotion/quickstart.md`'s "Done when" section.
+  This closes the review/generation-adjacent group (`UAT-07`, `UAT-08`,
+  `UAT-10`) — all four `Source:` tags (`spec-derived`, `route-gap-derived`,
+  `boundary-derived`, `review-derived`) are now fully specified.
 
 ---
 
@@ -299,11 +321,11 @@ bug on), and shipped as its own repo/submodule
 ---
 
 **Build order followed so far**: `UAT-01 → UAT-03 → UAT-02 → UAT-06 → UAT-12 → UAT-05
-→ UAT-04 → UAT-07 → UAT-08`, ahead of the original suggested order in places
-(`UAT-12` pulled forward once its architecture was approved, since later slices'
-completion evidence depends on it existing).
+→ UAT-04 → UAT-07 → UAT-08 → UAT-10`, ahead of the original suggested order in
+places (`UAT-12` pulled forward once its architecture was approved, since later
+slices' completion evidence depends on it existing).
 
-**Remaining order**: `UAT-10 → UAT-09 → UAT-11`
+**Remaining order**: `UAT-09 → UAT-11`
 (`UAT-11` continues in parallel — no hard dependency on the others beyond UAT-01).
 `UAT-09` is expected to land specified-but-not-live-verified, pending a Spec-Kit
 bug-workflow extension being installed somewhere to demonstrate against.
