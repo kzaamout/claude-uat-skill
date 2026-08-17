@@ -20,6 +20,7 @@ project, tech stack, or bug-tracking tool is assumed — see [Configuration](#co
 - [Configuration](#configuration)
 - [How it works](#how-it-works)
 - [Safety & guardrails](#safety--guardrails)
+- [Test scenarios](#test-scenarios)
 - [Project structure](#project-structure)
 - [Known limitations](#known-limitations)
 - [Related files](#related-files)
@@ -316,6 +317,49 @@ No `config.md` → the skill stops at invocation and points here instead of gues
 Full detail on every phase, with exact example output:
 [`USAGE.md`](.claude/skills/webapp-uat/USAGE.md).
 
+### Where this fits in your workflow
+
+```mermaid
+flowchart LR
+    subgraph dev["Developer"]
+        D1["Write / change\na feature"]
+        D5["Review report,\nmerge"]
+    end
+
+    subgraph spec["Spec Kit (optional)"]
+        S1["spec.md"] --> S2["plan.md"] --> S3["tasks.md"] --> S4["implement"]
+    end
+
+    subgraph uat["webapp-uat"]
+        U0["setup\n(once per repo)"]
+        U1["generate\nor hand-write\nscenarios"]
+        U2["Phase 1\nreview & approve"]
+        U3["Phase 2\nexecute in\nreal Chrome"]
+        U4["Phase 3\nclassify + severity"]
+        U5["Phase 4\nfix confirmed bugs,\nbrowser-retest"]
+        U6["Phase 5\nfinal report"]
+        U1 --> U2 --> U3 --> U4 --> U5 --> U6
+    end
+
+    subgraph app["App under test"]
+        A1["Running instance\n(scripts/dev.sh)"]
+        A2["Backend store(s)\n(DB / API / etc.)"]
+    end
+
+    D1 --> S1
+    S4 --> U0
+    U0 --> U1
+    U3 <-->|"drive UI,\nread console/network"| A1
+    U3 -->|"verify outcome"| A2
+    U5 -->|"stop / fix / restart"| A1
+    U6 --> D5
+```
+
+Sits after implementation, before merge — a browser-verified QA gate with a human in
+the loop for anything genuinely risky, not a replacement for Spec Kit's own workflow
+or for human code review. Spec Kit is optional: `bug-fix-mechanism: direct` (the
+default) skips that lane entirely and Claude fixes confirmed bugs in-session instead.
+
 ---
 
 ## Safety & guardrails
@@ -337,6 +381,26 @@ Full detail on every phase, with exact example output:
   `.claude/settings.local.json` permission allowlist.** Turning off the review pause
   without also constraining what commands can run unattended means unattended *and*
   unconstrained at the same time — treat these as one change, not two separate ones.
+
+---
+
+## Test scenarios
+
+Concrete, runnable examples instead of abstract descriptions — the bundled demo app's
+scenarios (`demo-app/uat/scenarios/`), each showcasing a different capability:
+
+| Scenario | Showcases |
+|---|---|
+| `UAT-001-admin-views-team-documents` | Baseline authenticated flow, role: admin |
+| `UAT-002-editor-creates-document-with-attachment` | Form validation + file upload, backend verification |
+| `UAT-003-document-title-too-short-rejected` | Boundary/negative-path case, client + server validation |
+| `UAT-004-search-with-no-matches-shows-empty-state` | Empty-state / data-integrity check |
+| `UAT-005-guest-cannot-edit-document` | Role-based access control, correctly enforced |
+| `UAT-006-editor-denied-direct-url-to-members` | Cross-tenant/direct-URL access control |
+
+Full step-by-step instructions for running these — plus toggling each of the three
+seeded bugs and seeing this skill actually catch them — live in
+[`webapp-uat-demo`'s own README](https://github.com/kzaamout/webapp-uat-demo#readme).
 
 ---
 
@@ -386,10 +450,29 @@ demo-app/                          git submodule — a separate repo (webapp-uat
   still "edit a script," not "declare commands in `config.md` and skip the script
   entirely." Whether to collapse it further into config-only is a separate,
   still-open discussion.
+- **`bug-fix-mechanism: spec-kit` can be proposed by Setup mode from a false
+  positive.** Detection currently looks for `specify` on `PATH` — a globally
+  installed CLI, not evidence that *this* project actually uses Spec Kit. A machine
+  with `specify` installed globally but no project-local `.specify/` directory gets
+  offered `spec-kit` anyway. Always review this specific proposal before accepting it;
+  see [`docs/design-history.md`](docs/design-history.md) D6.
+- **No concurrent-run protection.** Two `/webapp-uat` invocations against the same
+  project at the same time aren't guarded against — run-id-suffixed data keeps their
+  *records* from colliding, but nothing stops both from trying to start/stop the app
+  or write `discovered-environment.md` at once. Treat this as single-run-at-a-time per
+  project for now.
+- **Multi-store backend verification is UAT-05's open question, not yet resolved.**
+  When a scenario's outcome plausibly spans more than one discovered data store (e.g.
+  a relational DB and a search index that should both reflect the same write), the
+  skill doesn't yet have a defined strategy for verifying across both — only for
+  picking one primary store.
 - A handful of other ideas were deliberately **recorded but not built**: chat-app-based
   approval (Slack, etc.), and collecting all bugs before deciding what to fix in
   parallel vs. sequence. Details and the reasoning behind holding off on each:
   [`docs/design-history.md`](docs/design-history.md).
+
+See [`docs/roadmap.md`](docs/roadmap.md) for the full slice-by-slice breakdown of
+what's done, in progress, and not yet formalized.
 
 ---
 
