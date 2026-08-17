@@ -149,9 +149,8 @@ fully implemented and converged.
 ---
 
 ### UAT-07 — Scenario Generation: Spec-Derived + Route-Gap-Derived
-**Status: Not yet formalized.** The "up to four sources" wording bug this slice
-originally flagged was fixed directly as part of the Phase 1 correctness pass; the
-slice itself (generation behavior) has not gone through Spec Kit.
+**Status: Done.** Formalized via Spec Kit (`specs/006-spec-route-gap-generation/`),
+fully implemented and converged (zero convergence findings).
 
 - **User outcome**: Run `/webapp-uat generate` and get draft scenarios traced back to
   real acceptance criteria, plus stub coverage for screens nothing tests at all yet —
@@ -166,13 +165,18 @@ slice itself (generation behavior) has not gone through Spec Kit.
 - **Relevant specification sources**: `SKILL.md` Generation mode steps 1–2, Phase 0.5
   routing discovery; `docs/design-history.md` R6 (spec-derived, route-gap-derived
   portions).
-- **Completion evidence** (target): a `spec-dir` with known acceptance criteria
-  produces drafts that trace back correctly; a repo with an undiscoverable routing
-  source degrades to spec-derived-only rather than erroring. `demo-app` currently has
-  no `specs/` of its own yet (deliberately deferred, see `demo-app`'s README) — needed
-  before spec-derived generation can be demonstrated against it; route-gap-derived can
-  be demonstrated today (`/profile` and the settings landing page are deliberately
-  uncovered by the bundled scenarios).
+- **Completion evidence**: `SKILL.md` Generation mode step 1 now states the symmetric
+  routing-source-undiscoverable degradation case and the neither-prerequisite-met
+  case (FR-008/FR-009), alongside the pre-existing spec-dir-unconfigured case; step
+  2's `--priority` bullet now scopes every active source (not boundary-derived
+  alone) and states the zero-eligible-flows outcome (FR-010/FR-012). Text-traced
+  against all 12 FRs and 13 acceptance criteria, zero `/speckit-analyze` and zero
+  `/speckit-converge` findings. Route-gap-derived is live-demonstrable today against
+  `demo-app` (`/profile` and the settings landing page are deliberately uncovered by
+  the bundled scenarios); spec-derived generation's happy path still needs a project
+  with a real `spec-dir` to demonstrate against, since `demo-app` deliberately has no
+  `specs/` of its own yet (see `demo-app`'s README) — tracked in
+  `specs/006-spec-route-gap-generation/quickstart.md`'s "Done when" section.
 
 ---
 
@@ -279,11 +283,11 @@ bug on), and shipped as its own repo/submodule
 ---
 
 **Build order followed so far**: `UAT-01 → UAT-03 → UAT-02 → UAT-06 → UAT-12 → UAT-05
-→ UAT-04`, ahead of the original suggested order in places (`UAT-12` pulled forward
-once its architecture was approved, since later slices' completion evidence depends
-on it existing).
+→ UAT-04 → UAT-07`, ahead of the original suggested order in places (`UAT-12` pulled
+forward once its architecture was approved, since later slices' completion evidence
+depends on it existing).
 
-**Remaining order**: `UAT-07 → UAT-08 → UAT-10 → UAT-09 → UAT-11`
+**Remaining order**: `UAT-08 → UAT-10 → UAT-09 → UAT-11`
 (`UAT-11` continues in parallel — no hard dependency on the others beyond UAT-01).
 `UAT-09` is expected to land specified-but-not-live-verified, pending a Spec-Kit
 bug-workflow extension being installed somewhere to demonstrate against.

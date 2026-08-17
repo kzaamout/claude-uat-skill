@@ -214,7 +214,11 @@ lives in one place, not duplicated here.
 
 1. Confirm `config.md`'s `spec-dir` (if set) and, from discovery, the routing source
    are readable. No `spec-dir` configured → spec-derived and boundary-derived sources
-   are skipped, noted in the output; route-gap-derived still runs.
+   are skipped, noted in the output; route-gap-derived still runs. Symmetrically, no
+   routing source discovered → route-gap-derived is skipped, noted in the output;
+   spec-derived (and boundary-derived) still run if `spec-dir` is configured. Neither
+   prerequisite met → `generate` still completes, with an explicit note that no
+   drafts were produced from either source, rather than erroring.
 2. Draft scenarios from up to three sources, each tagged in the scenario's `Source:`
    field:
    - **spec-derived** — walk `spec.md` and `tasks.md` per feature under `spec-dir`
@@ -229,8 +233,12 @@ lives in one place, not duplicated here.
      and negative-path cases: max lengths, required fields, enums, type mismatches.
    - **route-gap-derived** — using the discovered routing source, find screens with
      no existing scenario at all, draft stubs for them.
-   - `--priority <tiers>` scopes which flows get boundary-derived treatment and which
-     get drafted at all if combined with a narrow scope.
+   - `--priority <tiers>` scopes every active source — spec-derived and
+     route-gap-derived as well as boundary-derived — to only the requested priority
+     tiers; it applies across the full `spec-dir`/routing source on its own, with no
+     narrow `scope` path required to combine with it. If it excludes every eligible
+     flow, `generate` completes with zero drafts and an explicit note, not an error —
+     the same treatment as the neither-prerequisite-met case above.
 3. Compute data/fixture requirements across every draft as one consolidated,
    structured list — filename, extension, and any constraint, not a vague summary:
    ```
