@@ -181,7 +181,8 @@ fully implemented and converged (zero convergence findings).
 ---
 
 ### UAT-08 — Scenario Generation: Boundary-Derived + Fixture Synthesis
-**Status: Not yet formalized.**
+**Status: Done.** Formalized via Spec Kit (`specs/007-boundary-fixture-synthesis/`),
+fully implemented and converged (zero convergence findings).
 
 - **User outcome**: Critical/High-priority flows get real negative-path and
   boundary-case scenarios derived from actual validation code, and a missing fixture
@@ -195,10 +196,25 @@ fully implemented and converged (zero convergence findings).
 - **Relevant specification sources**: `SKILL.md` Generation mode step 2
   (boundary-derived bullet), Phase 0 fixture-check/synthesis; `docs/design-history.md`
   R6 (boundary-derived portion).
-- **Completion evidence** (target): boundary cases trace to real validation rules read
-  from actual code; a synthesized "oversized" fixture is confirmed to be a real,
-  parseable file of its claimed type. `demo-app` deliberately ships without
-  `sample-oversized.pdf` so this can be demonstrated live rather than pre-staged.
+- **Completion evidence**: `SKILL.md` Generation mode step 2's boundary-derived
+  bullet now states drafting cardinality (one per distinct constraint category
+  present), requires each draft to name the specific constraint value it targets
+  (closing a traceability gap `/speckit-analyze` caught), and states the
+  unreadable-validation-code and zero-constraints-found degradation cases
+  (FR-002/FR-004/FR-011/FR-012); step 3's fixture list now states its dedup rule
+  (FR-006). Phase 0's fixture-check step and R7 were confirmed — not assumed — to
+  already satisfy the synthesis-offer, genuineness, `--silent`, and
+  fixture-persistence requirements (FR-007–FR-010) as written; one incorrect
+  assumption (that synthesized fixtures follow `UAT-06`'s run-id-suffixed cleanup
+  like DB rows) was caught and corrected in `spec.md` before implementation —
+  fixture files persist as reusable static assets, only a referencing DB row
+  follows `UAT-06`. Text-traced against all 12 FRs and 11 acceptance criteria, one
+  `/speckit-analyze` coverage-gap finding resolved inline, zero
+  `/speckit-converge` findings. `demo-app` deliberately ships without
+  `sample-oversized.pdf` and has real zod validation on its document-creation flow
+  (`lib/validation.ts`), so both this slice's completion evidence targets are
+  live-demonstrable against it; tracked in
+  `specs/007-boundary-fixture-synthesis/quickstart.md`'s "Done when" section.
 
 ---
 
@@ -283,11 +299,11 @@ bug on), and shipped as its own repo/submodule
 ---
 
 **Build order followed so far**: `UAT-01 → UAT-03 → UAT-02 → UAT-06 → UAT-12 → UAT-05
-→ UAT-04 → UAT-07`, ahead of the original suggested order in places (`UAT-12` pulled
-forward once its architecture was approved, since later slices' completion evidence
-depends on it existing).
+→ UAT-04 → UAT-07 → UAT-08`, ahead of the original suggested order in places
+(`UAT-12` pulled forward once its architecture was approved, since later slices'
+completion evidence depends on it existing).
 
-**Remaining order**: `UAT-08 → UAT-10 → UAT-09 → UAT-11`
+**Remaining order**: `UAT-10 → UAT-09 → UAT-11`
 (`UAT-11` continues in parallel — no hard dependency on the others beyond UAT-01).
 `UAT-09` is expected to land specified-but-not-live-verified, pending a Spec-Kit
 bug-workflow extension being installed somewhere to demonstrate against.

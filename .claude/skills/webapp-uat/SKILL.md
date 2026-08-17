@@ -231,6 +231,15 @@ lives in one place, not duplicated here.
      validation / API schema / ORM model for the flow in question (not a global
      upfront catalog — do this per-flow, at generation time) to derive real boundary
      and negative-path cases: max lengths, required fields, enums, type mismatches.
+     Draft at least one scenario per distinct constraint category actually present
+     for that flow, not one generic case covering all of them — and state the
+     specific constraint value each draft targets directly in its own content (the
+     actual max length, the actual required field, etc.), so the rule it traces to
+     is identifiable without re-reading the source code. If the flow's validation
+     can't be confidently read or parsed, skip boundary-derived generation for that
+     flow and note this explicitly — don't fall back to a generic, ungrounded case.
+     A flow with zero discoverable constraints simply produces no boundary-derived
+     draft; that's not an error.
    - **route-gap-derived** — using the discovered routing source, find screens with
      no existing scenario at all, draft stubs for them.
    - `--priority <tiers>` scopes every active source — spec-derived and
@@ -240,7 +249,8 @@ lives in one place, not duplicated here.
      flow, `generate` completes with zero drafts and an explicit note, not an error —
      the same treatment as the neither-prerequisite-met case above.
 3. Compute data/fixture requirements across every draft as one consolidated,
-   structured list — filename, extension, and any constraint, not a vague summary:
+   structured list — filename, extension, and any constraint, not a vague summary.
+   A fixture multiple drafts need appears once in this list, not once per draft:
    ```
    uat/fixtures/sample-small.pdf — valid, <1MB
    uat/fixtures/sample-oversized.pdf — valid PDF, >10MB (size-limit rejection path)
