@@ -1,8 +1,9 @@
 # Scenario: <Name>
 
 - ID: UAT-001
-- Related feature: <path to the Spec Kit spec.md this scenario tests against — also
-  what Phase 2's UI-conformance check reads to know what's actually required>
+- Related feature: <path to the spec this scenario tests against, under `config.md`'s
+  `spec-dir` — also what Phase 2's UI-conformance check reads to know what's actually
+  required. Leave blank if this project has no `spec-dir` configured.>
 - Priority: Critical | High | Medium | Low
 - Source: authored | spec-derived | boundary-derived | route-gap-derived | review-derived
 - Viewports: <optional — default is mobile 375px + desktop if omitted; list specific

@@ -17,8 +17,11 @@ hand; see `SETUP.md`.
 
 ## Phase -1 — Invocation parsing
 
-- `$ARGUMENTS` contains `--help` anywhere: print `USAGE.md` verbatim and stop. No git
-  check, no Chrome, no app, nothing touched. Safe to run anytime.
+- The invocation includes `--help` anywhere: stop reading this file and instead
+  **read `USAGE.md` in full and print its exact contents as the response, verbatim,
+  then stop** — do not describe, summarize, or paraphrase `USAGE.md`, and do not
+  fall back to describing this file (`SKILL.md`) instead. No git check, no Chrome,
+  no app, nothing touched. Safe to run anytime.
 - First token is literally `setup`: **setup mode** (see below). Runs even without
   `config.md` present — it's what creates it. Safe to run again later to re-propose
   values; never overwrites `config.md` or `scripts/dev.sh` without confirmation.
@@ -62,8 +65,11 @@ propose → confirm → write pattern `generate` already uses for scenarios.
    - A `package.json` with a `dev`/`start` script (no compose file) → propose
      `npm run dev` (or the equivalent for whichever lockfile is present — `pnpm`,
      `yarn`).
-   - A `Procfile` or a `Makefile` with `dev`/`up`/`down`-shaped targets → propose
-     those.
+   - A `Makefile` with `dev`/`up`/`down`-shaped targets → propose those. (`Procfile`
+     detection was considered and deliberately dropped from this tier — a real
+     `Procfile` conventionally uses process-type names like `web`/`worker`, not
+     `dev`/`up`/`down`-shaped targets, so it was never actually reachable by this
+     rule; see `docs/design-history.md` D5 before reintroducing it.)
    - Nothing recognizable → leave blank, marked **needs your input**.
    - **Port:** read `PORT` from `.env`/`.env.example`, or a dev-server config
      (`vite.config.*`, `next.config.*`), or a compose port mapping. Nothing found →
@@ -76,25 +82,52 @@ propose → confirm → write pattern `generate` already uses for scenarios.
 4. **Detect `spec-dir`** — a `specs/` directory containing `spec.md` files, or an
    equivalent convention → propose it. Nothing found → leave unset, note that
    spec-derived generation and the UI-conformance check will no-op without it.
-5. **Present one consolidated draft**, every value labeled **detected** (concrete
+5. **Present one consolidated draft**, including `project-name` — always asked
+   directly and labeled **needs your input**, since nothing in the repo itself can
+   supply a human-chosen project name. Every value labeled **detected** (concrete
    evidence found — name the evidence), **guessed** (a heuristic default, no real
-   evidence — e.g. port 3000), or **needs your input** (nothing found, or genuinely
-   ambiguous) — never blended together as if equally trustworthy. Ask: **write this**
-   / **edit values first** / **cancel**.
+   evidence — e.g. port 3000), or **needs your input** (nothing found, genuinely
+   ambiguous, or — as with `project-name` — never detectable at all) — never blended
+   together as if equally trustworthy. Ask: **write this** / **edit values first** /
+   **cancel**.
 6. On approval: write `config.md`, fill in `scripts/dev.sh`'s placeholders,
    `mkdir -p uat/scenarios uat/runs uat/artifacts uat/fixtures` for whichever don't
    already exist. **Does not** run `scripts/dev.sh start/stop/wait-ready` itself —
    that stays a manual verification step (Phase 0 sanity-checks it on the first real
    run regardless; starting/stopping the app before the user has reviewed anything
    this wizard proposed would be jumping ahead of consent, not saving a step).
+   Report every item's outcome individually once the write step finishes, e.g.:
+   ```
+   config.md ............... written
+   scripts/dev.sh ........... written
+   uat/scenarios/ ........... already existed, left as-is
+   uat/runs/ ................ created
+   uat/artifacts/ ........... created
+   uat/fixtures/ ............ FAILED — permission denied creating directory
+   ```
+   If one item fails partway through, this is **best-effort, not atomic**: every
+   item that already succeeded stays exactly as written — never rolled back because
+   a later item failed — and the failure is named specifically per item, never a
+   generic "write failed." Re-running setup afterward retries only the outstanding
+   (failed or not-yet-attempted) items; already-written ones are left untouched.
 7. An existing `config.md` is found (re-running setup deliberately, or by accident):
    don't silently overwrite. Show what's currently set next to what discovery now
-   proposes, and ask before replacing anything.
+   proposes, field by field, and ask before replacing anything. Approval is
+   **per-field**, not all-or-nothing for the whole diff: the user can accept some
+   proposed changes and decline others in the same pass, and only the accepted
+   fields are written to `config.md` — an unchanged field is left exactly as it was.
 
 ---
 
 ## Phase 0 — Pre-flight
 
+- **Validate `config.md`'s internal consistency** before anything else in this phase:
+  `bug-fix-mechanism: spec-kit` declared without all three of `bug-assess-command` /
+  `bug-fix-command` / `bug-test-command` filled in is caught and flagged here — ask
+  the user to fill in the missing command(s) (or switch to `direct`) rather than
+  letting this surface opaquely mid-Phase-4 after bugs have already been found in the
+  run. This is a one-time structural check on the file's contents, not a re-run of
+  Setup mode's discovery.
 - Confirm the git working tree (at `config.md`'s `project-dir`) is clean. If not, ask
   whether to commit, stash, or cancel.
 - Run `/chrome` and confirm it's connected.
@@ -113,11 +146,15 @@ propose → confirm → write pattern `generate` already uses for scenarios.
   `.claude/skills/webapp-uat/discovered-environment.md` doesn't exist, run Phase 0.5
   now and write it. Otherwise read and reuse it — don't re-discover every run.
 - **Start-of-run cleanup:** purge any record carrying the UAT marker (see R7 naming
-  below) left over from a previous run. This is a DB write — **always confirm it
-  explicitly for now, `--silent` or not.** This confirmation doesn't lapse
-  automatically on its own; if you later trust the marker scheme enough to stop
-  confirming this specific step, that's a manual edit to this file, not something this
-  skill decides for itself.
+  below) left over from a previous run. Nothing found → this step completes
+  silently as a no-op, no confirmation prompt shown. Something found → this is a DB
+  write — **always confirm it explicitly for now, `--silent` or not.** This
+  confirmation doesn't lapse automatically on its own; if you later trust the
+  marker scheme enough to stop confirming this specific step, that's a manual edit
+  to this file, not something this skill decides for itself. **Declined → block the
+  run**, rather than proceeding with stale UAT-marked data present during
+  execution — this is the one confirmation in this skill where declining stops the
+  run outright, not just that one step.
 
 ---
 
@@ -171,7 +208,7 @@ lives in one place, not duplicated here.
 1. Confirm `config.md`'s `spec-dir` (if set) and, from discovery, the routing source
    are readable. No `spec-dir` configured → spec-derived and boundary-derived sources
    are skipped, noted in the output; route-gap-derived still runs.
-2. Draft scenarios from up to four sources, each tagged in the scenario's `Source:`
+2. Draft scenarios from up to three sources, each tagged in the scenario's `Source:`
    field:
    - **spec-derived** — walk `spec.md` and `tasks.md` per feature under `spec-dir`
      (scoped to `scope` if given), one candidate scenario per acceptance criterion.
@@ -194,6 +231,11 @@ lives in one place, not duplicated here.
    uat/fixtures/sample-oversized.pdf — valid PDF, >10MB (size-limit rejection path)
    uat/fixtures/sample-corrupted.pdf — intentionally malformed (error-handling path)
    ```
+   Where this list includes new **seed data** (test accounts, seeded rows) beyond
+   static fixture files: creating that data is a DB write. Confirm it explicitly,
+   `--silent` or not — the same treatment Phase 0/Phase 5's cleanup purges already
+   get (R7) — not folded silently into the general Phase 1 approve/adjust/cancel
+   decision below as if it were just another line item in a batch summary.
 4. Hand off to Phase 1 with these drafts plus the fixture/data list attached to the
    same approval decision.
 
@@ -245,7 +287,9 @@ For each approved scenario:
      Parse `results.violations` — this is the source of accessibility findings, not
      visual inspection of the DOM.
    - **i18n:** only if discovery marked the app multi-locale — raw/unresolved
-     translation keys, unresolved placeholders, missing strings.
+     translation keys, unresolved placeholders, missing strings. App not marked
+     multi-locale → skip this specific check for the scenario, note it wasn't
+     applicable rather than silently passing it.
    - **Data integrity:** literal `NaN`, `undefined`, `[object Object]`, or a stuck
      infinite-loading state where real data is expected.
    - **UI conformance:** if the scenario's `Related feature` field points to a spec
@@ -284,7 +328,13 @@ Every finding gets exactly one category label, plus a severity if it's a BUG:
 | UNEXPECTED_BEHAVIOUR | Works, but not what a reasonable read of the workflow implies | Document only |
 | UX_FRICTION | Extra step, unclear copy, weak feedback, awkward navigation | Document only |
 | SPEC_GAP | Correct behavior can't be determined from the existing spec | Document only |
-| TEST_ENVIRONMENT | Chrome/server/fixture problem, not a product issue | Pause, don't touch product code |
+| TEST_ENVIRONMENT | Chrome/browser-automation/fixture problem, not a product issue | Pause, don't touch product code |
+
+`TEST_ENVIRONMENT` is reserved for the Chrome/browser-automation/fixture side —
+**never** the app under test itself. If the app being tested crashes or becomes
+unresponsive mid-scenario, that's a product failure: classify it `BUG` (typically
+P0 — "workflow can't complete at all"), not `TEST_ENVIRONMENT`, regardless of how
+unstable the environment feels in the moment.
 
 | Severity | Meaning |
 |---|---|
@@ -368,7 +418,10 @@ Write `uat/runs/<run-id>/final-report.md`:
 **End-of-run cleanup:** now that the report is actually written, purge this run's
 UAT-marked data — same confirmation requirement as the start-of-run purge, `--silent`
 or not. Runs regardless of unresolved bugs; the finding files are the source of truth
-for reproduction, not live DB state.
+for reproduction, not live DB state. **Declined → the run still completes** — unlike
+the start-of-run purge, declining here does not block anything: the report already
+exists, and the leftover data becomes the next run's start-of-run cleanup concern
+automatically.
 
 Present the report and offer: **review only** / **draft a spec update** / **draft a
 new feature spec** / **defer selected items**. This choice is **not** skipped by

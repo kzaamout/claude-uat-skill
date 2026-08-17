@@ -400,6 +400,22 @@ above, and the "parallel" half has a real technical ceiling worth naming.**
   one scenario" (already in the Phase 4 clarification above) rather than extending it
   across a whole run.
 
+### D5 — `Procfile` detection in Setup mode's start/stop tier 3
+
+Found during `UAT-01`'s implementation (2026-08-15): Setup mode's third
+most-specific-evidence detection tier originally read *"a `Procfile` or a `Makefile`
+with `dev`/`up`/`down`-shaped targets → propose those."* A real `Procfile`
+conventionally uses process-type names (`web`, `worker`, `release` — Heroku
+convention), not `dev`/`up`/`down`-shaped targets, so this rule was never actually
+reachable for a standard `Procfile` — only `Makefile`s commonly have targets named
+that way. Dropped `Procfile` from this tier entirely rather than ship a detection
+rule that claims to support something it can't actually match.
+
+**If revisited**: the right fix is almost certainly detecting a `Procfile`'s `web:`
+entry specifically (the actual signal a `Procfile` exists to provide), as its own
+distinct rule — not folding it back into the `Makefile`-shaped-target check it was
+never a good fit for.
+
 ---
 
 ## Open questions summary (resolve before building)

@@ -98,7 +98,7 @@ just replacing those two files wholesale.
 ```
 
 This is a **discovery-assisted config wizard**, not a form to fill in blind. It reads
-your repo — `package.json` scripts, `docker-compose.yml`/`Procfile`/`Makefile`, a
+your repo — `package.json` scripts, `docker-compose.yml`/`Makefile`, a
 `.specify/` directory, a `specs/` convention — and proposes `config.md` and
 `scripts/dev.sh` values instead of making you go find them by hand. Every proposed
 value is labeled with how confident that proposal actually is, and **nothing is

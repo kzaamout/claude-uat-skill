@@ -37,6 +37,10 @@ Expect to still fill in by hand, even after the wizard runs:
 - [ ] Anything the wizard flagged **needs your input** — an unrecognized start
       mechanism, an ambiguous repo root, etc.
 
+If the wizard reports a write failure on one item (e.g. a permissions error creating
+a directory), it's safe to just re-run `/webapp-uat setup` — already-written items
+are left as-is, and only the outstanding ones are retried.
+
 **Prefer not to use the wizard?** Skip to step 2b.
 
 ### 2b. Manual alternative
