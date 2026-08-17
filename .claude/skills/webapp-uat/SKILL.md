@@ -315,6 +315,18 @@ For each approved scenario:
    discovery identified as relevant. No data store discoverable → note in the finding
    that this scenario's outcome was verified via UI only. This is a read, not a
    write — doesn't need the DB-write confirmation gate.
+   - **Discrepancy:** if the backend's actual state contradicts what the UI
+     displayed (UI claimed success but nothing was persisted, or the reverse),
+     surface this explicitly in the finding as a mismatch between the two signals —
+     never silently prefer one over the other.
+   - **Multi-store scenarios:** if more than one discovered store is plausibly
+     relevant to a single outcome, verify against the single primary store/API
+     discovery identified as relevant, and say so explicitly in the finding — don't
+     represent this as full coverage across every plausibly relevant store.
+   - **Verification-connection failure** (the check itself can't reach the store/API,
+     as opposed to the app under test failing) is a `TEST_ENVIRONMENT` problem, not a
+     product data-persistence defect — same distinction Phase 3 draws for an
+     app-crash vs. an unstable test environment generally.
 8. If a browser-tool call fails mid-scenario: attempt one `/chrome` reconnect before
    treating it as a `TEST_ENVIRONMENT` finding. Reconnect fails too → pause the whole
    run and flag it; don't silently mark remaining scenarios as failed.
@@ -341,7 +353,11 @@ Every finding gets exactly one category label, plus a severity if it's a BUG:
 **never** the app under test itself. If the app being tested crashes or becomes
 unresponsive mid-scenario, that's a product failure: classify it `BUG` (typically
 P0 — "workflow can't complete at all"), not `TEST_ENVIRONMENT`, regardless of how
-unstable the environment feels in the moment.
+unstable the environment feels in the moment. The same distinction applies to Phase
+2 step 7's backend verification: a failure of the *verification connection itself*
+(store/API unreachable, timed out) is `TEST_ENVIRONMENT`; a verification that
+completes and finds the backend genuinely doesn't match what the UI claimed is a
+`BUG` (a discrepancy, not a connectivity problem).
 
 | Severity | Meaning |
 |---|---|

@@ -105,7 +105,8 @@ user's choice to fix directly rather than run full ceremony for this slice).
 ---
 
 ### UAT-05 — Backend Verification
-**Status: Not yet formalized.**
+**Status: Done.** Formalized via Spec Kit (`specs/004-backend-verification/`), fully
+implemented and converged (zero convergence findings).
 
 - **User outcome**: A scenario's claimed data change is confirmed directly against the
   app's own API or a discovered data store — not just inferred from what the UI
@@ -276,11 +277,12 @@ bug on), and shipped as its own repo/submodule
 
 ---
 
-**Build order followed so far**: `UAT-01 → UAT-03 → UAT-02 → UAT-06 → UAT-12`, ahead of
-the original suggested order in places (`UAT-12` pulled forward once its architecture
-was approved, since later slices' completion evidence depends on it existing).
+**Build order followed so far**: `UAT-01 → UAT-03 → UAT-02 → UAT-06 → UAT-12 → UAT-05`,
+ahead of the original suggested order in places (`UAT-12` pulled forward once its
+architecture was approved, since later slices' completion evidence depends on it
+existing).
 
-**Remaining order**: `UAT-05 → UAT-04 → UAT-07 → UAT-08 → UAT-10 → UAT-09 → UAT-11`
+**Remaining order**: `UAT-04 → UAT-07 → UAT-08 → UAT-10 → UAT-09 → UAT-11`
 (`UAT-11` continues in parallel — no hard dependency on the others beyond UAT-01).
 `UAT-09` is expected to land specified-but-not-live-verified, pending a Spec-Kit
 bug-workflow extension being installed somewhere to demonstrate against.
