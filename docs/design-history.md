@@ -443,6 +443,33 @@ from `claude-uat-skill` by `.gitmodules`. Its own `scripts/dev.sh` resolves
 underlying reason — the same repo may be checked out standalone or as a submodule at
 any parent path, and only self-relative resolution is correct in both cases.
 
+### D7 — Plugin marketplace: point `source`/`skills` at the existing folder, no duplication
+
+Built for UAT-11 (one-command install). Two constraints shaped this: Claude Code
+plugin installs can only place files under `.claude/` in the target repo (confirmed
+against current docs, not assumed) — `scripts/dev.sh` and
+`uat/scenarios/_template.md` can't be installed that way; and a marketplace plugin
+entry's `skills` field, when listed explicitly, can point directly at any folder
+containing `SKILL.md` at its own top level — it does **not** require the
+`<plugin-root>/skills/<name>/SKILL.md` nesting that auto-discovery uses. That second
+point matters because it meant `.claude-plugin/marketplace.json` could reference the
+existing `.claude/skills/webapp-uat/` directly (`"skills": ["./.claude/skills/webapp-uat"]`,
+`"strict": false` since that folder has no `plugin.json` of its own) — no second copy
+of `SKILL.md`/`USAGE.md`/`SETUP.md` to keep in sync, avoiding exactly the drift risk a
+naive plugin-packaging pass would have introduced.
+
+The first constraint is why Setup mode's step 6 now conditionally copies
+`scripts/dev.sh` and `uat/scenarios/_template.md` from `templates/` bundled inside the
+skill folder itself, rather than assuming they already exist: a plugin install leaves
+them missing (only `.claude/` is populated), while a manual copy already has them —
+the same setup step now handles both starting states correctly instead of assuming
+the manual-copy path is the only one.
+
+**If revisited**: the `templates/` folder is a second copy of `dev.sh`/`_template.md`
+by necessity (they need to exist standalone at the repo root too, for the manual-copy
+path and for this repo's own dogfooding) — worth a periodic diff check that the two
+haven't silently drifted, since nothing currently enforces they stay identical.
+
 **If revisited**: this only fixes the *scope* of root-detection, not the underlying
 `bug-fix-mechanism: spec-kit` false-positive risk when `specify` happens to be globally
 on `PATH` without a project-local `.specify/` directory — Setup mode still proposes

@@ -1,0 +1,14 @@
+{
+  "name": "webapp-uat-marketplace",
+  "owner": { "name": "kzaamout" },
+  "description": "Agent-driven UAT for web apps: reviews/generates scenarios, runs them in a real Chrome browser, classifies findings, fixes confirmed bugs with a browser-verified retest.",
+  "plugins": [
+    {
+      "name": "webapp-uat",
+      "source": "./",
+      "skills": ["./.claude/skills/webapp-uat"],
+      "strict": false,
+      "description": "Runs automated end-user acceptance testing against your web app in a real Chrome window."
+    }
+  ]
+}

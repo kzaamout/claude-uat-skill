@@ -81,7 +81,23 @@ Claude Code can do anything here — `/webapp-uat` doesn't exist as a command un
 these files exist), and configuring it (which the skill can mostly do for itself,
 once it exists).
 
-### 1. Copy the skill into your app's repo
+### 1. Get the skill into your app's repo
+
+**One-command install** (recommended), from inside your app's repo:
+
+```
+/plugin marketplace add kzaamout/claude-uat-skill
+/plugin install webapp-uat@webapp-uat-marketplace
+```
+
+This installs `.claude/skills/webapp-uat/`. `scripts/dev.sh` and
+`uat/scenarios/_template.md` still need to exist in your repo's own tree — a plugin
+install can only place files under `.claude/`, not elsewhere in your project — so step
+2 below (`/webapp-uat setup`) copies them in for you automatically from templates
+bundled inside the installed skill, the first time it runs.
+
+**Manual alternative**, if you'd rather not use the plugin system: copy from this
+skill's source repo into your app's repo root —
 
 ```
 .claude/skills/webapp-uat/     (the whole folder — SKILL.md, USAGE.md, SETUP.md, config.md.example)
@@ -89,7 +105,7 @@ scripts/dev.sh
 uat/scenarios/_template.md
 ```
 
-`SKILL.md` and `USAGE.md` are never hand-edited per project; everything
+Either way, `SKILL.md` and `USAGE.md` are never hand-edited per project; everything
 project-specific lives in `config.md`, so pulling in a future update to the skill is
 just replacing those two files wholesale.
 

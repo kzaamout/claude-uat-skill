@@ -90,7 +90,13 @@ propose → confirm → write pattern `generate` already uses for scenarios.
    ambiguous, or — as with `project-name` — never detectable at all) — never blended
    together as if equally trustworthy. Ask: **write this** / **edit values first** /
    **cancel**.
-6. On approval: write `config.md`, fill in `scripts/dev.sh`'s placeholders,
+6. On approval: write `config.md`. If `scripts/dev.sh` doesn't already exist in the
+   target repo — the case when this skill was installed as a plugin rather than
+   copied by hand, since a plugin install only places files under `.claude/` — copy
+   it from this skill's own bundled `templates/dev.sh.template`, then fill in the
+   copy's placeholders; if it already exists (the manual-copy path), fill in its
+   placeholders in place. Same pattern for `uat/scenarios/_template.md` from
+   `templates/_template.md`, verbatim (no placeholders to fill in that one).
    `mkdir -p uat/scenarios uat/runs uat/artifacts uat/fixtures` for whichever don't
    already exist. **Does not** run `scripts/dev.sh start/stop/wait-ready` itself —
    that stays a manual verification step (Phase 0 sanity-checks it on the first real
@@ -98,12 +104,13 @@ propose → confirm → write pattern `generate` already uses for scenarios.
    this wizard proposed would be jumping ahead of consent, not saving a step).
    Report every item's outcome individually once the write step finishes, e.g.:
    ```
-   config.md ............... written
-   scripts/dev.sh ........... written
-   uat/scenarios/ ........... already existed, left as-is
-   uat/runs/ ................ created
-   uat/artifacts/ ........... created
-   uat/fixtures/ ............ FAILED — permission denied creating directory
+   config.md ................... written
+   scripts/dev.sh ............... written (from bundled template)
+   uat/scenarios/_template.md ... written (from bundled template)
+   uat/scenarios/ ............... already existed, left as-is
+   uat/runs/ ..................... created
+   uat/artifacts/ ................ created
+   uat/fixtures/ ................. FAILED — permission denied creating directory
    ```
    If one item fails partway through, this is **best-effort, not atomic**: every
    item that already succeeded stays exactly as written — never rolled back because
