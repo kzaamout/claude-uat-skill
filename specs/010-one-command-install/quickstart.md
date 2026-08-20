@@ -49,6 +49,34 @@ individually, then re-run and confirm only the failed item retries.
 All 3 scenarios (9 acceptance criteria total) are confirmed via text-tracing
 against `SKILL.md` and `marketplace.json`, as documented above — **already
 achieved**, since every FR already matched existing text exactly (see
-`plan.md`'s Summary). **Live verification of the actual `/plugin` install flow
-remains blocked** — tracked explicitly as an open item, not silently treated
-as done, pending a user or fresh session with real `/plugin` access.
+`plan.md`'s Summary).
+
+**Live verification: achieved 2026-08-20.** The blocker dissolved: `/plugin` is
+interactive, but the `claude plugin` CLI is not, and it drives the identical
+flow. Evidence, per scenario, all against a scratch target repo:
+
+- **Scenario 1**: `claude plugin marketplace add kzaamout/claude-uat-skill`
+  cloned and validated the real GitHub repo; `claude plugin install
+  webapp-uat@webapp-uat-marketplace --scope project` succeeded, wrote the
+  `enabledPlugins` entry to the target's `.claude/settings.json`, and
+  `claude plugin details` resolved the plugin to exactly one skill
+  (`webapp-uat`, ~124 always-on tokens). A headless `/webapp-uat setup` run
+  then executed the full discovery→propose→write flow.
+- **Scenario 2**: setup copied `scripts/dev.sh` (placeholders filled from
+  detected values; port guess labeled as a guess) and
+  `uat/scenarios/_template.md` (byte-identical to the bundled template, md5
+  verified) into the target's own tree, created the four `uat/`
+  subdirectories, and created `.gitignore` with both runtime entries.
+- **Scenario 3**: a naturally occurring per-item failure (the headless
+  session's permission gate blocked one write while the others succeeded)
+  exercised the best-effort/no-rollback path — succeeded items stayed in
+  place, the failure was named per-item, and a re-run retried only the
+  outstanding items, leaving already-written files untouched (mtime-verified).
+
+One real defect was found and fixed in the same session — setup tried to write
+`config.md` into the plugin cache instead of the project tree, a gap
+text-tracing structurally could not catch — recorded as
+`docs/design-history.md` D12. **Remaining caveat**: the interactive `/plugin`
+slash-command wrapper itself was not exercised (it invokes the same
+marketplace/install machinery the CLI just verified); a user running the two
+README commands interactively is the trivial confirmation left.

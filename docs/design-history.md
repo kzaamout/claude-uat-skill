@@ -595,6 +595,38 @@ not a separate prompt. Two deliberate choices:
 Direct change per the D9 precedent (small, single-behavior addition; not a
 roadmap slice), recorded here and as NR-027 in `docs/requirements.md`.
 
+### D12 — Per-project files must never live in the plugin's own install location
+
+Found during live verification of `UAT-11` (2026-08-20), the first time the real
+`claude plugin marketplace add` + `claude plugin install` flow was ever exercised
+(previous sessions lacked `/plugin` access; the non-interactive `claude plugin` CLI
+turned out to make it fully verifiable). Setup mode, run in a plugin-installed
+target, interpreted `SKILL.md`'s "`config.md` in this same folder" literally and
+tried to write `config.md` next to `SKILL.md` — which for a plugin install is the
+plugin cache under `~/.claude/plugins/`. That location is wrong three separate ways:
+it's write-protected (the harness flags it as a sensitive path, which is what
+surfaced the bug), it's shared by every project using the plugin, and it's replaced
+wholesale when the plugin updates — so even a successful write would have produced
+config that collides across projects and silently vanishes on update. The same
+folder-relative assumption also affected Setup step 1's repo-root detection: `git
+rev-parse --show-toplevel` "from this skill's own location" resolves to the
+*marketplace clone of the skill's repo*, not the target project.
+
+Fix (same session): `SKILL.md` and `USAGE.md` now define the canonical location for
+per-project files (`config.md`, and by the same rule `discovered-environment.md`) as
+`<repo root>/.claude/skills/webapp-uat/` **in the project's own tree**, created by
+setup when missing — which for a manual install is unchanged (that *is* the skill's
+folder), and for a plugin install is a new project-local directory the plugin cache
+never touches. Repo-root detection is now explicitly anchored to the working
+directory, not the skill file's location. `SETUP.md` and the README already used the
+project-relative path throughout and needed no changes — the drift was confined to
+the two files that speak from the skill's own point of view.
+
+Worth noting as a pattern: text-tracing (UAT-11's original completion evidence)
+verified every FR yet could not have caught this, because the FRs themselves shared
+the assumption that "the skill's folder" and "the project's `.claude/skills/`
+folder" are the same place. Only running the real install flow separated them.
+
 ---
 
 ## Open questions summary (resolve before building)

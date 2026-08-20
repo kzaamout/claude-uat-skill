@@ -219,13 +219,18 @@ fully implemented and converged (zero convergence findings).
 ---
 
 ### UAT-09 — Bug-Fix Cycle (Spec-Kit Mechanism)
-**Status: Done (specified, text-traced; live-verification blocked as anticipated).**
-Formalized via Spec Kit (`specs/009-bug-fix-cycle-speckit/`), fully implemented and
-converged (zero convergence findings). Live invocation still needs a target repo
-with Spec Kit's bug-workflow extension actually installed and its three commands
-configured; `demo-app` uses `bug-fix-mechanism: direct` deliberately (see D6), so it
-cannot supply live completion evidence for this slice as-is — tracked explicitly as
-an open item, not silently treated as done.
+**Status: Done (specified, text-traced; environment for live verification unblocked
+2026-08-20, live run itself still open).** Formalized via Spec Kit
+(`specs/009-bug-fix-cycle-speckit/`), fully implemented and converged (zero
+convergence findings). The "no real extension available" blocker is resolved: Spec
+Kit's default catalog ships `specify extension add bug` (Bug Triage Workflow,
+spec-kit-core), verified installed in a scratch project — it provides exactly
+`/speckit-bug-assess` / `/speckit-bug-fix` / `/speckit-bug-test`, mapping
+one-to-one onto the three `bug-*-command` config keys. What remains is the actual
+Phase 4 delegation run in an interactive Chrome session against a
+spec-kit-configured app; `demo-app`'s committed config stays `direct` deliberately
+(see D6), so that run needs a temporary spec-kit `config.md` — tracked in
+`specs/009-bug-fix-cycle-speckit/quickstart.md`'s "Done when" section.
 
 - **User outcome**: Same fix cycle as UAT-04, but delegated to an installed Spec Kit
   bug-workflow extension's assess/fix/test commands instead of Claude fixing
@@ -300,9 +305,18 @@ fully implemented and converged (zero convergence findings).
 ---
 
 ### UAT-11 — One-Command Install
-**Status: Done (specified, text-traced; live `/plugin` verification blocked as
-anticipated).** Formalized via Spec Kit (`specs/010-one-command-install/`), fully
-implemented and converged (zero convergence findings).
+**Status: Done — live-verified 2026-08-20.** Formalized via Spec Kit
+(`specs/010-one-command-install/`), fully implemented and converged (zero
+convergence findings). Live verification landed via the non-interactive
+`claude plugin` CLI (which drives the same machinery as the interactive `/plugin`
+meta-command): real marketplace add from GitHub, project-scope install into a
+scratch repo, and a headless `/webapp-uat setup` run that copied both project-tree
+templates, created the `uat/` directories and `.gitignore`, and — via a natural
+per-item failure — exercised the best-effort/no-rollback/outstanding-only-retry
+behavior end to end. One genuine defect was found and fixed in the process
+(`config.md` written toward the plugin cache instead of the project tree — see
+`docs/design-history.md` D12); full evidence in
+`specs/010-one-command-install/quickstart.md`'s "Done when" section.
 
 - **User outcome**: A stranger installs the skill in a project with two native Claude
   Code commands (`/plugin marketplace add` + `/webapp-uat setup`), no manual
@@ -321,11 +335,13 @@ implemented and converged (zero convergence findings).
   `SKILL.md`/`marketplace.json` edits were needed; `/speckit-analyze` confirmed
   zero drift and `/speckit-implement` ran as a genuine no-op. Text-traced
   against all 8 FRs and 9 acceptance criteria, zero `/speckit-converge`
-  findings. **Live verification of the actual `/plugin marketplace add` +
-  `/plugin install` flow remains explicitly blocked** — `/plugin` is an
-  interactive CLI meta-command with no tool access available in this session;
-  tracked in `specs/010-one-command-install/quickstart.md`'s "Done when"
-  section as an open item for the user or a fresh session with real access.
+  findings. **Live verification: achieved 2026-08-20** via the non-interactive
+  `claude plugin` CLI — marketplace add, project-scope install, headless setup
+  with template copy, and the partial-failure/re-run path all confirmed against
+  a scratch target; one defect found and fixed (D12). Full evidence in
+  `specs/010-one-command-install/quickstart.md`'s "Done when" section. The
+  only unexercised remnant is the interactive `/plugin` wrapper itself, which
+  invokes the same machinery.
 
 ---
 
@@ -361,11 +377,13 @@ bug on), and shipped as its own repo/submodule
 suggested order in places (`UAT-12` pulled forward once its architecture was
 approved, since later slices' completion evidence depends on it existing).
 
-**All 12 roadmap slices are now Done.** Two land specified-but-not-
-live-verified, both for the same structural reason — no tool access in this
-session to the external system each depends on: `UAT-09` needs an installed
-Spec-Kit bug-workflow extension; `UAT-11` needs real `/plugin` CLI access. Both
-are tracked as explicit open items in their own `quickstart.md`, not silently
-treated as done. Remaining, non-roadmap work: item 5 from the session's
-standing "proceed with all of them" authorization (demo recording + LinkedIn
-draft) has not yet been started.
+**All 12 roadmap slices are now Done.** As of the 2026-08-20 live-verification
+pass: `UAT-11` is fully live-verified (via the non-interactive `claude plugin`
+CLI — see D12 for the defect that pass caught and fixed). `UAT-09` is the one
+remaining slice that is specified-but-not-live-verified: its environment
+blocker is resolved (Spec Kit's `bug` extension is real, installable, and its
+three commands are confirmed), but the actual Phase 4 delegation run — a full
+interactive `/webapp-uat` pass against a spec-kit-configured app — is still an
+open item tracked in its `quickstart.md`. Remaining, non-roadmap work: item 5
+from the session's standing "proceed with all of them" authorization (demo
+recording + LinkedIn draft) has not yet been started.

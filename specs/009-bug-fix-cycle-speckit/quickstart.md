@@ -56,6 +56,26 @@ distinguishes this from an ordinary unresolved bug or a restart-failure stop.
 
 All 3 scenarios (12 acceptance criteria total) are confirmed via text-tracing
 against `SKILL.md` and the constructed example `config.md` above.
-**Live verification of all 3 scenarios remains blocked** — tracked explicitly as
-an open item, not silently treated as done, pending a project with a real
-installed Spec Kit bug-workflow extension becoming available to test against.
+
+**Environment blocker resolved 2026-08-20; live run still open.** Spec Kit's
+default extension catalog ships an installable bug-workflow extension:
+`specify extension add bug` ("Bug Triage Workflow" v1.0.0, spec-kit-core).
+Verified live in a scratch `specify init` project: it installs exactly three
+Claude Code commands — `/speckit-bug-assess`, `/speckit-bug-fix`,
+`/speckit-bug-test` (skills under `.claude/skills/`, backed by
+`.specify/extensions/bug/commands/`) — matching the three `bug-*-command`
+config keys one-to-one, so a real `config.md` for this mechanism is now:
+
+```
+bug-fix-mechanism: spec-kit
+bug-assess-command: /speckit-bug-assess
+bug-fix-command: /speckit-bug-fix
+bug-test-command: /speckit-bug-test
+```
+
+What remains open is the actual Phase 4 delegation run: a full `/webapp-uat`
+pass, in an interactive session with Chrome, against an app configured with
+`bug-fix-mechanism: spec-kit` and the extension installed (e.g. `demo-app`
+with a temporary spec-kit `config.md` — its committed config stays `direct`
+per D6), producing a confirmed BUG finding and watching the three commands
+run in order.
