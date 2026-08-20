@@ -501,6 +501,34 @@ on `PATH` without a project-local `.specify/` directory — Setup mode still pro
 `spec-kit` from that global-`PATH` evidence alone. Worth tightening later to require a
 project-local `.specify/` directory as well, not `PATH` presence on its own.
 
+### D9 — Vendored axe-core, and batching predictable browser action sequences
+
+Raised directly by the user (2026-08-19): Phase 2 execution felt slow, specifically
+Chrome automation's own "clicking around." Investigated the actual mechanics rather
+than scenario count or check coverage — two real, code/tooling-level costs found,
+both fixed without touching what gets checked or how thoroughly:
+
+- **axe-core was fetched from CDN fresh every scenario.** Each scenario starts on a
+  new page, so the accessibility-check script needs re-injecting per scenario — but
+  it was also being re-*fetched* over the network from `cdnjs.cloudflare.com` every
+  single time, for a file that never changes mid-run. Vendored `axe-core` 4.10.0 as
+  `.claude/skills/webapp-uat/vendor/axe.min.js`, read once per run and injected via
+  `script.textContent` instead of `script.src` pointing at the CDN — removes a
+  network round-trip per scenario, with a CDN fallback if the vendored file is ever
+  missing.
+- **No guidance to batch predictable Chrome action sequences.** Phase 2 issued one
+  tool call per click/type/screenshot, each its own round-trip. Added explicit
+  guidance to use `browser_batch` for sequences that are already known (fill a
+  field, tab, type, submit), reserving single calls for points where the next
+  action genuinely depends on what the page just showed.
+
+**Explicitly not changed**: coordinate-based clicking vs. semantic element
+references (`find`/`read_page`) — flagged as a related, real lever (directly
+observed causing stale-screenshot click failures while recording the session's
+demo GIF) but the user asked to leave it alone for this pass. Also not touched:
+scenario count, viewport defaults, or any check's actual coverage — this was
+scoped to tooling mechanics only, per the user's explicit framing.
+
 ---
 
 ## Open questions summary (resolve before building)

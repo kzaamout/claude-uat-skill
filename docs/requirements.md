@@ -305,6 +305,15 @@ there.
 - **NR-023**: Under `--silent`, Phase 5's spec-disposition choice (review only / draft a spec update / draft a new feature spec / defer selected items) MUST default to *review only* rather than touching a spec file automatically (stated in Phase 5's prose; `UAT-02`'s FR-017 requires the choice exist and never auto-modify a spec, but doesn't itself state this specific `--silent` default value).
 - **NR-024**: All UAT-created data, once cleaned up, MUST use the file/directory layout documented in `USAGE.md`'s "File & directory reference" (`uat/scenarios/`, `uat/fixtures/`, `uat/runs/<run-id>/`, `uat/artifacts/<run-id>/<scenario-id>/`, `scripts/dev.sh`) — this layout is assumed throughout every formalized feature's requirements but was never itself stated as a requirement anywhere.
 
+### 2.6 — Phase 2: Execution Performance
+Governs `SKILL.md` lines 318-354. Fixed directly at the user's explicit request
+(2026-08-19) — a tooling/mechanics-level performance pass, not a new capability,
+scoped deliberately to exclude scenario count, viewport defaults, and check
+coverage. See `docs/design-history.md` D9.
+
+- **NR-025**: Where a scenario's next several Chrome actions are already predictable (a fill-tab-type-submit sequence, or navigate-click-screenshot), system MUST issue them as one batched call rather than one round-trip per action — reserved for sequences that don't depend on intervening page state.
+- **NR-026**: The accessibility check's `axe-core` script MUST be read from this skill's own bundled copy (`.claude/skills/webapp-uat/vendor/axe.min.js`) once per run and injected inline (`script.textContent`) for each scenario, rather than fetched from a CDN URL per scenario. A missing vendored file MUST fall back to the CDN URL rather than skipping the check.
+
 ---
 
 ## Part 3 — Known Open / Unresolved Policy Questions

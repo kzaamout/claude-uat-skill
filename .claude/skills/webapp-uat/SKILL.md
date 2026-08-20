@@ -320,6 +320,12 @@ For each approved scenario:
    if none declared). Any file a step requires must be an exact path under
    `uat/fixtures/` as stated in Preconditions — never substitute a real/personal file
    found elsewhere on the machine.
+   - **Batch predictable action sequences.** Where a scenario's next several steps
+     are already known (fill a field, tab to the next, type, submit — or navigate,
+     click, screenshot), issue them as one `browser_batch` call instead of one
+     round-trip per action. Reserve single, unbatched calls for the points where the
+     next action genuinely depends on what the page just showed — batching a
+     sequence you can't yet predict just means re-deriving it after a wasted call.
    - **Client-side validation blocking a server-side check:** if a scenario's steps
      are meant to exercise server-side enforcement (a boundary/negative-path case)
      but the app's own client-side validation prevents the form from ever
@@ -330,17 +336,22 @@ For each approved scenario:
      deliberately to test the server boundary, not encountered as an app failure.
 4. Note actual vs. expected result.
 5. **Expanded checks**, every scenario:
-   - **Accessibility:** inject axe-core via CDN through the JS-execution tool and run
-     it —
+   - **Accessibility:** inject axe-core from this skill's own bundled copy
+     (`.claude/skills/webapp-uat/vendor/axe.min.js`) through the JS-execution tool —
+     read the file once per run and reuse its contents for every scenario, injecting
+     inline rather than fetching from a CDN per scenario (each scenario starts on a
+     fresh page, so the script still needs re-injecting per scenario, but not
+     re-fetched over the network each time) —
      ```js
      const s = document.createElement('script');
-     s.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js';
+     s.textContent = /* the vendored axe.min.js file's contents, read once this run */;
      document.head.appendChild(s);
-     await new Promise(r => s.onload = r);
      const results = await axe.run();
      ```
      Parse `results.violations` — this is the source of accessibility findings, not
-     visual inspection of the DOM.
+     visual inspection of the DOM. If the vendored file is ever missing, fall back to
+     the CDN URL (`https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js`)
+     rather than skipping the check.
    - **i18n:** only if discovery marked the app multi-locale — raw/unresolved
      translation keys, unresolved placeholders, missing strings. App not marked
      multi-locale → skip this specific check for the scenario, note it wasn't
