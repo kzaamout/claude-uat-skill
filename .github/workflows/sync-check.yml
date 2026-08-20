@@ -1,0 +1,19 @@
+name: sync-check
+
+# Guards against silent drift between this repo's deliberate copy-pairs:
+# bundled templates vs. root reference files, and the parent skill folder vs.
+# demo-app's installed copy. See scripts/check-sync.sh and design-history D7/D8.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  sync-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - run: bash scripts/check-sync.sh

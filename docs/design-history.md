@@ -478,7 +478,8 @@ lacked `templates/`/`vendor/` entirely. Exactly the risk D8 warned about: two
 divergent copies, which one runs depending on where the session is rooted. Caught by
 a full-repo review's diff pass and re-synced. The periodic diff check this note asked
 for should cover all three copy-pairs: `templates/` vs root files, parent skill vs
-`demo-app`'s installed skill — still manual, still unenforced by tooling.
+`demo-app`'s installed skill — now enforced by `scripts/check-sync.sh`, run in CI on
+every push (see D10).
 
 ### D8 — `Skill` invocation always resolves to the outer repo's copy, not a nested project's
 
@@ -538,6 +539,31 @@ observed causing stale-screenshot click failures while recording the session's
 demo GIF) but the user asked to leave it alone for this pass. Also not touched:
 scenario count, viewport defaults, or any check's actual coverage — this was
 scoped to tooling mechanics only, per the user's explicit framing.
+
+### D10 — Sync-check enforcement, and a configurable `wait-ready` timeout
+
+Built 2026-08-19, directly downstream of the drift D7's addendum records:
+
+- **`scripts/check-sync.sh` + a GitHub Actions workflow** (`sync-check.yml`, on
+  every push/PR with submodules checked out) now enforce byte-identity across all
+  copy-pairs this repo deliberately carries: the skill's bundled
+  `templates/dev.sh.template`/`_template.md` vs. their root reference copies, and
+  all seven tracked files of the parent's skill folder vs. `demo-app`'s installed
+  copy. `config.md`/`discovered-environment.md` are local-only and excluded.
+  Verified both directions: passes clean on the synced tree, and a deliberately
+  injected one-line drift fails with exit 1 naming the pair. The check skips the
+  demo-app pair with a notice when the submodule isn't checked out locally; CI
+  always checks it out. Note the check enforces *identity*, not *direction* — a
+  drift still needs a human to decide which copy is the correct one before
+  re-syncing, which is why the failure message says so rather than auto-fixing.
+- **`WAIT_TIMEOUT` in `dev.sh`** (default 30, roughly seconds — one health-check
+  per second): previously hardcoded as `seq 1 30`, meaning a slow-booting app
+  couldn't lengthen the window without hand-editing a loop, and Phase 4's
+  two-consecutive-restart-failure threshold would trip on a healthy-but-slow app.
+  Now an editable default in the config block and overridable per-run via the
+  environment. Applied to all three copies (root, bundled template, `demo-app`'s
+  filled-in variant); timeout path live-verified at `WAIT_TIMEOUT=3` (~3.5s, exit
+  1) and the success path unaffected (~7.5s to ready against `demo-app`).
 
 ---
 
