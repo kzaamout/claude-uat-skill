@@ -50,15 +50,26 @@ Open source. Point it at your own app.
 
 ## Notes for whoever posts this
 
-- **`[link]`** → the published workflow diagram:
+- **`[link]`** → the published workflow diagram (updated 2026-08-20 to the
+  SDLC swimlane version — developer / webapp-uat / Chrome+app lanes):
   `https://claude.ai/code/artifact/2d795969-a2b9-4349-aadd-db6a66af9db9`
   (currently private — share it from the artifact's own share menu before
   the post goes live, otherwise the link 404s for anyone else). Repo:
   `https://github.com/kzaamout/claude-uat-skill`.
-- Attach `webapp-uat-demo-flow.gif` directly to the post (LinkedIn native
-  video/GIF upload gets far more reach than an outbound link preview) — use
-  the full recording from `docs/demo-recording-runbook.md` instead if it
-  gets made; the GIF is the fallback, not the first choice.
+- Attach GIFs directly to the post (LinkedIn native video/GIF upload gets
+  far more reach than an outbound link preview). Three recorded 2026-08-20
+  against the demo app's silent-comment-failure bug (checked in under
+  `docs/gifs/`), telling the full story in sequence:
+  1. `uat-scenario-execution.gif` — a scenario running in real Chrome
+     (login as the scenario's account, navigate to the documents list).
+  2. `uat-bug-found-ui-lies.gif` — the catch: UI says "Comment added.",
+     comment count stays 0, reload confirms nothing persisted (backend
+     verification via direct Postgres read found 0 rows).
+  3. `uat-fix-retest-passing.gif` — after the fix + app restart, the same
+     steps re-driven: the comment persists and renders.
+  The full recording from `docs/demo-recording-runbook.md` is still the
+  first choice if it gets made; these GIFs are the ready-now fallback
+  (older single `webapp-uat-demo-flow.gif` is superseded).
 - The "UI says saved, nothing persisted" line is the single most
   differentiated claim in either draft — if trimming for length, cut
   elsewhere first.

@@ -1,0 +1,134 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="webapp-uat SDLC swimlanes" id="uat-sdlc-swimlanes">
+    <mxGraphModel dx="1200" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- SDLC stage column headers -->
+        <mxCell id="hdr0" value="SPEC" style="text;html=1;align=center;fontFamily=Courier New;fontSize=12;fontStyle=1;fontColor=#7D8B85;" vertex="1" parent="1">
+          <mxGeometry x="135" y="80" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="hdr1" value="BUILD" style="text;html=1;align=center;fontFamily=Courier New;fontSize=12;fontStyle=1;fontColor=#7D8B85;" vertex="1" parent="1">
+          <mxGeometry x="322" y="80" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="hdr2" value="TEST" style="text;html=1;align=center;fontFamily=Courier New;fontSize=12;fontStyle=1;fontColor=#7D8B85;" vertex="1" parent="1">
+          <mxGeometry x="509" y="80" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="hdr3" value="TRIAGE" style="text;html=1;align=center;fontFamily=Courier New;fontSize=12;fontStyle=1;fontColor=#7D8B85;" vertex="1" parent="1">
+          <mxGeometry x="696" y="80" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="hdr4" value="FIX" style="text;html=1;align=center;fontFamily=Courier New;fontSize=12;fontStyle=1;fontColor=#7D8B85;" vertex="1" parent="1">
+          <mxGeometry x="883" y="80" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="hdr5" value="SHIP" style="text;html=1;align=center;fontFamily=Courier New;fontSize=12;fontStyle=1;fontColor=#7D8B85;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="80" width="120" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Pool with three horizontal lanes -->
+        <mxCell id="pool" value="webapp-uat — where it sits in your SDLC" style="swimlane;html=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;collapsible=0;fontSize=13;fontStyle=1;fillColor=#F4F6F5;strokeColor=#55635E;" vertex="1" parent="1">
+          <mxGeometry x="40" y="110" width="1190" height="600" as="geometry" />
+        </mxCell>
+
+        <mxCell id="laneDev" value="DEVELOPER" style="swimlane;html=1;startSize=30;horizontal=0;collapsible=0;fontFamily=Courier New;fontSize=11;fontStyle=1;fillColor=#FBFCFB;strokeColor=#55635E;swimlaneFillColor=#FBFCFB;" vertex="1" parent="pool">
+          <mxGeometry x="0" y="30" width="1190" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="laneUat" value="WEBAPP-UAT" style="swimlane;html=1;startSize=30;horizontal=0;collapsible=0;fontFamily=Courier New;fontSize=11;fontStyle=1;fillColor=#E9F4F1;strokeColor=#55635E;swimlaneFillColor=#E9F4F1;" vertex="1" parent="pool">
+          <mxGeometry x="0" y="220" width="1190" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="laneApp" value="CHROME + APP" style="swimlane;html=1;startSize=30;horizontal=0;collapsible=0;fontFamily=Courier New;fontSize=11;fontStyle=1;fillColor=#FBFCFB;strokeColor=#55635E;swimlaneFillColor=#FBFCFB;" vertex="1" parent="pool">
+          <mxGeometry x="0" y="410" width="1190" height="190" as="geometry" />
+        </mxCell>
+
+        <!-- Developer lane nodes -->
+        <mxCell id="d1" value="Write specs &amp;amp; acceptance criteria" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFFFFF;strokeColor=#8A9690;fontSize=12;" vertex="1" parent="laneDev">
+          <mxGeometry x="65" y="55" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="d2" value="Implement the feature" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFFFFF;strokeColor=#8A9690;fontSize=12;" vertex="1" parent="laneDev">
+          <mxGeometry x="252" y="55" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="d3" value="Approve the test plan" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#F4E3C8;strokeColor=#B5741A;strokeWidth=1.5;fontSize=12;" vertex="1" parent="laneDev">
+          <mxGeometry x="439" y="55" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="d4" value="Sign off — high-risk fixes only&#10;(security · auth · deletion)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#F4E3C8;strokeColor=#B5741A;strokeWidth=1.5;fontSize=12;" vertex="1" parent="laneDev">
+          <mxGeometry x="626" y="55" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="d5" value="Review report, merge &amp;amp; ship" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFFFFF;strokeColor=#8A9690;fontSize=12;" vertex="1" parent="laneDev">
+          <mxGeometry x="1000" y="55" width="160" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- webapp-uat lane nodes -->
+        <mxCell id="u1" value="Generate &amp;amp; tighten scenarios&#10;(specs · validation code · routes)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFFFFF;strokeColor=#227B70;strokeWidth=1.5;fontSize=12;" vertex="1" parent="laneUat">
+          <mxGeometry x="439" y="55" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="u2" value="Classify findings: bug · UX · spec gap + severity P0–P3" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFFFFF;strokeColor=#227B70;strokeWidth=1.5;fontSize=12;" vertex="1" parent="laneUat">
+          <mxGeometry x="626" y="55" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="u3" value="Assess &amp;amp; fix each confirmed bug, commit per bug" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFFFFF;strokeColor=#227B70;strokeWidth=1.5;fontSize=12;" vertex="1" parent="laneUat">
+          <mxGeometry x="813" y="55" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="u4" value="Write the final report: fixed · unresolved · spec recommendations" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFFFFF;strokeColor=#227B70;strokeWidth=1.5;fontSize=12;" vertex="1" parent="laneUat">
+          <mxGeometry x="1000" y="55" width="160" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Chrome + app lane nodes -->
+        <mxCell id="a1" value="Drive scenario in visible Chrome — axe-core · console capture" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFFFFF;strokeColor=#8A9690;fontSize=12;" vertex="1" parent="laneApp">
+          <mxGeometry x="439" y="55" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="a2" value="Backend verification: API or direct DB read — not just what the UI says" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFFFFF;strokeColor=#8A9690;fontSize=12;" vertex="1" parent="laneApp">
+          <mxGeometry x="626" y="55" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="a3" value="Restart the app, re-drive the same steps — browser retest" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFFFFF;strokeColor=#8A9690;fontSize=12;" vertex="1" parent="laneApp">
+          <mxGeometry x="813" y="55" width="160" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Flows -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;strokeColor=#55635E;fontSize=11;fontColor=#55635E;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="d1" target="d2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="ready to test" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;strokeColor=#55635E;fontSize=11;fontColor=#55635E;exitX=0.5;exitY=1;entryX=0;entryY=0.5;" edge="1" parent="1" source="d2" target="u1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="plan" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;strokeColor=#55635E;fontSize=11;fontColor=#55635E;exitX=0.35;exitY=0;entryX=0.35;entryY=1;" edge="1" parent="1" source="u1" target="d3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="approved" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;dashed=1;strokeColor=#B5741A;fontSize=11;fontColor=#B5741A;fontStyle=1;exitX=0.65;exitY=1;entryX=0.65;entryY=0;" edge="1" parent="1" source="d3" target="u1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="execute" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;strokeColor=#55635E;fontSize=11;fontColor=#55635E;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="u1" target="a1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;strokeColor=#55635E;fontSize=11;fontColor=#55635E;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="a1" target="a2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="evidence" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;strokeColor=#55635E;fontSize=11;fontColor=#55635E;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" edge="1" parent="1" source="a2" target="u2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" value="bugs" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;strokeColor=#55635E;fontSize=11;fontColor=#55635E;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="u2" target="u3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" value="high-risk → pause" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;dashed=1;strokeColor=#B5741A;fontSize=11;fontColor=#B5741A;fontStyle=1;exitX=0.35;exitY=0;entryX=0.35;entryY=1;" edge="1" parent="1" source="u2" target="d4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" value="signed off" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;dashed=1;strokeColor=#B5741A;fontSize=11;fontColor=#B5741A;fontStyle=1;exitX=1;exitY=0.75;entryX=0.35;entryY=0;" edge="1" parent="1" source="d4" target="u3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" value="fix applied" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;strokeColor=#55635E;fontSize=11;fontColor=#55635E;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="u3" target="a3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" value="retest passed" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;strokeColor=#55635E;fontSize=11;fontColor=#55635E;exitX=1;exitY=0.25;entryX=0.35;entryY=1;" edge="1" parent="1" source="a3" target="u4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" value="report" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;strokeColor=#55635E;fontSize=11;fontColor=#55635E;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" edge="1" parent="1" source="u4" target="d5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legend" value="Amber fill / dashed amber = human approval gates (the high-risk pause is never skipped, not even in --silent).&#10;Teal outline = webapp-uat's automated lane. No bug closes without a browser retest." style="text;html=1;align=left;verticalAlign=top;fontSize=11;fontColor=#7D8B85;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="70" y="725" width="900" height="40" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

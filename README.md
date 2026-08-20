@@ -180,7 +180,10 @@ scripts/dev.sh wait-ready
 scripts/dev.sh stop
 ```
 
-Run these once by hand before trusting them to an unattended pass. Then copy
+Run these once by hand before trusting them to an unattended pass. (`wait-ready`
+gives up after ~30 seconds by default — a slow-booting app can raise that in
+`scripts/dev.sh`'s `WAIT_TIMEOUT`, or per-run via the `WAIT_TIMEOUT` environment
+variable.) Then copy
 `uat/scenarios/_template.md` into a real scenario file and drop anything it needs
 into `uat/fixtures/`. Full checklist: [`SETUP.md`](.claude/skills/webapp-uat/SETUP.md).
 
@@ -340,48 +343,48 @@ No `config.md` → the skill stops at invocation and points here instead of gues
 Full detail on every phase, with exact example output:
 [`USAGE.md`](.claude/skills/webapp-uat/USAGE.md).
 
-### Where this fits in your workflow
+### Where this fits in your SDLC
+
+A swimlane view of a typical software development life cycle — what stays yours
+(top lane), what this skill takes over (middle lane), and what actually happens in
+the browser and backend while it does (bottom lane). Left to right is SDLC order:
+requirements → implementation → testing → bug fixing → verification → merge.
 
 ```mermaid
-flowchart LR
-    subgraph dev["Developer"]
-        D1["Write / change\na feature"]
-        D5["Review report,\nmerge"]
+flowchart TB
+    subgraph DEV["👤 Developer"]
+        direction LR
+        D1["Requirements<br/>& specs"] --> D2["Design &<br/>implement"] --> D3["Approve<br/>test plan"] --> D4["Sign off —<br/>high-risk fixes only"] --> D5["Review report,<br/>merge & ship"]
     end
 
-    subgraph spec["Spec Kit (optional)"]
-        S1["spec.md"] --> S2["plan.md"] --> S3["tasks.md"] --> S4["implement"]
+    subgraph UAT["🤖 webapp-uat (Claude Code)"]
+        direction LR
+        U1["Generate scenarios from<br/>specs · validation code ·<br/>route gaps — or review yours"] --> U2["Tighten scenarios,<br/>promote missing cases"] --> U3["Classify findings:<br/>bug / UX / spec gap<br/>+ severity P0–P3"] --> U4["Assess & fix each<br/>confirmed bug,<br/>commit per bug"] --> U5["Final report: fixed ·<br/>unresolved · spec-update<br/>recommendations"]
     end
 
-    subgraph uat["webapp-uat"]
-        U0["setup\n(once per repo)"]
-        U1["generate\nor hand-write\nscenarios"]
-        U2["Phase 1\nreview & approve"]
-        U3["Phase 2\nexecute in\nreal Chrome"]
-        U4["Phase 3\nclassify + severity"]
-        U5["Phase 4\nfix confirmed bugs,\nbrowser-retest"]
-        U6["Phase 5\nfinal report"]
-        U1 --> U2 --> U3 --> U4 --> U5 --> U6
+    subgraph APP["🌐 Chrome + app under test"]
+        direction LR
+        C1["Drive scenario in a<br/>real, visible Chrome<br/>window"] --> C2["axe-core accessibility<br/>audit · console/network/<br/>screenshot capture"] --> C3["Verify outcome directly<br/>in the backend<br/>(API or DB read)"] --> C4["Restart app,<br/>re-drive the same steps —<br/>browser retest"]
     end
 
-    subgraph app["App under test"]
-        A1["Running instance\n(scripts/dev.sh)"]
-        A2["Backend store(s)\n(DB / API / etc.)"]
-    end
-
-    D1 --> S1
-    S4 --> U0
-    U0 --> U1
-    U3 <-->|"drive UI,\nread console/network"| A1
-    U3 -->|"verify outcome"| A2
-    U5 -->|"stop / fix / restart"| A1
-    U6 --> D5
+    D2 -.->|"feature ready<br/>to test"| U1
+    U2 -.->|"plan presented"| D3
+    D3 -.->|"approved"| C1
+    C3 -.->|"evidence"| U3
+    U3 -.->|"security / auth /<br/>data-deletion bug"| D4
+    D4 -.->|"approved"| U4
+    U4 -.->|"fix applied"| C4
+    C4 -.->|"retest passed"| U5
+    U5 -.->|"report"| D5
 ```
 
 Sits after implementation, before merge — a browser-verified QA gate with a human in
-the loop for anything genuinely risky, not a replacement for Spec Kit's own workflow
-or for human code review. Spec Kit is optional: `bug-fix-mechanism: direct` (the
-default) skips that lane entirely and Claude fixes confirmed bugs in-session instead.
+the loop for anything genuinely risky, not a replacement for writing specs or for
+human code review. The developer's involvement collapses to three touch points:
+approve the plan, sign off on high-risk fixes, review the final report. Spec Kit is
+optional: `bug-fix-mechanism: direct` (the default) needs nothing beyond Claude
+Code, and Claude fixes confirmed bugs in-session instead of delegating to Spec
+Kit's bug workflow.
 
 ---
 
@@ -433,9 +436,13 @@ seeded bugs and seeing this skill actually catch them — live in
 .claude/skills/webapp-uat/
   SKILL.md                        the skill's operating logic — never hand-edited per project
   USAGE.md                        full usage reference (also the --help output)
+  SETUP.md                        one-time setup checklist
   config.md.example               template — copy to config.md and fill in
-  config.md                       your project's settings (you create this)
-  discovered-environment.md       cached environment facts (auto-created on first run)
+  config.md                       your project's settings (you create this; gitignored)
+  discovered-environment.md       cached environment facts (auto-created on first run; gitignored)
+  templates/                      bundled dev.sh/_template.md copies — what setup mode
+                                    installs into a repo when the plugin path was used
+  vendor/axe.min.js               vendored axe-core for the accessibility audit
 
 uat/
   scenarios/
@@ -451,10 +458,28 @@ uat/
 
 scripts/
   dev.sh                           start / stop / wait-ready wrapper for your app
+  check-sync.sh                    drift guard for this repo's deliberate copy-pairs (see below)
+
+.claude-plugin/marketplace.json    what makes `/plugin marketplace add` work against this repo
+.github/workflows/sync-check.yml   CI: runs check-sync.sh on every push/PR
+
+docs/                              design history, roadmap, requirements reference,
+                                    demo-recording runbook, LinkedIn draft
+specs/                             Spec Kit feature specs this skill's own development
+                                    was formalized through (one folder per roadmap slice)
 
 demo-app/                          git submodule — a separate repo (webapp-uat-demo),
                                     see "Try it with the bundled demo app" above
 ```
+
+**A note on deliberate duplication:** this repo carries the same file in more than
+one place on purpose — the bundled `templates/` vs. the root `scripts/dev.sh` /
+`uat/scenarios/_template.md` reference copies (a plugin install can only write under
+`.claude/`), and the parent repo's skill folder vs. `demo-app`'s own installed copy
+(a separate repo, so it needs its own copy). `scripts/check-sync.sh` — run locally
+or by the `sync-check` CI workflow on every push — fails loudly if any pair drifts,
+so the duplication stays deliberate instead of becoming silent divergence. See
+[`docs/design-history.md`](docs/design-history.md) D7/D8/D10.
 
 ---
 
@@ -517,6 +542,10 @@ what's done, in progress, and not yet formalized.
 - [`SETUP.md`](.claude/skills/webapp-uat/SETUP.md) — one-time setup checklist
 - [`docs/design-history.md`](docs/design-history.md) — design history, resolved
   decisions, still-open questions, and deferred ideas
+- [`docs/roadmap.md`](docs/roadmap.md) — the slice-by-slice implementation roadmap
+  and each slice's verification status
+- [`docs/requirements.md`](docs/requirements.md) — every requirement governing the
+  skill's behavior in one place, formalized (`FR-###`) and not (`NR-###`)
 - [`uat/scenarios/_template.md`](uat/scenarios/_template.md) — the shape every
   scenario follows
 - [`demo-app`](demo-app) / [`webapp-uat-demo`](https://github.com/kzaamout/webapp-uat-demo) —
