@@ -470,6 +470,16 @@ by necessity (they need to exist standalone at the repo root too, for the manual
 path and for this repo's own dogfooding) — worth a periodic diff check that the two
 haven't silently drifted, since nothing currently enforces they stay identical.
 
+**Drift materialized (2026-08-19)**: not in the templates pair (those stayed
+identical), but in the third copy this note didn't name — `demo-app`'s own installed
+`.claude/skills/webapp-uat/`, which had silently fallen 160 lines behind the parent's
+`SKILL.md` (missing every UAT-04/05/07/08/09/10 implementation edit plus D9) and
+lacked `templates/`/`vendor/` entirely. Exactly the risk D8 warned about: two
+divergent copies, which one runs depending on where the session is rooted. Caught by
+a full-repo review's diff pass and re-synced. The periodic diff check this note asked
+for should cover all three copy-pairs: `templates/` vs root files, parent skill vs
+`demo-app`'s installed skill — still manual, still unenforced by tooling.
+
 ### D8 — `Skill` invocation always resolves to the outer repo's copy, not a nested project's
 
 Found during live-verification of `UAT-02`/`UAT-06` against `demo-app` (2026-08-16):

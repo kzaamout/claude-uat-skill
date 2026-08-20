@@ -285,6 +285,9 @@ For when you don't want to be present at all. Skips:
 - the confirmation before any DB write (seeding or cleaning up test data)
 - Phase 5's spec-update choice (defaults to *review only*, never touches a spec file
   automatically)
+- under `bug-fix-mechanism: spec-kit`: the pause when a configured bug-workflow
+  command itself fails to run — a tool-invocation failure is the tooling breaking,
+  not a routine decision
 
 ### `--priority <tiers>`
 

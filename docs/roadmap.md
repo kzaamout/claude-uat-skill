@@ -344,7 +344,10 @@ bug on), and shipped as its own repo/submodule
   rules; a 6-entity relational schema queryable for backend verification; a genuine
   list-view empty state; file-based routing with an intentional coverage gap; 3
   env-gated, off-by-default seeded bugs (permission bypass, accessibility, silent
-  backend-write failure); root-level `scripts/dev.sh`/`uat/scenarios/` wired to it.
+  backend-write failure); its own in-repo `scripts/dev.sh`/`uat/scenarios/` (these
+  moved inside the submodule when demo-app became its own repo — see D6; the
+  parent repo's root copies are the pristine, unfilled reference templates, not
+  wired to demo-app).
 - **Scope explicitly deferred**: the Spec-Kit specs needed to exercise UAT-07/UAT-09
   against this app; multi-locale support.
 - **Dependencies**: none on other webapp-uat slices directly, but UAT-02/UAT-04/

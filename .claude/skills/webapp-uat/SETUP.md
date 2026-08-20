@@ -80,6 +80,10 @@ scripts/dev.sh wait-ready
 scripts/dev.sh stop
 ```
 
+`start` writes two files into your repo (`dev.log`, `.webapp-uat.pid`). Add both to
+your `.gitignore` — Phase 0 requires a clean git working tree before every run, so
+leaving them untracked-and-unignored blocks the very next run.
+
 ## 4. Confirm Chrome is actually connected
 
 ```bash
