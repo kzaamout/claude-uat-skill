@@ -565,6 +565,36 @@ Built 2026-08-19, directly downstream of the drift D7's addendum records:
   filled-in variant); timeout path live-verified at `WAIT_TIMEOUT=3` (~3.5s, exit
   1) and the success path unaffected (~7.5s to ready against `demo-app`).
 
+### D11 — Setup mode proposes the `.gitignore` entries its own runs depend on
+
+Built 2026-08-20, closing the gap the 2026-08-19 review documented but only
+half-fixed: `scripts/dev.sh start` writes `dev.log` and `.webapp-uat.pid` into the
+target repo, and Phase 0 requires a clean working tree before every run — so in any
+repo whose `.gitignore` doesn't already cover them, the first `start` blocks the
+very next run. SETUP.md warning users to add the entries by hand (the review's fix)
+still left the wizard silently setting up a repo into that trap.
+
+Setup mode's step 6 write step now checks both files and appends whichever isn't
+covered to the repo's `.gitignore` (creating it if absent), inside the same
+propose→confirm→write flow and per-item outcome reporting as every other write —
+not a separate prompt. Two deliberate choices:
+
+- **Coverage is tested with `git check-ignore`, not by grepping for literal
+  lines** — an existing `*.log` pattern already covers `dev.log`, and appending a
+  redundant literal line to a repo that handles this its own way would be noise.
+  Mechanics validated in a scratch repo before writing the instruction: no
+  `.gitignore` at all, pattern-based coverage, post-append coverage, and
+  check-ignore working on paths that don't exist yet.
+- **Scope is exactly the two files `dev.sh` generates, nothing more.** `uat/runs/`
+  and `uat/artifacts/` were deliberately left out: Phase 4 commits finding files
+  from `uat/runs/<run-id>/findings/` as part of each bug's commit, so blanket-
+  ignoring run output would contradict the skill's own commit behavior. Whether
+  run artifacts *should* be ignored is a per-project policy question (demo-app
+  ignores them; the skill takes no position), not something setup should decide.
+
+Direct change per the D9 precedent (small, single-behavior addition; not a
+roadmap slice), recorded here and as NR-027 in `docs/requirements.md`.
+
 ---
 
 ## Open questions summary (resolve before building)

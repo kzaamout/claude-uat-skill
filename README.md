@@ -151,10 +151,14 @@ Needs your input:
 Write config.md and scripts/dev.sh with these values / Edit first / Cancel?
 ```
 
-On approval, it writes `config.md`, fills in `scripts/dev.sh`'s placeholders, and
-creates any missing `uat/` subdirectory. It deliberately does **not** start or stop
-your app itself as part of this — that first real start/stop happens under your eyes
-in step 3, not silently during setup.
+On approval, it writes `config.md`, fills in `scripts/dev.sh`'s placeholders,
+creates any missing `uat/` subdirectory, and makes sure the two files
+`scripts/dev.sh start` generates (`dev.log`, `.webapp-uat.pid`) are gitignored —
+appending them to your `.gitignore` if an existing pattern doesn't already cover
+them, since a run's leftovers would otherwise trip the clean-working-tree check the
+next run starts with. It deliberately does **not** start or stop your app itself as
+part of this — that first real start/stop happens under your eyes in step 3, not
+silently during setup.
 
 A couple of things it can't do for you, even when it detects Spec Kit is present:
 exact `bug-assess-command`/`bug-fix-command`/`bug-test-command` names aren't guessed —

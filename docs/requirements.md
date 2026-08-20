@@ -314,6 +314,16 @@ coverage. See `docs/design-history.md` D9.
 - **NR-025**: Where a scenario's next several Chrome actions are already predictable (a fill-tab-type-submit sequence, or navigate-click-screenshot), system MUST issue them as one batched call rather than one round-trip per action — reserved for sequences that don't depend on intervening page state.
 - **NR-026**: The accessibility check's `axe-core` script MUST be read from this skill's own bundled copy (`.claude/skills/webapp-uat/vendor/axe.min.js`) once per run and injected inline (`script.textContent`) for each scenario, rather than fetched from a CDN URL per scenario. A missing vendored file MUST fall back to the CDN URL rather than skipping the check.
 
+### 2.7 — Setup Mode: Generated-File Gitignore Proposal
+Governs `SKILL.md` Setup mode step 6. Fixed directly per the D9 precedent
+(2026-08-20) — see `docs/design-history.md` D11 for the two deliberate scope
+decisions (coverage tested via `git check-ignore` rather than literal-line
+grepping; scope limited to the two `dev.sh`-generated files, deliberately
+excluding `uat/runs/`/`uat/artifacts/` since Phase 4 commits finding files
+from there).
+
+- **NR-027**: Setup mode's write step MUST check that `dev.log` and `.webapp-uat.pid` (the files `scripts/dev.sh start` generates in the target repo) are gitignored, testing coverage with `git check-ignore` so existing patterns count, and MUST append whichever isn't covered to the repo's `.gitignore` (creating it if absent) — within the same consolidated approval and per-item outcome reporting as every other write-step item, not as a separate prompt. Already-covered entries MUST be left as-is and reported as such.
+
 ---
 
 ## Part 3 — Known Open / Unresolved Policy Questions
