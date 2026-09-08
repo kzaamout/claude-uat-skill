@@ -627,6 +627,81 @@ verified every FR yet could not have caught this, because the FRs themselves sha
 the assumption that "the skill's folder" and "the project's `.claude/skills/`
 folder" are the same place. Only running the real install flow separated them.
 
+### D13 — Managed files: engine/values split, marker contract, and self-applied updates
+
+Found 2026-09-06 while answering "how does someone with the skill installed get the
+latest?" — the honest answer was "re-run the two plugin commands, then hand-merge
+`scripts/dev.sh`," because that file mixed skill logic (pidfile, SIGINT, wait loop)
+with four project values setup had written into it, and nothing ever copied a newer
+bundled `templates/` into a project after the first install. Every release that
+touched either project-tree file stranded every existing install. Built as `UAT-13`
+(`specs/011-self-updating-managed-files/`), 2026-09-07.
+
+Three moves, each necessary:
+
+1. **Engine/values split.** `scripts/dev.sh` became a placeholder-free engine that
+   derives the project root from its own location (demo-app's D6 precedent) and
+   sources a project-owned, committed `scripts/dev.env` (`START_COMMAND`,
+   `STOP_COMMAND`, `PORT`, optional `WAIT_TIMEOUT`, optional `READY_COMMAND`). A file
+   that carries no project data can be replaced by a plain copy; one that does can
+   never be. Same `start|stop|wait-ready` interface and exit codes. The one behavior
+   change is in `stop`: the end-to-end test caught that a process backgrounded from
+   a script ignores SIGINT (no job control), so the old wrapper's SIGINT-only stop
+   never actually stopped a plain server — the engine escalates to SIGTERM, then
+   SIGKILL, when SIGINT didn't take.
+2. **Marker contract.** Every skill-owned file placed in the project tree carries
+   `webapp-uat managed file -- do not edit; overwritten on skill update; remove this
+   line to take ownership` within its first three lines. The marker is the sole
+   permission to overwrite; deleting it is the documented opt-out, and the skill
+   then reports the file as unmanaged once per run and never reclaims it silently.
+   A pre-marker `dev.sh` with the old four-value block is recognized as *legacy*:
+   never overwritten, still used, migrated only on confirmation (values extracted
+   deterministically by `sync-managed.sh --legacy-values`, `PROJECT_DIR` dropped).
+3. **A deterministic sync script, three invocation points.**
+   `${CLAUDE_SKILL_DIR}/scripts/sync-managed.sh` byte-compares each bundled file
+   with its project copy — no version numbers, no LLM judgment. `--check` runs at
+   skill load through dynamic context injection (always exit 0; the injected line
+   is the bare command with no `$(…)` or `||`, so the `allowed-tools` prefix rule
+   matches and the invocation is never aborted), `--apply` runs first in Phase 0
+   and in Setup's write step. Phase 0 commits exactly the `changed-paths` as one
+   `chore(webapp-uat): update managed files (…)` commit, `--silent` included —
+   the one consequential decision, taken with the owner on 2026-09-07: without it,
+   Phase 0's clean-tree requirement would block every unattended run right after
+   every skill update, and the files carry nothing a human needs to review.
+
+**Rejected**: a plugin `SessionStart` hook (feasible — `CLAUDE_PLUGIN_ROOT` and
+`CLAUDE_PROJECT_DIR` reach hooks — but it would write into every project with the
+plugin enabled, every session, whether or not that project uses the skill); running
+the engine straight from the skill folder (the plugin-cache path changes on every
+update, and `scripts/dev.sh` is the documented human-runnable interface); release
+tags / version fields (for this marketplace the version already *is* the commit SHA,
+and tags don't help the manual-copy path); a three-way merge against the originally
+installed copy (needs a stored baseline and still ends in a manual conflict).
+
+**The D12 lesson, again.** The same pass found that `SKILL.md` pointed the axe-core
+injection at `.claude/skills/webapp-uat/vendor/axe.min.js` — a project-relative path
+that doesn't exist for a plugin install, since the skill folder lives in the plugin
+cache. Text-tracing against `NR-026` couldn't have caught it, because `NR-026`
+carried the same assumption. Every self-reference now uses `${CLAUDE_SKILL_DIR}`,
+which Claude Code substitutes for plugin, project, and manual installs alike
+(verified against the official docs 2026-09-06, Claude Code 2.1.263 locally).
+Live verification then found the next layer: for a plugin install that folder is
+outside the session's working directories, and Claude Code blocks direct reads
+there — `Read` prompts (unanswerable headless), `cat` is refused outright, and no
+`allowed-tools` rule lifts that. Executing the pre-authorized bundled script *is*
+allowed, so `sync-managed.sh --print <bundled path>` reads on the skill's behalf;
+`--help` (USAGE.md) and the axe-core injection go through it. Before this, `--help`
+and the accessibility check silently depended on the skill folder being inside the
+project — i.e. they only ever worked for manual installs.
+
+**Deliberately left alone**: `demo-app/scripts/dev.sh` (a separate repo) keeps its
+legacy shape for now. The re-synced skill copy there reports it as `legacy` and
+keeps using it — which exercises FR-010's `--silent` path for real, so it doubles as
+evidence that the migration story is optional rather than forced. Whether
+`scripts/dev.env` should eventually fold into `config.md` (one file, but then a
+Markdown key/value parser in bash) stays an open question, recorded in README's
+Known limitations.
+
 ---
 
 ## Open questions summary (resolve before building)

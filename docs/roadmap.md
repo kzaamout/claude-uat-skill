@@ -370,15 +370,50 @@ bug on), and shipped as its own repo/submodule
   UAT-05/UAT-07/UAT-08's completion evidence is far stronger demonstrated against this
   app than a synthetic example.
 
+### UAT-13 — Self-Updating Managed Files
+**Status: Done — built and live-verified 2026-09-07.** Formalized via Spec Kit
+(`specs/011-self-updating-managed-files/`), with an end-to-end automated test
+(`scripts/test-sync-managed.sh`, 79 checks, in CI) and all four user stories
+exercised against a real project-scope plugin install through the two-command
+update path (five successive plugin updates).
+
+- **User outcome**: After `claude plugin marketplace update` + `claude plugin update`
+  (or re-copying the skill folder), the next `/webapp-uat` invocation brings the two
+  skill-owned files in the project tree (`scripts/dev.sh`, `uat/scenarios/_template.md`)
+  to the installed version by itself and commits the change — no hand merge, nothing
+  project-owned touched.
+- **Scope included**: `scripts/dev.sh` split into a placeholder-free managed engine
+  plus a project-owned `scripts/dev.env`; the managed-file marker contract (remove
+  the marker to take ownership); bundled `scripts/sync-managed.sh`
+  (`--check` / `--apply` / `--legacy-values`) run at skill load, in Phase 0 (with a
+  path-scoped auto-commit, `--silent` included), and in Setup; one-time legacy
+  migration on confirmation; every skill self-reference via `${CLAUDE_SKILL_DIR}`
+  (fixing the axe-core path for plugin installs); README "Updating" section;
+  `bash -n` + the new test added to CI.
+- **Scope explicitly deferred**: a plugin `SessionStart` sync hook; an explicit
+  `/webapp-uat update` command; version tags; migrating `demo-app`'s own
+  legacy-shaped `scripts/dev.sh` (separate repo).
+- **Dependencies**: UAT-01 (extends Setup mode), UAT-11 (plugin install; D12).
+- **Completion evidence**: automated — `scripts/test-sync-managed.sh` and
+  `scripts/check-sync.sh` green locally and in CI. Live — the record in
+  `specs/011-self-updating-managed-files/quickstart.md` "Done when": load-time
+  status from the plugin cache, setup landing engine + `dev.env` + template, a
+  changed bundled file propagating as exactly one path-scoped commit with
+  `dev.env` byte-identical, an unmanaged file reported and left alone, and a
+  legacy wrapper migrated with its values preserved. Two defects found and fixed
+  in the pass (bundled files unreadable for plugin installs → `--print`; status
+  block ordering on `--help`) — `docs/design-history.md` D13. The one remnant is
+  the interactive `/plugin` wrapper, same as UAT-11.
+
 ---
 
 **Build order followed**: `UAT-01 → UAT-03 → UAT-02 → UAT-06 → UAT-12 → UAT-05
-→ UAT-04 → UAT-07 → UAT-08 → UAT-10 → UAT-09 → UAT-11`, ahead of the original
+→ UAT-04 → UAT-07 → UAT-08 → UAT-10 → UAT-09 → UAT-11 → UAT-13`, ahead of the original
 suggested order in places (`UAT-12` pulled forward once its architecture was
 approved, since later slices' completion evidence depends on it existing).
 
-**All 12 roadmap slices are now Done.** As of the 2026-08-20 live-verification
-pass: `UAT-11` is fully live-verified (via the non-interactive `claude plugin`
+**All 13 roadmap slices are Done** (`UAT-13` added and live-verified 2026-09-07).
+As of the 2026-08-20 live-verification pass: `UAT-11` is fully live-verified (via the non-interactive `claude plugin`
 CLI — see D12 for the defect that pass caught and fixed). `UAT-09` is the one
 remaining slice that is specified-but-not-live-verified: its environment
 blocker is resolved (Spec Kit's `bug` extension is real, installable, and its

@@ -13,6 +13,7 @@ project, tech stack, or bug-tracking tool is assumed — see [Configuration](#co
 - [What this does](#what-this-does)
 - [Prerequisites](#prerequisites)
 - [Installation & setup](#installation--setup)
+- [Updating](#updating)
 - [Quick start](#quick-start)
 - [Try it with the bundled demo app](#try-it-with-the-bundled-demo-app)
 - [Commands](#commands)
@@ -59,11 +60,14 @@ earned less oversight over time.
 - **Claude Code**, authenticated via `/login` with a direct Anthropic plan (Pro, Max,
   Team, or Enterprise) — Chrome integration doesn't work with an API key or through a
   third-party provider (Bedrock, Vertex, Foundry).
+- **Claude Code 2.1.263 or later** (the version this was verified on) — the skill
+  relies on skill-folder path substitution and a load-time status check that older
+  versions don't have; on those, the skill aborts at load instead of running.
 - **Claude in Chrome** extension (v1.0.36+), installed in Chrome and signed in with
   the same account.
 - **macOS or Linux.** Chrome integration is not supported inside WSL.
 - **Your app's start/stop/health-check commands**, known ahead of time — whatever they
-  are, filled into `scripts/dev.sh`.
+  are, they end up in `scripts/dev.env` (the setup wizard proposes them from your repo).
 - **Optional:** [Spec Kit](https://github.com/github/spec-kit) with its bug-workflow
   extension, if you want Phase 4's fix cycle to go through it instead of Claude
   fixing bugs directly in-session (confirm with `specify extension list` for the
@@ -90,24 +94,28 @@ once it exists).
 /plugin install webapp-uat@webapp-uat-marketplace
 ```
 
-This installs `.claude/skills/webapp-uat/`. `scripts/dev.sh` and
+This makes `/webapp-uat` available in that project (the skill's own files live in
+Claude Code's plugin cache, not in your tree). `scripts/dev.sh` and
 `uat/scenarios/_template.md` still need to exist in your repo's own tree — a plugin
 install can only place files under `.claude/`, not elsewhere in your project — so step
-2 below (`/webapp-uat setup`) copies them in for you automatically from templates
-bundled inside the installed skill, the first time it runs.
+2 below (`/webapp-uat setup`) places them for you from the copies bundled inside the
+installed skill, and writes `scripts/dev.env` with your app's start/stop values next
+to them. Those two placed files stay *managed*: later skill updates replace them on
+their own (see [Updating](#updating)); `scripts/dev.env` is yours.
 
 **Manual alternative**, if you'd rather not use the plugin system: copy from this
 skill's source repo into your app's repo root —
 
 ```
-.claude/skills/webapp-uat/     (the whole folder — SKILL.md, USAGE.md, SETUP.md, config.md.example)
+.claude/skills/webapp-uat/     (the whole folder — SKILL.md, USAGE.md, SETUP.md, scripts/, templates/, vendor/)
 scripts/dev.sh
+scripts/dev.env.example        (copy to scripts/dev.env and fill in — or let the wizard write it)
 uat/scenarios/_template.md
 ```
 
-Either way, `SKILL.md` and `USAGE.md` are never hand-edited per project; everything
-project-specific lives in `config.md`, so pulling in a future update to the skill is
-just replacing those two files wholesale.
+Either way, nothing in the skill folder is hand-edited per project — everything
+project-specific lives in `config.md` and `scripts/dev.env` — and pulling in a future
+update is two commands plus a restart; see [Updating](#updating).
 
 ### 2. Run the setup wizard
 
@@ -118,7 +126,7 @@ just replacing those two files wholesale.
 This is a **discovery-assisted config wizard**, not a form to fill in blind. It reads
 your repo — `package.json` scripts, `docker-compose.yml`/`Makefile`, a
 `.specify/` directory, a `specs/` convention — and proposes `config.md` and
-`scripts/dev.sh` values instead of making you go find them by hand. Every proposed
+`scripts/dev.env` values instead of making you go find them by hand. Every proposed
 value is labeled with how confident that proposal actually is, and **nothing is
 written until you confirm**:
 
@@ -148,11 +156,12 @@ Guessed:
 Needs your input:
   - project-name
 
-Write config.md and scripts/dev.sh with these values / Edit first / Cancel?
+Write config.md and scripts/dev.env with these values / Edit first / Cancel?
 ```
 
-On approval, it writes `config.md`, fills in `scripts/dev.sh`'s placeholders,
-creates any missing `uat/` subdirectory, and makes sure the two files
+On approval, it writes `config.md` and `scripts/dev.env`, places the skill's managed
+files (`scripts/dev.sh`, `uat/scenarios/_template.md`) from the copies bundled in the
+installed skill, creates any missing `uat/` subdirectory, and makes sure the two files
 `scripts/dev.sh start` generates (`dev.log`, `.webapp-uat.pid`) are gitignored —
 appending them to your `.gitignore` if an existing pattern doesn't already cover
 them, since a run's leftovers would otherwise trip the clean-working-tree check the
@@ -181,11 +190,62 @@ scripts/dev.sh stop
 ```
 
 Run these once by hand before trusting them to an unattended pass. (`wait-ready`
-gives up after ~30 seconds by default — a slow-booting app can raise that in
-`scripts/dev.sh`'s `WAIT_TIMEOUT`, or per-run via the `WAIT_TIMEOUT` environment
-variable.) Then copy
+gives up after ~30 seconds by default — a slow-booting app can raise that with
+`WAIT_TIMEOUT` in `scripts/dev.env`, or per-run via the `WAIT_TIMEOUT` environment
+variable. `scripts/dev.sh` itself is managed by the skill — don't edit it; every value
+it needs comes from `scripts/dev.env`.) Then copy
 `uat/scenarios/_template.md` into a real scenario file and drop anything it needs
 into `uat/fixtures/`. Full checklist: [`SETUP.md`](.claude/skills/webapp-uat/SETUP.md).
+
+---
+
+## Updating
+
+Two steps: get the newer skill onto your machine, then let the next run bring the
+files it manages in your repo up to date. Nothing you own is touched by either.
+
+**Plugin install** — run both, in this order (the second doesn't refresh the
+marketplace clone on its own), then restart Claude Code:
+
+```
+claude plugin marketplace update webapp-uat-marketplace
+claude plugin update webapp-uat@webapp-uat-marketplace
+```
+
+The same two actions are available under `/plugin` inside a session. If you installed
+with `--scope project`, pass the same scope to `plugin update`. Every commit on this
+repo's `main` counts as a new version — there's no version number to wait for.
+
+**Manual install** — copy `.claude/skills/webapp-uat/` from this repo over your
+project's copy again. `config.md` and `discovered-environment.md` are yours and
+aren't in this repo, so nothing overwrites them.
+
+**What the next `/webapp-uat` run does.** The skill owns two files that have to live
+in your repo's own tree — `scripts/dev.sh` and `uat/scenarios/_template.md` — and marks
+each with a "webapp-uat managed file" line near the top. Every invocation (even
+`--help`) compares your copies with the ones bundled in the installed skill at load
+and tells you if either is out of date. Phase 0 of the next real run (and
+`/webapp-uat setup`) then overwrites the out-of-date ones and commits exactly those
+paths as one `chore(webapp-uat): update managed files (…)` commit — automatically,
+`--silent` included, because those files carry nothing of yours. The final report
+lists what was updated. Managed files are compared byte for byte, so there's nothing
+to merge and no version to bump.
+
+**What is never touched:** `scripts/dev.env` (your start/stop values — the reason
+`scripts/dev.sh` can be replaced at all), `config.md`, `discovered-environment.md`,
+your scenarios, fixtures, run history, and artifacts.
+
+**Taking ownership of a managed file.** Need to change `scripts/dev.sh` beyond what
+`scripts/dev.env` allows? Delete the marker line. From then on the skill leaves that
+file alone, tells you once per run that it's unmanaged, and never reclaims it
+silently — `/webapp-uat setup` offers to put the skill's version back, and only does
+so if you say yes.
+
+**Installs from before this mechanism existed** have a `scripts/dev.sh` with the four
+values written into it. The skill recognizes that as legacy and keeps using it as is;
+`/webapp-uat setup` (or any attended run) shows the values it found and offers to move
+them into `scripts/dev.env` and replace the script with the managed one. Nothing
+changes until you confirm; `--silent` runs never migrate.
 
 ---
 
@@ -252,7 +312,7 @@ mode, fixture auto-synthesis) with the steps, the expected outcome, and why, for
 
 | Command | What it does |
 |---|---|
-| `/webapp-uat setup` | Discovery-assisted wizard — proposes `config.md`/`scripts/dev.sh` values, asks before writing |
+| `/webapp-uat setup` | Discovery-assisted wizard — proposes `config.md`/`scripts/dev.env` values, places/updates the managed files, asks before writing |
 | `/webapp-uat` | Run all scenarios in `uat/scenarios/` |
 | `/webapp-uat <path>` | Run one scenario file, or all scenarios in a directory |
 | `/webapp-uat --help` | Print the full usage reference (`USAGE.md`) |
@@ -440,13 +500,14 @@ seeded bugs and seeing this skill actually catch them — live in
   config.md.example               template — copy to config.md and fill in
   config.md                       your project's settings (you create this; gitignored)
   discovered-environment.md       cached environment facts (auto-created on first run; gitignored)
-  templates/                      bundled dev.sh/_template.md copies — what setup mode
-                                    installs into a repo when the plugin path was used
+  scripts/sync-managed.sh         keeps the managed files below in sync (check / apply / legacy-values)
+  templates/                      bundled dev.sh, dev.env.example, _template.md — what setup
+                                    and Phase 0 place into a repo (the managed files)
   vendor/axe.min.js               vendored axe-core for the accessibility audit
 
 uat/
   scenarios/
-    _template.md                  shape new scenarios should follow
+    _template.md                  shape new scenarios should follow (managed — overwritten on update)
     *.md                          your actual scenarios
   fixtures/                       real files scenarios reference — never descriptions
   runs/<run-id>/
@@ -457,11 +518,14 @@ uat/
     screenshots, evidence
 
 scripts/
-  dev.sh                           start / stop / wait-ready wrapper for your app
+  dev.sh                           start / stop / wait-ready engine — managed, never hand-edited
+  dev.env                          your app's start/stop values (setup writes it; committed; yours)
+  dev.env.example                  documents every dev.env key
   check-sync.sh                    drift guard for this repo's deliberate copy-pairs (see below)
+  test-sync-managed.sh             end-to-end test of sync-managed.sh + dev.sh (CI runs it)
 
 .claude-plugin/marketplace.json    what makes `/plugin marketplace add` work against this repo
-.github/workflows/sync-check.yml   CI: runs check-sync.sh on every push/PR
+.github/workflows/sync-check.yml   CI: bash -n, test-sync-managed.sh, check-sync.sh on every push/PR
 
 docs/                              design history, roadmap, requirements reference,
                                     demo-recording runbook, LinkedIn draft
@@ -474,12 +538,12 @@ demo-app/                          git submodule — a separate repo (webapp-uat
 
 **A note on deliberate duplication:** this repo carries the same file in more than
 one place on purpose — the bundled `templates/` vs. the root `scripts/dev.sh` /
-`uat/scenarios/_template.md` reference copies (a plugin install can only write under
-`.claude/`), and the parent repo's skill folder vs. `demo-app`'s own installed copy
+`scripts/dev.env.example` / `uat/scenarios/_template.md` reference copies (a plugin
+install can only write under `.claude/`), and the parent repo's skill folder vs. `demo-app`'s own installed copy
 (a separate repo, so it needs its own copy). `scripts/check-sync.sh` — run locally
 or by the `sync-check` CI workflow on every push — fails loudly if any pair drifts,
 so the duplication stays deliberate instead of becoming silent divergence. See
-[`docs/design-history.md`](docs/design-history.md) D7/D8/D10.
+[`docs/design-history.md`](docs/design-history.md) D7/D8/D10/D13.
 
 ---
 
@@ -492,12 +556,11 @@ so the duplication stays deliberate instead of becoming silent divergence. See
 - **Environment setup/teardown is scoped to this skill's own test data.** Broader
   preconditions a scenario might need — an empty database, a different model
   provider — aren't handled; only cleanup of what this skill itself created is.
-- **`scripts/dev.sh` is a script file with placeholders, not pure config.** Setup
-  mode now fills those placeholders in for you (see
-  [Installation & setup](#installation--setup)), but the underlying mechanism is
-  still "edit a script," not "declare commands in `config.md` and skip the script
-  entirely." Whether to collapse it further into config-only is a separate,
-  still-open discussion.
+- **Start/stop values live in `scripts/dev.env`, not in `config.md`.** Since UAT-13
+  `scripts/dev.sh` is a managed engine with no project values in it, and the values
+  sit in a second project-owned file so a plain shell script can read them. Folding
+  `dev.env` into `config.md` (one file, but a Markdown parser in bash) is a
+  still-open discussion; see [`docs/design-history.md`](docs/design-history.md) D13.
 - **`bug-fix-mechanism: spec-kit` can be proposed by Setup mode from a false
   positive.** Detection currently looks for `specify` on `PATH` — a globally
   installed CLI, not evidence that *this* project actually uses Spec Kit. A machine

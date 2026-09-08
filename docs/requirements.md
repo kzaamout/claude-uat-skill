@@ -231,12 +231,36 @@ itself, so it isn't itemized here.
 
 - **FR-001**: A `.claude-plugin/marketplace.json` MUST exist at the repo root, declaring `webapp-uat` as a plugin whose skill source resolves to `.claude/skills/webapp-uat`.
 - **FR-002**: After a plugin install, `/webapp-uat setup` MUST run and behave identically to a manually-copied install's setup flow.
-- **FR-003**: When `scripts/dev.sh` does not already exist in the target repo, setup MUST copy it from the plugin's bundled `templates/dev.sh.template` and fill in its placeholders from discovery.
+- **FR-003**: When `scripts/dev.sh` does not already exist in the target repo, setup MUST copy it from the plugin's bundled `templates/dev.sh.template` and fill in its placeholders from discovery. *(Superseded 2026-09-07 by `UAT-13`: the bundled file is now `templates/dev.sh`, a placeholder-free managed engine placed by `sync-managed.sh --apply`; the project values go to `scripts/dev.env` instead — see `UAT-13` FR-002/FR-005.)*
 - **FR-004**: When `uat/scenarios/_template.md` does not already exist, setup MUST copy it verbatim from the plugin's bundled `templates/_template.md`.
-- **FR-005**: When `scripts/dev.sh` already exists (the manual-copy case), setup MUST fill in its existing placeholders in place — MUST NOT overwrite it from the bundled template.
+- **FR-005**: When `scripts/dev.sh` already exists (the manual-copy case), setup MUST fill in its existing placeholders in place — MUST NOT overwrite it from the bundled template. *(Letter superseded 2026-09-07 by `UAT-13`, intent preserved: a `scripts/dev.sh` without the managed-file marker — which includes every pre-`UAT-13` wrapper — is still never overwritten automatically; it is reported as `legacy` and migrated only on confirmation (`UAT-13` FR-009/FR-010). Only marker-bearing files, which carry no project values by construction, are overwritten.)*
 - **FR-006**: If one item in the write step fails, every other item that succeeded MUST remain exactly as written.
 - **FR-007**: Every write-step item MUST be reported individually with its own specific outcome.
 - **FR-008**: Re-running setup after a partial failure MUST retry only the outstanding items — MUST NOT re-touch already-written items.
+
+---
+
+### UAT-13 — Self-Updating Managed Files
+`specs/011-self-updating-managed-files/spec.md` · governs `SKILL.md`'s "Managed files" block, Phase 0's first bullet, Setup mode step 6, `scripts/sync-managed.sh`, `templates/dev.sh` + `templates/dev.env.example` · **built 2026-09-07, automated gates green** — live-verification status in `docs/roadmap.md`
+
+> After a skill update (plugin commands or a re-copied folder), the next
+> `/webapp-uat` invocation brings the skill-owned files in the project tree to the
+> installed version by itself, commits the change, and touches nothing project-owned.
+
+- **FR-001**: The skill MUST define a fixed managed-file set (`scripts/dev.sh`, `uat/scenarios/_template.md`); each MUST carry, within its first three lines, a marker stating it is managed by webapp-uat, overwritten on skill update, not to be edited, and that removing the marker line takes ownership. The marker's presence is the sole authority for overwriting.
+- **FR-002**: `scripts/dev.sh` MUST contain no project-specific value; every project-specific value lives in a project-owned `scripts/dev.env` the engine reads at run time. The `start`/`stop`/`wait-ready` interface and success/failure statuses MUST be unchanged.
+- **FR-003**: `scripts/dev.env` MUST support `START_COMMAND` (required), `STOP_COMMAND` (optional), `PORT` (required unless `READY_COMMAND` is set), `WAIT_TIMEOUT` (optional, default 30, per-run env override wins), `READY_COMMAND` (optional, replaces the port poll). The engine MUST derive the project root from its own location.
+- **FR-004**: With `scripts/dev.env` absent or a required value missing, the engine MUST stop with a message naming the file/value, point to setup, and return failure.
+- **FR-005**: Setup MUST propose `scripts/dev.env` from discovery with its existing confirm-before-write, per-item reporting; MUST NOT write project values into `scripts/dev.sh`; and MUST place or refresh every managed file as one of its write-step items.
+- **FR-006**: At every invocation, before any mode runs, per-file managed status (in sync / update available / unmanaged / missing) MUST be computed deterministically and, whenever any file is not in sync, shown to the user first; all in sync → silent. The check MUST never prompt and MUST never block or abort the invocation.
+- **FR-007**: Phase 0 MUST apply pending managed-file updates before its clean-working-tree check — overwrite marker-bearing files that differ, create missing ones, touch nothing else. Project-owned files MUST never be written by this step.
+- **FR-008**: If the apply changed anything, the skill MUST commit exactly those paths as one commit whose message names them — in `--silent` runs too, without confirmation. Unrelated uncommitted changes MUST be left to the clean-tree step.
+- **FR-009**: A marker-less managed file MUST be left untouched by every automatic step, reported once per run (pre-flight and final report) with how to re-adopt it; setup MUST offer replacement and act only on confirmation; `--silent` MUST never replace it.
+- **FR-010**: A marker-less `scripts/dev.sh` carrying the previous four-value block MUST be recognized as legacy: setup and attended pre-flight show the kept values, propose `scripts/dev.env` plus the replacement engine, write on confirmation only; declining keeps the legacy wrapper in use; `--silent` leaves it as-is and says so in the final report.
+- **FR-011**: Every skill reference to a bundled file (templates, axe-core, the sync script) MUST resolve for plugin, project-level, and manual installs alike (`${CLAUDE_SKILL_DIR}`), never assuming the skill folder is inside the project tree.
+- **FR-012**: The final report MUST list managed files updated / reported unmanaged / a legacy wrapper left unmigrated, when any occurred, and MUST NOT mention managed files otherwise.
+- **FR-013**: This repo's bundled copies and root reference copies (`scripts/dev.sh`, `scripts/dev.env.example`, `uat/scenarios/_template.md`) MUST stay byte-identical; `scripts/check-sync.sh` covers the new pair list.
+- **FR-014**: Documentation MUST describe the update path end to end (README "Updating"; SETUP.md, USAGE.md; this file; design history D13; roadmap UAT-13).
 
 ---
 
@@ -303,7 +327,7 @@ there.
 
 - **NR-022**: Setup mode's write-confirmation (config.md write, per Setup mode step 6/`UAT-01` FR-008) MUST NOT be skipped by `--silent` — it is a one-time, low-frequency prompt, not routine run-to-run friction (stated in Phase -1, not in `UAT-01`'s own `spec.md`).
 - **NR-023**: Under `--silent`, Phase 5's spec-disposition choice (review only / draft a spec update / draft a new feature spec / defer selected items) MUST default to *review only* rather than touching a spec file automatically (stated in Phase 5's prose; `UAT-02`'s FR-017 requires the choice exist and never auto-modify a spec, but doesn't itself state this specific `--silent` default value).
-- **NR-024**: All UAT-created data, once cleaned up, MUST use the file/directory layout documented in `USAGE.md`'s "File & directory reference" (`uat/scenarios/`, `uat/fixtures/`, `uat/runs/<run-id>/`, `uat/artifacts/<run-id>/<scenario-id>/`, `scripts/dev.sh`) — this layout is assumed throughout every formalized feature's requirements but was never itself stated as a requirement anywhere.
+- **NR-024**: All UAT-created data, once cleaned up, MUST use the file/directory layout documented in `USAGE.md`'s "File & directory reference" (`uat/scenarios/`, `uat/fixtures/`, `uat/runs/<run-id>/`, `uat/artifacts/<run-id>/<scenario-id>/`, `scripts/dev.sh`, `scripts/dev.env`) — this layout is assumed throughout every formalized feature's requirements but was never itself stated as a requirement anywhere.
 
 ### 2.6 — Phase 2: Execution Performance
 Governs `SKILL.md` lines 318-354. Fixed directly at the user's explicit request
@@ -312,7 +336,7 @@ scoped deliberately to exclude scenario count, viewport defaults, and check
 coverage. See `docs/design-history.md` D9.
 
 - **NR-025**: Where a scenario's next several Chrome actions are already predictable (a fill-tab-type-submit sequence, or navigate-click-screenshot), system MUST issue them as one batched call rather than one round-trip per action — reserved for sequences that don't depend on intervening page state.
-- **NR-026**: The accessibility check's `axe-core` script MUST be read from this skill's own bundled copy (`.claude/skills/webapp-uat/vendor/axe.min.js`) once per run and injected inline (`script.textContent`) for each scenario, rather than fetched from a CDN URL per scenario. A missing vendored file MUST fall back to the CDN URL rather than skipping the check.
+- **NR-026**: The accessibility check's `axe-core` script MUST be read from this skill's own bundled copy (`${CLAUDE_SKILL_DIR}/vendor/axe.min.js` — the skill's own folder, which for a plugin install is the plugin cache, not the project tree; *amended 2026-09-07 by `UAT-13` FR-011 — the earlier project-relative path did not exist for plugin installs*) once per run and injected inline (`script.textContent`) for each scenario, rather than fetched from a CDN URL per scenario. A missing vendored file MUST fall back to the CDN URL rather than skipping the check.
 
 ### 2.7 — Setup Mode: Generated-File Gitignore Proposal
 Governs `SKILL.md` Setup mode step 6. Fixed directly per the D9 precedent

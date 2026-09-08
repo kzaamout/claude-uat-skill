@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Guards against silent drift between the deliberate copies this repo carries.
-# Three copy-pairs exist by necessity (see docs/design-history.md D7/D8, and the
+# Two copy-pairs exist by necessity (see docs/design-history.md D7/D8/D13, and the
 # 2026-08-19 drift that motivated this script):
 #
 #   1. The skill's bundled templates vs. the root reference copies
@@ -28,8 +28,9 @@ check() { # check <label> <file-a> <file-b>
 }
 
 echo "Templates vs. root reference copies:"
-check "dev.sh"       "$SKILL/templates/dev.sh.template" "scripts/dev.sh"
-check "_template.md" "$SKILL/templates/_template.md"    "uat/scenarios/_template.md"
+check "dev.sh"          "$SKILL/templates/dev.sh"          "scripts/dev.sh"
+check "dev.env.example" "$SKILL/templates/dev.env.example" "scripts/dev.env.example"
+check "_template.md"    "$SKILL/templates/_template.md"    "uat/scenarios/_template.md"
 
 echo ""
 if [ -f "demo-app/$SKILL/SKILL.md" ]; then
@@ -37,7 +38,9 @@ if [ -f "demo-app/$SKILL/SKILL.md" ]; then
   # Every tracked skill file. config.md and discovered-environment.md are
   # local-only (gitignored) and deliberately excluded.
   for f in SKILL.md USAGE.md SETUP.md config.md.example \
-           templates/dev.sh.template templates/_template.md vendor/axe.min.js; do
+           scripts/sync-managed.sh \
+           templates/dev.sh templates/dev.env.example templates/_template.md \
+           vendor/axe.min.js; do
     check "$f" "$SKILL/$f" "demo-app/$SKILL/$f"
   done
 else
