@@ -471,6 +471,24 @@ reference, an entry whose plugin has no `plugin.json` *is* the manifest regardle
 any component field in the entry (such as `skills`) into a load failure. Removed, so
 the flag can't bite if a `plugin.json` is ever added.
 
+**Correction (2026-09-28), payload**: `"source": "./"` made the whole repo the plugin,
+so every install and update copied 4.7 MB into the plugin cache — `docs/gifs`, the
+spec folders, `.specify/`, ten unrelated `speckit-*` skills and a partly populated
+`demo-app/` — for a skill folder of 96 KB. The entry now reads
+`"source": "./.claude/skills/webapp-uat"` with `"skills": ["./"]`: per the plugin
+manifest and skills references, a plugin whose root holds `SKILL.md` loads as one
+skill, its command name comes from the frontmatter `name` (so `/webapp-uat` is
+unchanged), and `${CLAUDE_SKILL_DIR}` is the folder containing `SKILL.md`, which for
+a root skill is the plugin root — so nothing in `SKILL.md` changed. The
+no-duplication property this entry was designed for holds. Verified three ways
+before merging: `claude plugin validate ./ --strict`; a session-only
+`claude --plugin-dir <skill folder>` load reporting `Skills (1) webapp-uat` and a
+headless `/webapp-uat --help` from an empty scratch repo printing the status block
+and USAGE.md; and a real git-marketplace install from a branch into a throwaway
+`CLAUDE_CONFIG_DIR`, whose cache copy held just the skill folder. Not chosen:
+`"source": "./.claude/skills"`, which would still copy all eleven skill folders and,
+with `"skills": ["./"]`, load them all under the `webapp-uat:` prefix.
+
 The first constraint is why Setup mode's step 6 now conditionally copies
 `scripts/dev.sh` and `uat/scenarios/_template.md` from `templates/` bundled inside the
 skill folder itself, rather than assuming they already exist: a plugin install leaves

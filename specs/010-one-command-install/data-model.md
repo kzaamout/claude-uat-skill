@@ -10,9 +10,9 @@ Process/state conventions, not a schema this feature owns.
 |---|---|
 | `name` | `webapp-uat-marketplace` |
 | `plugins[0].name` | `webapp-uat` |
-| `plugins[0].source` | `./` — resolves the plugin to this repo itself |
-| `plugins[0].skills` | `["./.claude/skills/webapp-uat"]` — points directly at the existing skill folder, no duplication (`FR-001`) |
-| `plugins[0].strict` | `false` — permits the skill folder's own structure without requiring a separate marketplace-convention layout |
+| `plugins[0].source` | `./.claude/skills/webapp-uat` — the skill folder itself, so an install copies only it (was `./`, the whole repo, until 2026-09-28; D7 payload correction) |
+| `plugins[0].skills` | `["./"]` — the plugin root is the skill folder, no duplication (`FR-001`); was `["./.claude/skills/webapp-uat"]` relative to the repo root until 2026-09-28 |
+| `plugins[0].strict` | *(removed 2026-09-28, D14/D7 correction: inert without a `plugin.json`, a load failure with one; was `false`)* |
 
 ## Bundled Template
 

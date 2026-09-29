@@ -17,7 +17,8 @@ Each scenario maps to acceptance scenarios in [spec.md](./spec.md).
 → validates User Story 1, all 3 acceptance scenarios (text-traced)
 
 Trace `marketplace.json`'s `source`/`skills` fields against `FR-001` — confirm
-they resolve to `.claude/skills/webapp-uat` directly. Trace `SKILL.md`'s Setup
+they resolve to `.claude/skills/webapp-uat` directly *(since 2026-09-28 `source`
+names that folder itself and `skills` is `["./"]`; D7 payload correction)*. Trace `SKILL.md`'s Setup
 mode steps 1-5 — confirm nothing in the discovery/proposal flow branches on
 install method. **Live check (blocked)**: `/plugin marketplace add
 kzaamout/claude-uat-skill` + `/plugin install webapp-uat@webapp-uat-marketplace`

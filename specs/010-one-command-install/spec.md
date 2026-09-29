@@ -16,7 +16,7 @@
 
 **Input**: User description: "UAT-11 -- One-Command Install. User outcome: A stranger installs the skill in a project with two native Claude Code commands (/plugin marketplace add + /webapp-uat setup), no manual file-copying required, despite Claude Code plugins being unable to install files outside .claude/. Scope included: .claude-plugin/marketplace.json at repo root declaring webapp-uat as a git-sourced plugin pointing at .claude/skills/webapp-uat; scripts/dev.sh and uat/scenarios/_template.md shipped as templates inside the installable plugin folder (.claude/skills/webapp-uat/templates/); Setup mode extended to copy those templates into the target repo's own tree when missing, using the same confirm-before-write, best-effort-not-atomic pattern already used for config.md. Scope explicitly deferred: a separate curl | sh install script. Dependencies: UAT-01 (done, extends Setup mode). Relevant existing specification sources: SKILL.md Setup mode step 6 (already extended in a prior session to conditionally copy from bundled templates/ when scripts/dev.sh or uat/scenarios/_template.md don't already exist in the target repo -- this is the plugin-install case, distinct from the manual-copy case where the files already exist and only need placeholder-filling); .claude-plugin/marketplace.json (already exists, already committed); README.md Installation & setup section (already documents the one-command path). Completion evidence target: from a scratch clone, /plugin marketplace add kzaamout/claude-uat-skill + /plugin install webapp-uat@webapp-uat-marketplace + /webapp-uat setup lands config.md, scripts/dev.sh, and uat/scenarios/_template.md correctly with zero manual file copying. This is expected to land specified-but-not-live-verified for the /plugin portion specifically -- /plugin is an interactive CLI meta-command with no tool access available in this session, so the actual install flow needs real user/session testing; the Setup mode template-copy logic itself, and the marketplace.json schema, were already verified this session via direct SKILL.md reading and prior research-agent fact-checking against live Claude Code docs."
 
-[Note, 2026-09-28: "git-sourced plugin" above is loose — `marketplace.json` declares the plugin with `"source": "./"`, a relative path inside the git-hosted marketplace; see Key Entities.]
+[Note, 2026-09-28: "git-sourced plugin" above is loose — `marketplace.json` declares the plugin with a relative-path `source` inside the git-hosted marketplace; originally `"./"` (the whole repo), since 2026-09-28 `"./.claude/skills/webapp-uat"` (the skill folder itself, so installs copy only it — design-history D7's payload correction); see Key Entities.]
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -175,7 +175,8 @@ confirming only the failed item is retried.
 ### Key Entities
 
 - **Plugin Marketplace Declaration**: `.claude-plugin/marketplace.json`,
-  declaring `webapp-uat` as a relative-path (`./`) plugin inside a git-hosted
+  declaring `webapp-uat` as a relative-path plugin (`./.claude/skills/webapp-uat`,
+  the skill folder itself; `./` until 2026-09-28) inside a git-hosted
   marketplace, pointing at `.claude/skills/webapp-uat`.
 - **Bundled Template**: A copy of a project-tree file
   (`templates/dev.sh.template`, `templates/_template.md`) shipped inside the

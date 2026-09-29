@@ -11,7 +11,8 @@ verification-only plan, unlike every prior slice this session
 **Rationale**: Re-reading `marketplace.json` and `SKILL.md`'s Setup mode step 6
 against every FR in `spec.md` found all 8 FRs already satisfied, several
 verbatim: `marketplace.json`'s `source`/`skills` fields already resolve to
-`.claude/skills/webapp-uat` exactly as FR-001 requires; step 6's text already
+`.claude/skills/webapp-uat` exactly as FR-001 requires *(still true after the
+2026-09-28 change that made `source` name the folder itself)*; step 6's text already
 states the bundled-template-copy behavior (FR-003/004), the
 existing-file-fills-in-place behavior (FR-005), and the
 best-effort/per-item-reporting/safe-re-run behavior (FR-006/007/008) nearly
