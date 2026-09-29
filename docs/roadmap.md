@@ -16,7 +16,8 @@ happened.
 
 ---
 
-### UAT-01 — Config & Environment Bootstrap
+## UAT-01 — Config & Environment Bootstrap
+
 **Status: Done.** Formalized via Spec Kit (`specs/001-config-env-bootstrap/`), fully
 implemented and converged.
 
@@ -35,7 +36,8 @@ implemented and converged.
 
 ---
 
-### UAT-02 — Manual Scenario Execution, Checks, Classification & Report
+## UAT-02 — Manual Scenario Execution, Checks, Classification & Report
+
 **Status: Done.** Formalized via Spec Kit
 (`specs/002-scenario-execution-reporting/`), fully implemented and converged.
 
@@ -57,7 +59,8 @@ implemented and converged.
 
 ---
 
-### UAT-03 — Invocation Parsing & Flag Semantics
+## UAT-03 — Invocation Parsing & Flag Semantics
+
 **Status: Done.** Fixed directly (not a full Spec Kit cycle — the confirmed `--help`
 bug and related Phase 1 correctness fixes were resolved as targeted edits, per the
 user's choice to fix directly rather than run full ceremony for this slice).
@@ -79,7 +82,8 @@ user's choice to fix directly rather than run full ceremony for this slice).
 
 ---
 
-### UAT-04 — Bug-Fix Cycle (Direct Mechanism)
+## UAT-04 — Bug-Fix Cycle (Direct Mechanism)
+
 **Status: Done.** Formalized via Spec Kit (`specs/005-bug-fix-cycle-direct/`), fully
 implemented and converged (zero convergence findings).
 
@@ -109,7 +113,8 @@ implemented and converged (zero convergence findings).
 
 ---
 
-### UAT-05 — Backend Verification
+## UAT-05 — Backend Verification
+
 **Status: Done.** Formalized via Spec Kit (`specs/004-backend-verification/`), fully
 implemented and converged (zero convergence findings).
 
@@ -137,7 +142,8 @@ implemented and converged (zero convergence findings).
 
 ---
 
-### UAT-06 — Run Isolation & Data Hygiene
+## UAT-06 — Run Isolation & Data Hygiene
+
 **Status: Done.** Formalized via Spec Kit (`specs/003-run-isolation-data-hygiene/`),
 fully implemented and converged.
 
@@ -155,7 +161,8 @@ fully implemented and converged.
 
 ---
 
-### UAT-07 — Scenario Generation: Spec-Derived + Route-Gap-Derived
+## UAT-07 — Scenario Generation: Spec-Derived + Route-Gap-Derived
+
 **Status: Done.** Formalized via Spec Kit (`specs/006-spec-route-gap-generation/`),
 fully implemented and converged (zero convergence findings).
 
@@ -187,7 +194,8 @@ fully implemented and converged (zero convergence findings).
 
 ---
 
-### UAT-08 — Scenario Generation: Boundary-Derived + Fixture Synthesis
+## UAT-08 — Scenario Generation: Boundary-Derived + Fixture Synthesis
+
 **Status: Done.** Formalized via Spec Kit (`specs/007-boundary-fixture-synthesis/`),
 fully implemented and converged (zero convergence findings).
 
@@ -225,7 +233,8 @@ fully implemented and converged (zero convergence findings).
 
 ---
 
-### UAT-09 — Bug-Fix Cycle (Spec-Kit Mechanism)
+## UAT-09 — Bug-Fix Cycle (Spec-Kit Mechanism)
+
 **Status: Done (specified, text-traced; environment for live verification unblocked
 2026-08-20, live run itself still open).** Formalized via Spec Kit
 (`specs/009-bug-fix-cycle-speckit/`), fully implemented and converged (zero
@@ -271,7 +280,8 @@ spec-kit-configured app; `demo-app`'s committed config stays `direct` deliberate
 
 ---
 
-### UAT-10 — Resumability & In-Run Gap Promotion
+## UAT-10 — Resumability & In-Run Gap Promotion
+
 **Status: Done.** Formalized via Spec Kit (`specs/008-resumability-gap-promotion/`),
 fully implemented and converged (zero convergence findings).
 
@@ -310,7 +320,8 @@ fully implemented and converged (zero convergence findings).
 
 ---
 
-### UAT-11 — One-Command Install
+## UAT-11 — One-Command Install
+
 **Status: Done — live-verified 2026-08-20.** Formalized via Spec Kit
 (`specs/010-one-command-install/`), fully implemented and converged (zero
 convergence findings). Live verification landed via the non-interactive
@@ -351,7 +362,8 @@ behavior end to end. One genuine defect was found and fixed in the process
 
 ---
 
-### UAT-12 — Demo/Test Application (`demo-app/`)
+## UAT-12 — Demo/Test Application (`demo-app/`)
+
 **Status: Done.** Built, live-verified (all three seeded bugs confirmed working via
 real HTTP requests, cross-tenant isolation confirmed to hold even with the permission
 bug on), and shipped as its own repo/submodule
@@ -376,7 +388,8 @@ bug on), and shipped as its own repo/submodule
   UAT-05/UAT-07/UAT-08's completion evidence is far stronger demonstrated against this
   app than a synthetic example.
 
-### UAT-13 — Self-Updating Managed Files
+## UAT-13 — Self-Updating Managed Files
+
 **Status: Done — built and live-verified 2026-09-07.** Formalized via Spec Kit
 (`specs/011-self-updating-managed-files/`), with an end-to-end automated test
 (`scripts/test-sync-managed.sh`, 91 checks since the 2026-09-28 review pass, in CI) and all four user stories

@@ -145,6 +145,7 @@ app."
 ## Fallback: no split-screen / single-monitor setup
 
 Record two shorter clips instead of one continuous take:
+
 - **Clip A** (Chrome only, ~30s): steps 4-5's browser side. This is
   essentially what `docs/gifs/uat-scenario-execution.gif` and
   `uat-bug-found-ui-lies.gif` already captured — reuse them or re-record.

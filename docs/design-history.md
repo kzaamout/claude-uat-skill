@@ -140,7 +140,7 @@ decision, not a fallback.
 
 ### Generation strategy — three sources
 
-- **Spec-derived (primary).** Walk `spec.md` (and `tasks.md` alongside it — 
+- **Spec-derived (primary).** Walk `spec.md` (and `tasks.md` alongside it —
   implementation-level tasks sometimes surface edge cases the acceptance criteria
   don't spell out) for each feature, turn each into a candidate scenario — traceable
   back to a documented source. Keeps generated scenarios accurate and sharpens BUG vs
@@ -192,6 +192,7 @@ problem R2/R6 merged away. Not being built.
      - 5 seeded `documents` records
    Approve / adjust / cancel?
    ```
+
 4. Approved → fixtures created, seed script/API runs (see R7's safety gate), straight
    into Phase 2.
 
@@ -205,6 +206,7 @@ slide file for whatever varied cases a scenario needs, not a placeholder file wi
 right extension — or tests built on them are testing nothing real.
 
 **Open questions:**
+
 - Does Decker have seed scripts or an API suitable for test-data creation, or would
   this fall back to raw DB writes?
 - What are Decker's actual validation rules (field limits, required fields, enums)?
@@ -793,6 +795,26 @@ catches this class is one that exercises the instruction — hence the engine te
 runs a real compound command instead of asserting on the text that describes one.
 
 ---
+
+### D15 — A Markdown gate for Principle VIII (2026-09-28)
+
+Every spec folder's plan had promised a "Markdown lint pass" as its Principle VIII
+gate, and every tasks file then admitted no linter was installed (reworded to "manual
+structural check" during D14's pass). CI now runs markdownlint-cli2 0.23.2, pinned
+through `DavidAnson/markdownlint-cli2-action@v24.2.0`, over every Markdown file this
+repo owns. `.markdownlint-cli2.jsonc` at the root carries the config and the exact
+local command (same tool, same version); `specs/.markdownlint-cli2.jsonc` reduces the
+generated spec folders to whitespace hygiene. Ignored outright: the demo-app
+submodule, the vendored Spec Kit templates and speckit skills, and run output. Rules
+switched off as house style: line length, inline HTML (the `<placeholder>` notation),
+first-line heading (SKILL.md opens with frontmatter and prose), bare code fences
+(transcripts, not code), and table-pipe style (`| a |` headers over `|---|`
+separators). The first run found 73 issues, all whitespace-shaped except one
+heading-level jump in the roadmap (its slice headings were `###` directly under the
+title; now `##`). `--fix` handled the rest, which touched `SKILL.md` — blank lines
+around seven fences — and so needed the usual demo-app re-sync. The "no Markdown
+linter is installed" wording inside the spec folders describes the state at their
+formalization dates and stays.
 
 ## Open questions summary (resolve before building)
 

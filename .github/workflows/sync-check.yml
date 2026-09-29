@@ -12,7 +12,8 @@ name: sync-check
 #      deliberate copy-pairs: bundled templates vs. root reference files, and the
 #      parent skill folder vs. demo-app's installed copy (design-history D7/D8/D13)
 #   5. demo-app's own unit tests and type check (the one sub-project with code)
-# No Markdown linter runs; spec-folder plans that mention one mean a manual pass.
+#   6. markdownlint-cli2, pinned, over every Markdown file this repo owns — config and the
+#      matching local command in .markdownlint-cli2.jsonc; specs/ has a hygiene-only override
 
 on:
   push:
@@ -34,6 +35,10 @@ jobs:
                    demo-app/run.sh demo-app/scripts/dev.sh; do
             bash -n "$f" && echo "ok   $f"
           done
+      - name: Markdown lint (markdownlint-cli2 0.23.2, pinned via the action)
+        uses: DavidAnson/markdownlint-cli2-action@v24.2.0
+        with:
+          globs: "**/*.md"
       - name: shellcheck (advisory)
         continue-on-error: true
         run: shellcheck -S warning scripts/*.sh .claude/skills/webapp-uat/scripts/*.sh .claude/skills/webapp-uat/templates/dev.sh

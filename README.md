@@ -574,8 +574,10 @@ uat/scenarios/_template.md         root reference copy of the bundled template
 .claude-plugin/marketplace.json    what makes `/plugin marketplace add` work against this repo; its
                                      plugin source is `.claude/skills/webapp-uat/` itself, so an
                                      install copies only that folder into the plugin cache
-.github/workflows/sync-check.yml   CI on pushes to main and every PR: per-file bash -n, the
-                                     mechanism test, check-sync.sh, demo-app's tests + type check
+.github/workflows/sync-check.yml   CI on pushes to main and every PR: per-file bash -n, markdownlint,
+                                     the mechanism test, check-sync.sh, demo-app's tests + type check
+.markdownlint-cli2.jsonc           Markdown lint config (specs/ carries a hygiene-only override); the
+                                     file's header gives the pinned local command
 .specify/                          Spec Kit tooling (constitution, templates, scripts) used to
 .claude/skills/speckit-*/            formalize this skill's own features, plus its ten skills
 specs/                             one Spec Kit feature folder per roadmap slice
