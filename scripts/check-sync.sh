@@ -41,18 +41,10 @@ if [ -f "demo-app/$SKILL/SKILL.md" ]; then
   for f in $(git ls-files "$SKILL" | sed "s|^$SKILL/||"); do
     check "$f" "$SKILL/$f" "demo-app/$SKILL/$f"
   done
-  # demo-app's copies of the files the skill manages in a project tree: its
-  # _template.md must match the bundled one; its scripts/dev.sh is deliberately
-  # still the pre-UAT-13 legacy wrapper (design-history D13), so only its status
-  # is asserted, not its content.
+  # demo-app's copies of the files the skill manages in a project tree (both
+  # marker-bearing since 2026-09-28; its start/stop values live in scripts/dev.env).
+  check "demo-app scripts/dev.sh"             "$SKILL/templates/dev.sh"       "demo-app/scripts/dev.sh"
   check "demo-app uat/scenarios/_template.md" "$SKILL/templates/_template.md" "demo-app/uat/scenarios/_template.md"
-  st="$(bash "$SKILL/scripts/sync-managed.sh" demo-app --check | awk '$2=="scripts/dev.sh"{print $1}')"
-  if [ "$st" = "legacy" ] || [ "$st" = "in-sync" ]; then
-    echo "  in sync: demo-app scripts/dev.sh ($st)"
-  else
-    echo "  DRIFT:   demo-app scripts/dev.sh reports '$st' (expected legacy or in-sync)"
-    FAIL=1
-  fi
 else
   echo "demo-app submodule not checked out - skipping that pair."
   echo "(git submodule update --init, then re-run, for the full check)"

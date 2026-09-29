@@ -734,17 +734,24 @@ injection did too, until D14 moved it back to the CDN). Before this, `--help` an
 the accessibility check silently depended on the skill folder being inside the
 project — i.e. they only ever worked for manual installs.
 
-**Deliberately left alone**: `demo-app/scripts/dev.sh` (a separate repo) keeps its
-legacy shape for now. The re-synced skill copy there reports it as `legacy` and
-keeps using it — which exercises FR-010's `--silent` path for real, so it doubles as
-evidence that the migration story is optional rather than forced. (Not deliberate,
-fixed 2026-09-28: `demo-app/uat/scenarios/_template.md` also predated the marker and
-was therefore reported `unmanaged` — with a "marker removed" message for a file
-nobody had touched — on every run; it now carries the marker, the Phase 0 message
-says "no marker", and `check-sync.sh` compares it and asserts `dev.sh`'s `legacy`
-status.) Whether `scripts/dev.env` should eventually fold into `config.md` (one
-file, but then a Markdown key/value parser in bash) stays an open question, recorded
-in README's Known limitations.
+**Deliberately left alone at the time**: `demo-app/scripts/dev.sh` (a separate repo)
+kept its legacy shape until 2026-09-28. The re-synced skill copy there reported it as
+`legacy` and kept using it — which exercised FR-010's `--silent` path for real. (Not
+deliberate, fixed 2026-09-28: `demo-app/uat/scenarios/_template.md` also predated the
+marker and was therefore reported `unmanaged` — with a "marker removed" message for a
+file nobody had touched — on every run; it now carries the marker and the Phase 0
+message says "no marker".) **Migrated 2026-09-28**, using the mechanism itself:
+`sync-managed.sh --legacy-values` extracted `START_COMMAND='./run.sh'`,
+`STOP_COMMAND='docker compose down'`, `PORT='3000'`, `WAIT_TIMEOUT='30'` into
+`scripts/dev.env`, the legacy file was deleted and `--apply` placed the engine. Live
+check against the real app with Docker up: `start` ran `run.sh` (Postgres, migrate,
+seed, `exec npm run dev`, so the pidfile's process was `npm run dev` leading its own
+process group), `wait-ready` returned in ~13s with `/api/health` reporting the
+database connected, `stop` signalled the group and ran `docker compose down`, and
+port 3000 was free afterwards. `check-sync.sh` now byte-compares that file too.
+Whether `scripts/dev.env` should eventually fold into `config.md` (one file, but
+then a Markdown key/value parser in bash) stays an open question, recorded in
+README's Known limitations.
 
 ### D14 — Review pass: what green gates didn't catch (2026-09-28)
 

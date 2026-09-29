@@ -333,10 +333,6 @@ claude --chrome
 /webapp-uat setup          # proposes config.md from what's actually in demo-app/
 ```
 
-`demo-app` still ships the pre-managed-engine `scripts/dev.sh` with its values written
-in, so setup also offers to move those values into `scripts/dev.env` and swap in the
-managed engine — accept or keep it, both work.
-
 From there, `demo-app`'s own [`README.md`](https://github.com/kzaamout/webapp-uat-demo#readme)
 has the full walkthrough: seeded accounts, what the app is built to exercise, and a
 step-by-step testing guide — one section per command/scenario (setup, running one
@@ -594,8 +590,8 @@ one place on purpose — the bundled `templates/` vs. the root `scripts/dev.sh` 
 install can only write under `.claude/`), and the parent repo's skill folder vs.
 `demo-app`'s own installed copy (a separate repo, so it needs its own copy).
 `scripts/check-sync.sh` — run locally or by the `sync-check` CI workflow — fails
-loudly if any pair drifts (it also checks `demo-app`'s `_template.md` and asserts
-its `scripts/dev.sh` is still the deliberately kept legacy wrapper), so the
+loudly if any pair drifts (it also checks `demo-app`'s `scripts/dev.sh` and
+`uat/scenarios/_template.md` against the bundled copies), so the
 duplication stays deliberate instead of becoming silent divergence. See
 [`docs/design-history.md`](docs/design-history.md) D7/D8/D10/D13.
 

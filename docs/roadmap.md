@@ -410,9 +410,10 @@ update path (five successive plugin updates).
   (fixing the axe-core path for plugin installs); README "Updating" section;
   `bash -n` + the new test added to CI.
 - **Scope explicitly deferred**: a plugin `SessionStart` sync hook; an explicit
-  `/webapp-uat update` command; version tags; migrating `demo-app`'s own
-  legacy-shaped `scripts/dev.sh` (separate repo; its marker-less
-  `uat/scenarios/_template.md` was re-adopted 2026-09-28, D14).
+  `/webapp-uat update` command; version tags. (`demo-app`'s own legacy-shaped
+  `scripts/dev.sh`, deferred at the time, was migrated to the engine plus
+  `scripts/dev.env` on 2026-09-28 and live-verified with Docker up; its marker-less
+  `uat/scenarios/_template.md` was re-adopted the same day — D13/D14.)
 - **Amended 2026-09-28 (D14)**: the engine now runs `START_COMMAND` through
   `bash -c` in its own process group (shell syntax works; `stop` reaches every
   descendant), `--legacy-values` sources the legacy `PROJECT_DIR` and exits 2

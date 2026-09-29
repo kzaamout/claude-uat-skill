@@ -356,7 +356,7 @@ setup and confirm it offers to re-adopt the file and only does so on confirmatio
   (2026-09-28: demo-app's `uat/scenarios/_template.md` also carried no marker — it
   predates the marker and was never a "marker removed" case — so the re-synced skill
   reported it `unmanaged`; it was re-adopted with the marker on 2026-09-28.
-  `demo-app/scripts/dev.sh` stays legacy-shaped on purpose.)
+  `demo-app/scripts/dev.sh` stayed legacy-shaped on purpose until later that day, when it was migrated to the engine plus `scripts/dev.env` and live-verified — D13.)
 - The values file is committed to the project, since it contains shared,
   machine-independent values; the per-machine absolute project path it replaces is
   no longer needed anywhere.
