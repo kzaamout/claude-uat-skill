@@ -43,6 +43,13 @@ uat/artifacts/ ........... created
 uat/fixtures/ ............ FAILED — permission denied creating directory
 ```
 
+*(This example predates `UAT-11`, D11 and `UAT-13`: today's write step also reports
+`scripts/dev.env` — which now holds the approved values, `scripts/dev.sh` being a
+placeholder-free managed engine reported as `created`/`updated`/`in-sync` (`UAT-13`
+FR-002/FR-005) — plus `uat/scenarios/_template.md` and any `.gitignore` entries
+appended for `dev.log`/`.webapp-uat.pid`. See SKILL.md Setup mode step 6's example
+report; the per-item guarantees below are unchanged.)*
+
 **MUST**: report every item individually, even ones that succeeded — not just the
 failures (so a partial-failure report is distinguishable from "nothing happened").
 

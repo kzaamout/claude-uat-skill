@@ -1,10 +1,10 @@
 # Feature Specification: Scenario Generation — Spec-Derived + Route-Gap-Derived
 
-**Feature Branch**: `006-spec-route-gap-generation`
+**Feature Branch**: `006-spec-route-gap-generation` (no branch was created; work landed directly on `main`)
 
 **Created**: 2026-08-17
 
-**Status**: Draft
+**Status**: Implemented — converged 2026-08-17
 
 **Input**: User description: "UAT-07 -- Scenario Generation: Spec-Derived + Route-Gap-Derived. User outcome: run /webapp-uat generate and get draft scenarios traced back to real acceptance criteria, plus stub coverage for screens nothing tests at all yet -- reviewed through the same approval flow as hand-written scenarios. Scope included: spec-derived generation (one candidate scenario per acceptance criterion, persona variants derived from the spec's own use cases, no separate persona catalog needed); route-gap-derived generation (using Phase 0.5's discovered routing source, find screens with no existing scenario, draft stubs); --priority scoping; Source: tagging on every draft. Scope explicitly deferred: boundary-derived generation and fixture synthesis (UAT-08). Dependencies: UAT-01. Relevant existing specification sources: SKILL.md Generation mode steps 1-2; Phase 0.5 routing discovery; docs/design-history.md R6."
 

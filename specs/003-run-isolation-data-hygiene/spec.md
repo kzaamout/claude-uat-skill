@@ -1,10 +1,10 @@
 # Feature Specification: Run Isolation & Data Hygiene
 
-**Feature Branch**: `003-run-isolation-data-hygiene`
+**Feature Branch**: `003-run-isolation-data-hygiene` (no branch was created; work landed directly on `main`)
 
 **Created**: 2026-08-16
 
-**Status**: Draft
+**Status**: Implemented — converged 2026-08-16
 
 **Input**: User description: "UAT-06 — Run Isolation & Data Hygiene. User outcome: every record the skill creates is safely, automatically cleaned up at both ends of a run, with collisions across runs structurally near-impossible rather than merely policy-discouraged. Scope included: run-id-suffixed naming (uat-{run-id}-<descriptor>) for every created record; start-of-run purge (self-heals from an interrupted prior run); end-of-run purge (only after the report is actually written); explicit confirmation on both purges, every run, --silent or not; the same explicit-confirmation treatment for seed-data creation during generation, not just cleanup. Scope explicitly deferred: none within this slice's own boundary. Dependencies: UAT-01. Relevant specification sources: SKILL.md 'Naming convention for UAT-created data (R7)'; Phase 0 start-of-run cleanup; Phase 5 end-of-run cleanup; Generation mode's data/fixture DB-write confirmation; docs/design-history.md R7 in full."
 

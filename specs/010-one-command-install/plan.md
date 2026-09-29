@@ -31,6 +31,8 @@ session (interactive CLI meta-command, no tool access) — text-tracing against
 `SKILL.md` and `marketplace.json` is the achievable completion evidence; live
 verification is explicitly blocked, per `spec.md`'s Assumptions.
 
+*(Superseded 2026-08-20 — live verification achieved via the non-interactive `claude plugin` CLI; see quickstart.md "Done when" and D12.)*
+
 **Target Platform**: A Claude Code CLI session; macOS or Linux.
 
 **Project Type**: Claude Code Skill (an agent instruction set) plus a plugin
@@ -58,7 +60,7 @@ manifest's schema. This is the last roadmap slice.
 | V. Reuse Before Reinvention | PASS | Setup mode's template-copy logic reuses the same propose→confirm→write, best-effort-not-atomic pattern already used for `config.md` — confirmed by direct re-read, not assumed. |
 | VI. Usability Is Not Optional | PASS | Per-item outcome reporting (FR-007) instead of a generic success/failure is itself a usability requirement. |
 | VII. Deliberate Dependencies | PASS (trivial) | Claude Code's own plugin system is the only "dependency," already the platform this skill runs on — no new adoption. |
-| VIII. Automated Quality Gates | PASS, same documented interpretation as prior slices | No compiled source; Markdown/JSON, text-tracing stands in given the stated `/plugin`-verification limitation. |
+| VIII. Automated Quality Gates | PASS, same documented interpretation as prior slices | No compiled source; manual structural check (no Markdown linter is installed) of the Markdown/JSON plus text-tracing stands in given the stated `/plugin`-verification limitation. |
 | IX. Human Approval Before Consequential Change | PASS (N/A-by-design) | Setup's file writes flow into the existing propose→confirm→write gate — this feature doesn't change approval, only how files land afterward. |
 
 No violations requiring Complexity Tracking justification.

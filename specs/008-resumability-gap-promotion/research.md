@@ -47,8 +47,9 @@ natural stopping point. Scoping gap promotion to "the scenarios that existed whe
 the pass began" gives review a clean, single-pass semantics — a genuinely deeper
 gap is still available to be caught on a subsequent run's review, consistent with
 how this product already treats iterative discovery elsewhere (e.g. `UAT-07`'s
-loop-until-dry pattern is explicitly a multi-run concept, not demanded to
-converge in one pass).
+FR-006 leaves a screen with any existing scenario un-stubbed "regardless of how
+complete that coverage is" — deeper coverage is a later run's concern, not
+demanded to converge in one pass).
 
 **Alternatives considered**: Allowing bounded recursion (e.g. up to one
 additional promotion pass) — rejected as unnecessary complexity for a case the
@@ -57,5 +58,5 @@ Edge Cases section already treats as acceptable to defer to the next run.
 ## Decision: No automated test/type-check/lint runner applies, same as prior
 features
 
-**Rationale**: No compiled source. Markdown lint + `quickstart.md`'s scenarios
+**Rationale**: No compiled source. A manual structural check (no Markdown linter is installed) + `quickstart.md`'s scenarios
 stand in for the constitution's Principle VIII gate.

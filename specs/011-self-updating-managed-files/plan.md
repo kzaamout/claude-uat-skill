@@ -25,7 +25,7 @@ cannot find today. Existing installs migrate once, keeping their values.
 associative arrays, no `mapfile`); Markdown agent-instruction files (`SKILL.md`,
 `USAGE.md`, `SETUP.md`); repo docs.
 
-**Primary Dependencies**: `bash`, `git`, `cmp`, `grep`, `sed`, `cp`, `curl` — all
+**Primary Dependencies**: `bash`, `git`, `cmp`, `grep`, `head`, `cat`, `dirname`, `cp`, `curl` — all
 already assumed by the existing wrapper. No new dependency. Two Claude Code
 features, both verified against the official docs on 2026-09-06 and present in the
 local 2.1.263: `${CLAUDE_SKILL_DIR}` substitution in skill markdown and
@@ -101,7 +101,7 @@ specs/011-self-updating-managed-files/
 │   ├── sync-managed-cli.md    # sync script: args, statuses, output, exit codes
 │   ├── dev-sh-interface.md    # engine commands + dev.env schema
 │   └── managed-marker.md      # marker text, placement, detection rule
-├── checklists/requirements.md
+├── checklists/requirements.md # no readiness.md for this slice — deliberate omission (006–010 have one)
 └── tasks.md                   # Phase 2 (/speckit-tasks)
 ```
 
@@ -137,12 +137,17 @@ uat/scenarios/_template.md     # root reference copy (byte-identical)
 .github/workflows/sync-check.yml  # EDIT: add bash -n + test-sync-managed.sh steps
 
 README.md                      # EDIT: install text, NEW "Updating" section, structure, TOC
-docs/requirements.md           # EDIT: NR-026 amended; UAT-11 FR-005 note; NR-028+ added
+docs/requirements.md           # EDIT: NR-026 amended; UAT-11 FR-005 note; Part 1 `### UAT-13`
+                               #   FR-001–FR-014 added (landed as FRs, not NR-028+)
 docs/design-history.md         # EDIT: D13
 docs/roadmap.md                # EDIT: UAT-13 entry, build-order footnote
 
 demo-app/.claude/skills/webapp-uat/   # RE-SYNC (submodule commit + pointer bump)
 ```
+
+*The two `vendor/axe.min.js` lines above are historical (2026-09-28: axe-core now
+loads via `script.src` from the CDN; `vendor/axe.min.js` removed; `--print` still
+serves `USAGE.md` and `templates/dev.env.example`).*
 
 **Structure Decision**: The skill folder stays the single source (D7); the new
 script lives under the skill's own `scripts/` so it ships with every install and is
@@ -151,7 +156,7 @@ reference-only and are guarded by `check-sync.sh`.
 
 ## Implementation Notes (carried into tasks)
 
-- **Injected line shape**: `` !`bash "${CLAUDE_SKILL_DIR}/scripts/sync-managed.sh" --check` `` —
+- **Injected line shape**: `` !`bash ${CLAUDE_SKILL_DIR}/scripts/sync-managed.sh --check` `` —
   no positional root (the script derives it from `git rev-parse --show-toplevel`,
   falling back to `pwd`), no `$(...)`, no `||`, so the `allowed-tools` rule
   `Bash(bash ${CLAUDE_SKILL_DIR}/scripts/sync-managed.sh *)` prefix-matches it.
@@ -165,7 +170,11 @@ reference-only and are guarded by `check-sync.sh`.
   after re-sync the new skill reports it as `legacy` and keeps using it, which is
   exactly FR-010's `--silent` path. Its skill-folder copy must be re-synced for
   `check-sync.sh` to pass; pushing the submodule before the parent is the owner's
-  step and is called out in `quickstart.md`.
+  step and is called out in `quickstart.md`. (2026-09-28: demo-app's
+  `uat/scenarios/_template.md` also carried no marker — it predates the marker and was
+  never a "marker removed" case — so the re-synced skill reported it `unmanaged`; it
+  was re-adopted with the marker on 2026-09-28. `demo-app/scripts/dev.sh` stays
+  legacy-shaped on purpose.)
 
 ## Complexity Tracking
 

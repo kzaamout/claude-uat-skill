@@ -20,7 +20,7 @@ The three-way choice offered when an Interrupted Run is found.
 | Value | Effect |
 |---|---|
 | **resume** | reuse existing `test-plan.md` without regenerating/re-reviewing it (`FR-005`); skip any scenario with a pre-interruption recorded result, carrying that result forward unchanged (`FR-006`); execute every scenario with no recorded result, in original plan order (`FR-007`); produce one final report covering the whole set (`FR-008`) |
-| **abandon** | (implicit — start fresh is the only other listed choice; "abandon" without "start fresh" reads as: leave the interrupted run's directory as-is and stop, distinct from actively starting a new run) |
+| **abandon** | stop this invocation entirely — nothing runs; the interrupted run's directory is left exactly as it was, still unresolved (`FR-009a`; Key Entities' Resume Decision) |
 | **start fresh** | new `run-id`, new directory; interrupted run's directory left untouched — not deleted, not merged (`FR-009`, Edge Cases) |
 
 | `--silent` behavior | Notes |

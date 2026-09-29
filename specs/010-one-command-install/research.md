@@ -31,6 +31,8 @@ of whether the *code* (agent instructions) needs to change.
 ## Decision: `/plugin` install-flow verification stays explicitly blocked, same
 limitation pattern as `UAT-09`
 
+*(Superseded 2026-08-20 — live verification achieved via the non-interactive `claude plugin` CLI; see quickstart.md "Done when" and D12.)*
+
 **Rationale**: `/plugin marketplace add` and `/plugin install` are interactive
 Claude Code CLI meta-commands with no tool access available in this session —
 identical in kind to `UAT-09`'s Spec Kit bug-workflow extension limitation.
@@ -65,6 +67,6 @@ regardless of plugin packaging.
 ## Decision: No automated test/type-check/lint runner applies, same as prior
 features
 
-**Rationale**: No compiled source. Markdown/JSON structural review plus
-`quickstart.md`'s text-traced scenarios stand in for the constitution's
+**Rationale**: No compiled source. A manual structural check (no Markdown linter is installed) of the
+Markdown/JSON plus `quickstart.md`'s text-traced scenarios stand in for the constitution's
 Principle VIII gate, within the stated `/plugin`-verification limitation.

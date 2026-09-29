@@ -48,7 +48,7 @@ cross-source tagging/dedup rules that make the two draft types safely coexist.
 
 ## Dependencies & Assumptions
 
-- [x] CHK016 Is the dependency on `UAT-01`'s Phase 0.5 routing discovery documented? [Dependency, Spec Input] — named directly in the feature description and reflected in FR-004/FR-008's routing-source language.
+- [x] CHK016 Is the dependency on Phase 0.5 discovery (unformalized; NR-016) documented? [Dependency, Spec Input] — named directly in the feature description (which attributes it to `UAT-01`; Phase 0.5 was never formalized through Spec Kit — `docs/requirements.md` NR-015–NR-019) and reflected in FR-004/FR-008's routing-source language.
 - [x] CHK017 Is the boundary between this feature's scope and `UAT-08`'s boundary-derived/fixture-synthesis scope stated explicitly? [Dependency, Spec Assumptions] — first Assumptions bullet states this directly.
 
 ## Ambiguities & Conflicts

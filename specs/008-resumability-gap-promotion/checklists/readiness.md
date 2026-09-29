@@ -21,7 +21,7 @@ new addition) and the three-way choice's exact semantics.
 
 ## Requirement Consistency
 
-- [x] CHK005 Does `data-model.md`'s Resume Decision table match `contracts/resume-and-gap-promotion-contract.md` §2-§4 exactly, including the corrected "abandon" vs. "start fresh" distinction? [Consistency, Spec §FR-002/FR-009] — verified: both now state the same two distinct effects.
+- [x] CHK005 Does `data-model.md`'s Resume Decision table match `contracts/resume-and-gap-promotion-contract.md` §2-§4 exactly, including the corrected "abandon" vs. "start fresh" distinction? [Consistency, Spec §FR-002/FR-009/FR-009a] — verified: both now state the same two distinct effects *(the data-model "abandon" row and contract §3a were made explicit on 2026-09-28; before that only the spec's Key Entities stated it)*.
 - [x] CHK006 Does the Edge Cases section's multiple-interrupted-runs tie-break match `data-model.md`'s Interrupted Run entity and FR-004's wording? [Consistency, Spec Edge Cases] — verified: both state most-recent-by-run-id, others left untouched.
 
 ## Acceptance Criteria Quality

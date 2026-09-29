@@ -39,6 +39,14 @@ silently omit it from the count or abort the entire resume over it (`FR-017`).
 **MUST**: begin under a new `run-id` and new directory. **MUST NOT**: modify or
 delete the interrupted run's directory (`FR-009`).
 
+## 3a. Abandon
+
+**Trigger**: "abandon" is chosen.
+
+**MUST**: stop this invocation entirely — nothing runs. **MUST NOT**: modify or
+delete the interrupted run's directory — it is left exactly as it was, still
+unresolved (`FR-009a`; Key Entities' Resume Decision).
+
 ## 4. `--silent` resume default
 
 **Trigger**: an interrupted run is found and `--silent` is set.

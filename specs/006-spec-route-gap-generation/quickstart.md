@@ -33,8 +33,8 @@ than walking the entire `spec-dir`.
 
 Run `/webapp-uat generate` against `demo-app` (which deliberately has no `spec-dir`
 yet, so this exercises route-gap-derived generation alone). Expect: a stub drafted
-for `/profile` and the `/settings` landing page (deliberately left uncovered by the
-bundled root `uat/scenarios/`), each tagged `Source: route-gap-derived`; no stub
+for `/profile` and `/teams/[teamId]/settings` (deliberately left uncovered by the
+bundled `demo-app/uat/scenarios/`), each tagged `Source: route-gap-derived`; no stub
 drafted for any screen the bundled scenarios already cover (e.g.
 `/teams/[teamId]/documents`), even though that coverage isn't exhaustive.
 

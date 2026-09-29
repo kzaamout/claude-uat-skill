@@ -13,7 +13,7 @@ session), and consistency across spec/data-model/contract.
 ## Requirement Completeness
 
 - [x] CHK001 Are requirements defined for what happens when start/stop detection finds evidence for more than the two illustrated mechanisms at once (beyond `run.sh`+compose vs. `package.json`)? [Completeness, Spec Edge Cases]
-- [ ] CHK002 Are requirements defined for what "the skill's own installed location" resolves to when installed via a plugin/marketplace mechanism rather than a manual file copy? [Gap]
+- [x] CHK002 Are requirements defined for what "the skill's own installed location" resolves to when installed via a plugin/marketplace mechanism rather than a manual file copy? [Gap] — **Resolved 2026-08-20 by D12** (`docs/design-history.md`): live-verifying `UAT-11`'s plugin install showed the skill's own location resolves to the marketplace clone under `~/.claude/plugins/`; root detection is now anchored to the current working directory, never the skill's file location (SKILL.md Setup mode step 1), so the question no longer arises.
 - [x] CHK003 Is the exact set of accepted `Procfile`/`Makefile` "dev/up/down-shaped" target names enumerated, or left to interpretation? [Completeness, Spec §FR-002] — **Resolved by removal, not enumeration**: found during `/speckit-implement` that `Procfile` never actually matched this criterion (see `docs/design-history.md` D5); `Procfile` was dropped from FR-002 entirely rather than having its target names enumerated. `Makefile`'s exact accepted target names remain informally described ("dev/up/down-shaped") rather than a fixed enumerated list — acceptable, since `Makefile` targets are genuinely free-form by convention and an exhaustive list would be false precision.
 
 ## Requirement Clarity
@@ -68,13 +68,17 @@ must-have items were given for this checklist.
 
 Reviewed at the `/speckit-implement` checklist gate. 5/18 resolved in substance by
 this session's `/speckit-clarify` + `/speckit-analyze` remediation work and checked
-off above (CHK001, CHK007, CHK008, CHK015, CHK018). The remaining 13 are real gaps,
-but every one is either scoped to a not-yet-built dependency (CHK002 → `UAT-11`) or a
-low-impact edge case that doesn't block or contradict this feature's three user
-stories:
+off above (CHK001, CHK007, CHK008, CHK015, CHK018). The remaining 12 listed below
+(13 at this gate — CHK003 was then resolved during implementation, see the update
+below) are real gaps, but every one is either scoped to a not-yet-built dependency
+(CHK002 → `UAT-11`) or a low-impact edge case that doesn't block or contradict this
+feature's three user stories:
 
 - **Still open, deferred by explicit decision, not oversight**: CHK002, CHK004,
   CHK005, CHK006, CHK009, CHK010, CHK011, CHK012, CHK013, CHK014, CHK016, CHK017.
+- **Decision**: proceed to implementation despite the FAIL status. If implementation
+  work actually runs into one of these 12 (not just brushes past it), stop and raise
+  it for discussion rather than silently resolving or silently ignoring it.
 
 ### During-implementation update (2026-08-15, T003)
 
@@ -84,6 +88,8 @@ as the checklist item anticipated; resolved by discovering the requirement was
 wrong (`Procfile` was never actually reachable by the stated criterion) and removing
 that part of the claim entirely. `spec.md` FR-002, `data-model.md`, `plan.md`,
 `quickstart.md` (Scenario 11), `SKILL.md`, and `README.md` were all updated to match.
-- **Decision**: proceed to implementation despite the FAIL status. If implementation
-  work actually runs into one of these 13 (not just brushes past it), stop and raise
-  it for discussion rather than silently resolving or silently ignoring it.
+
+### Post-implementation update (2026-08-20, D12)
+
+CHK002 resolved by D12 (`docs/design-history.md`) — see its checkbox above. Of the
+12 items deferred at the gate, 11 remain open.

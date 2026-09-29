@@ -1,12 +1,14 @@
 # Feature Specification: Backend Verification
 
-**Feature Branch**: `004-backend-verification`
+**Feature Branch**: `004-backend-verification` (no branch was created; work landed directly on `main`)
 
 **Created**: 2026-08-16
 
-**Status**: Draft
+**Status**: Implemented — converged 2026-08-16
 
 **Input**: User description: "UAT-05 — Backend Verification. User outcome: a scenario's claimed data change is confirmed directly against the app's own API or a discovered data store, not just inferred from what the UI showed. Scope: API-first verification when Phase 0.5 discovery found API coverage for the relevant data, direct-data-store fallback (relational DB, document store, vector store, cache -- whatever discovery identified) when the API doesn't cover it, graceful UI-only degradation with an explicit note in the finding when no store is discoverable at all. This check is a read against already-written data, not gated by the DB-write confirmation that seeding/cleanup writes require. Explicitly deferred from this slice: verifying across more than one data store when a single outcome plausibly spans several. Dependencies: UAT-01, UAT-02. Relevant existing specification sources: SKILL.md Phase 0.5 'Backend verification path' and Phase 2 step 7; docs/design-history.md R10."
+
+[Scope note: "explicitly deferred" in the input means not addressed by this slice — multi-store verification is a disclosed limitation (FR-009); verifying one outcome across several stores is an open architecture question with no slice scheduled (see Assumptions).]
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -120,7 +122,8 @@ classified as a test-environment problem, not attributed to the app under test.
 
 - What happens when a scenario's outcome plausibly spans more than one discovered
   data store (e.g. a write that should appear in both a relational DB and a search
-  index)? **Explicitly deferred** — this feature verifies against the single primary
+  index)? **Explicitly deferred** (a disclosed limitation, not a scheduled follow-up —
+  see the scope note under Input) — this feature verifies against the single primary
   store or API discovery identified as relevant, and does not define a strategy for
   verifying across multiple stores for one outcome. Not silently resolved by picking
   one arbitrarily and calling it complete; recorded as an open limitation (see
@@ -166,8 +169,9 @@ classified as a test-environment problem, not attributed to the app under test.
 - **FR-009**: When a scenario's outcome plausibly spans more than one discovered data
   store, system MUST verify against the single primary store or API Phase 0.5
   discovery identified as relevant, and MUST NOT represent that verification as
-  covering every plausibly relevant store — this is a known, undeferred-to-later
-  limitation, not silently resolved.
+  covering every plausibly relevant store — this is a disclosed limitation, not
+  silently resolved; verifying one outcome across several stores is an open
+  architecture question with no slice scheduled.
 
 ### Key Entities
 

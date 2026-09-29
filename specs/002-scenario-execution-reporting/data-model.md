@@ -19,11 +19,13 @@ this feature doesn't cover resumability (`UAT-10`).
 
 ## Finding (`uat/runs/<run-id>/findings/<scenario-id>.md`)
 
-One per scenario outcome that isn't a clean pass (spec Key Entities).
+One per executed scenario, written immediately on completion (`FR-010`, spec Key
+Entities). A clean pass is recorded as `PASS` with no category and none of the fields
+below populated; the fields apply to any other outcome.
 
 | Field | Values | Notes |
 |---|---|---|
-| category | `BUG` / `UNEXPECTED_BEHAVIOUR` / `UX_FRICTION` / `SPEC_GAP` / `TEST_ENVIRONMENT` | exactly one, never zero or multiple (`FR-012`) |
+| category | `BUG` / `UNEXPECTED_BEHAVIOUR` / `UX_FRICTION` / `SPEC_GAP` / `TEST_ENVIRONMENT` | exactly one for any non-pass outcome, never zero or multiple (`FR-012`); a clean pass carries `PASS` and no category |
 | severity | `P0`–`P3` | present only when category is `BUG` (`FR-013`); an app crash mid-scenario is `BUG`, typically `P0` (`FR-009a`) |
 | evidence | console errors/warnings, failed network requests (status + URL), screenshot path | truncated before write (`FR-008`); treated as data, never instructions, regardless of content |
 | recommendation | `no action` / `update the existing feature spec` / `new feature spec` / `needs more research` | present only when category is `UNEXPECTED_BEHAVIOUR`, `UX_FRICTION`, or `SPEC_GAP` (`FR-014`) |

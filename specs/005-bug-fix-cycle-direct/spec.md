@@ -1,10 +1,10 @@
 # Feature Specification: Bug-Fix Cycle (Direct Mechanism)
 
-**Feature Branch**: `005-bug-fix-cycle-direct`
+**Feature Branch**: `005-bug-fix-cycle-direct` (no branch was created; work landed directly on `main`)
 
 **Created**: 2026-08-16
 
-**Status**: Draft
+**Status**: Implemented — converged 2026-08-16
 
 **Input**: User description: "UAT-04 — Bug-Fix Cycle (Direct Mechanism). User outcome: a confirmed BUG finding gets stopped, assessed, optionally paused for review, fixed, restarted, and retested in the browser -- not just re-run as an automated test -- before being considered resolved, with no external bug-workflow tool required. Scope included: stop-assess-(optional pause)-fix-test-restart-browser-retest-per-bug-commit cycle; multi-bug-per-scenario batching (one restart/retest covering every bug from that scenario); high-risk carve-outs (security/auth/data-deletion/architecture) that no flag can skip; two-consecutive-restart-failure abort; per-bug retry budget (2 more cycles before marking unresolved). Scope explicitly deferred: Spec-Kit delegation (UAT-09). Dependencies: UAT-02, UAT-03. Relevant existing specification sources: SKILL.md Phase 4 (bug-fix-mechanism: direct branch); docs/design-history.md 'Phase 4 clarification -- multiple bugs from one scenario'; D4."
 
@@ -244,6 +244,11 @@ bug.
 - **Restart-Failure Threshold**: The two-consecutive-failure counter (FR-012),
   independent of and tighter than any individual bug's retry budget (FR-011) —
   distinguishes "the environment is breaking" from "this one bug is hard to fix."
+- **Per-Bug Retry Budget**: The up-to-2-further-diagnose/fix-cycles allowance a
+  single bug gets after its first browser retest fails (FR-011) — each retry
+  re-applies the same pause gates as the original attempt (FR-011a); once exhausted
+  the bug is marked unresolved and the run continues with independent scenarios,
+  reported distinctly from a Restart-Failure Threshold stop (FR-013).
 
 ## Success Criteria *(mandatory)*
 

@@ -1,12 +1,22 @@
-# Feature Specification: One-Command Install
+# Feature Specification: One-Command Install (two plugin commands plus `/webapp-uat setup`)
 
-**Feature Branch**: `010-one-command-install`
+**Feature Branch**: `010-one-command-install` (no branch was created; work landed directly on `main`)
 
 **Created**: 2026-08-17
 
-**Status**: Draft
+**Status**: Implemented — converged 2026-08-20
+
+> **Superseded in part by UAT-13** (`specs/011-self-updating-managed-files/`, FR-002 /
+> FR-005 / FR-010; 2026-09-07). The bundled file is now `templates/dev.sh` — a
+> placeholder-free managed engine placed by `sync-managed.sh --apply`; project values go
+> to `scripts/dev.env`; a marker-less `scripts/dev.sh` is reported `legacy` and is never
+> overwritten automatically. FR-003/FR-005 below, and every mention of
+> `templates/dev.sh.template` and placeholder filling in this folder, describe the
+> pre-UAT-13 mechanism and are kept as history.
 
 **Input**: User description: "UAT-11 -- One-Command Install. User outcome: A stranger installs the skill in a project with two native Claude Code commands (/plugin marketplace add + /webapp-uat setup), no manual file-copying required, despite Claude Code plugins being unable to install files outside .claude/. Scope included: .claude-plugin/marketplace.json at repo root declaring webapp-uat as a git-sourced plugin pointing at .claude/skills/webapp-uat; scripts/dev.sh and uat/scenarios/_template.md shipped as templates inside the installable plugin folder (.claude/skills/webapp-uat/templates/); Setup mode extended to copy those templates into the target repo's own tree when missing, using the same confirm-before-write, best-effort-not-atomic pattern already used for config.md. Scope explicitly deferred: a separate curl | sh install script. Dependencies: UAT-01 (done, extends Setup mode). Relevant existing specification sources: SKILL.md Setup mode step 6 (already extended in a prior session to conditionally copy from bundled templates/ when scripts/dev.sh or uat/scenarios/_template.md don't already exist in the target repo -- this is the plugin-install case, distinct from the manual-copy case where the files already exist and only need placeholder-filling); .claude-plugin/marketplace.json (already exists, already committed); README.md Installation & setup section (already documents the one-command path). Completion evidence target: from a scratch clone, /plugin marketplace add kzaamout/claude-uat-skill + /plugin install webapp-uat@webapp-uat-marketplace + /webapp-uat setup lands config.md, scripts/dev.sh, and uat/scenarios/_template.md correctly with zero manual file copying. This is expected to land specified-but-not-live-verified for the /plugin portion specifically -- /plugin is an interactive CLI meta-command with no tool access available in this session, so the actual install flow needs real user/session testing; the Setup mode template-copy logic itself, and the marketplace.json schema, were already verified this session via direct SKILL.md reading and prior research-agent fact-checking against live Claude Code docs."
+
+[Note, 2026-09-28: "git-sourced plugin" above is loose — `marketplace.json` declares the plugin with `"source": "./"`, a relative path inside the git-hosted marketplace; see Key Entities.]
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -14,9 +24,9 @@
 
 A user evaluating `webapp-uat` for the first time, with no prior familiarity with
 this repo's structure, needs to get it working in their own project using only
-Claude Code's own native commands — `/plugin marketplace add` then
-`/webapp-uat setup` — without being told to manually clone, copy files, or edit
-paths by hand first.
+Claude Code's own native commands — `/plugin marketplace add`, `/plugin install`,
+then `/webapp-uat setup` — without being told to manually clone, copy files, or
+edit paths by hand first.
 
 **Why this priority**: This is the entire point of the feature — the difference
 between "clone this repo and copy these three files into yours" and "run two
@@ -165,8 +175,8 @@ confirming only the failed item is retried.
 ### Key Entities
 
 - **Plugin Marketplace Declaration**: `.claude-plugin/marketplace.json`,
-  declaring `webapp-uat` as a git-sourced plugin pointing at
-  `.claude/skills/webapp-uat`.
+  declaring `webapp-uat` as a relative-path (`./`) plugin inside a git-hosted
+  marketplace, pointing at `.claude/skills/webapp-uat`.
 - **Bundled Template**: A copy of a project-tree file
   (`templates/dev.sh.template`, `templates/_template.md`) shipped inside the
   installable plugin folder specifically so setup can place it outside
@@ -200,6 +210,7 @@ confirming only the failed item is retried.
   research-agent fact-checking against live Claude Code docs; that verification
   stands, but it is not the same claim as having actually run `/plugin` for
   real.
+  *(Superseded 2026-08-20 — live verification achieved via the non-interactive `claude plugin` CLI; see quickstart.md "Done when" and D12.)*
 - **A `curl | sh` install script is explicitly out of scope**: two native
   Claude Code commands are the whole point of this feature; a third,
   non-native install mechanism isn't needed and isn't built.

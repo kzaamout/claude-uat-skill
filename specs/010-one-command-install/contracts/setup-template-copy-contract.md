@@ -23,6 +23,12 @@ pattern — regardless of install method (`FR-002`).
 
 ## 3. Project-tree file placement
 
+> **Superseded by UAT-13** (`specs/011-self-updating-managed-files/`, FR-002 / FR-005 /
+> FR-010). The bundled file is now `templates/dev.sh`, a placeholder-free managed engine
+> placed by `sync-managed.sh --apply`; values go to `scripts/dev.env`; a marker-less
+> `scripts/dev.sh` is `legacy` and is never overwritten automatically. The three rules
+> below are the pre-UAT-13 mechanism, kept as history.
+
 **Trigger**: setup reaches its write step, on approval.
 
 **MUST**, when `scripts/dev.sh` does not already exist in the target repo: copy

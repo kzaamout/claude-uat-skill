@@ -66,7 +66,7 @@ explicitly out of scope (spec Assumptions).
 | V. Reuse Before Reinvention | PASS | Extends the existing Phase 0.5/Phase 2 step 7 sections in place; no new mechanism invented. |
 | VI. Usability Is Not Optional | PASS | Graceful UI-only degradation (FR-004) and the discrepancy-surfaced-not-silently-resolved rule (FR-006) are both usability requirements — never block/error, never hide a contradiction. |
 | VII. Deliberate Dependencies | PASS (trivial) | No new framework/library/dependency. |
-| VIII. Automated Quality Gates | **PASS, same documented interpretation as prior slices** | No compiled source; Markdown lint + quickstart validation stand in. |
+| VIII. Automated Quality Gates | **PASS, same documented interpretation as prior slices** | No compiled source; a manual structural check (no Markdown linter is installed) + quickstart validation stand in. |
 | IX. Human Approval Before Consequential Change | PASS (N/A-by-design) | This feature is explicitly a read, not a write (FR-005) — no consequential change for this principle to gate. |
 
 No violations requiring Complexity Tracking justification.

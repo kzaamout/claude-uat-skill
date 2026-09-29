@@ -1,12 +1,14 @@
 # Feature Specification: Manual Scenario Execution, Checks, Classification & Report
 
-**Feature Branch**: `002-scenario-execution-reporting`
+**Feature Branch**: `002-scenario-execution-reporting` (no branch was created; work landed directly on `main`)
 
 **Created**: 2026-08-15
 
-**Status**: Draft
+**Status**: Implemented — converged 2026-08-16
 
 **Input**: User description: "UAT-02 — Manual Scenario Execution, Checks, Classification & Report. User outcome: run one hand-written scenario in a real Chrome window and get accessibility/data-integrity findings, a category+severity classification, and a written report — the smallest slice that proves the core value loop without fixing anything. Scope included: Phase 1 scenario review (read/tighten/write test-plan/approve-or-cancel); Phase 2 execution minus backend verification (login, viewport handling, axe-core audit, i18n/data-integrity checks, console/network/screenshot capture on anything that looks off, one-reconnect-then-pause on browser-tool failure, per-scenario progress line); Phase 3 five-way classification plus P0-P3 severity; Phase 5 report (scenario/finding breakdown, end-of-run cleanup, spec-update disposition offer) — excluding the bug-fix cycle itself. Scope explicitly deferred: backend verification (UAT-05); the bug-fix cycle (UAT-04/UAT-09); scenario generation (UAT-07/UAT-08); resumability and in-run gap promotion (UAT-10). Dependencies: UAT-01. Relevant specification sources: SKILL.md Phase 1, Phase 2 (steps 1-6, 8-10), Phase 3, Phase 5; docs/design-history.md R3 (expanded per-scenario checks), R5 (content-safety hardening); uat/scenarios/_template.md."
+
+[Scope note: end-of-run cleanup is specified by UAT-06 (specs/003), not here.]
 
 ## Clarifications
 
@@ -169,7 +171,12 @@ it.
 - What happens when the axe-core CDN script fails to load (e.g. a network-restricted
   environment)? Not resolved by this feature — a known, pre-existing gap (no
   `onerror`/timeout handling in the injection snippet), carried forward rather than
-  silently fixed as a side effect of this slice.
+  silently fixed as a side effect of this slice. *(Revised since: D9, 2026-08-19,
+  replaced the CDN `<script src>` with an inline injection of a vendored copy; on
+  2026-09-28 that was reverted to a `script.src` load of the pinned cdnjs 4.10.0 URL
+  with an SRI integrity hash, wrapped in an onload/onerror promise, with one retry
+  from jsdelivr and an explicit "accessibility check not run" note in the finding if
+  both fail — the gap named here is closed.)*
 - What happens when a scenario has no `Related feature` set, or `spec-dir` isn't
   configured? The UI-conformance check is skipped for that scenario and the report
   notes it wasn't applicable — not silently treated as passing.
@@ -248,7 +255,9 @@ it.
 
 - **Test Plan**: The reviewed, written-before-execution record of which scenarios are
   approved to run this pass — the artifact FR-001/FR-002 produce and gate on.
-- **Finding**: One record per scenario outcome that isn't a clean pass — carries
+- **Finding**: One record per executed scenario, written to
+  `uat/runs/<run-id>/findings/<scenario-id>.md` immediately on completion (FR-010).
+  A clean pass is recorded as `PASS` with no category; any other outcome carries
   exactly one category, an optional severity (bugs only), captured evidence
   (truncated), and — for `UNEXPECTED_BEHAVIOUR`/`UX_FRICTION`/`SPEC_GAP` — a
   recommendation (`TEST_ENVIRONMENT` findings carry neither severity nor

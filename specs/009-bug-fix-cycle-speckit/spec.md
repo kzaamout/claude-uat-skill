@@ -1,10 +1,10 @@
 # Feature Specification: Bug-Fix Cycle (Spec-Kit Mechanism)
 
-**Feature Branch**: `009-bug-fix-cycle-speckit`
+**Feature Branch**: `009-bug-fix-cycle-speckit` (no branch was created; work landed directly on `main`)
 
 **Created**: 2026-08-17
 
-**Status**: Draft
+**Status**: Implemented — converged 2026-08-20
 
 **Input**: User description: "UAT-09 -- Bug-Fix Cycle (Spec-Kit Mechanism). User outcome: Same fix cycle as UAT-04, but delegated to an installed Spec Kit bug-workflow extension's assess/fix/test commands instead of Claude fixing the bug in-session -- for teams that already run bug work through a Spec Kit extension and want webapp-uat's findings to flow into that same pipeline rather than a parallel one. Scope included: bug-fix-mechanism: spec-kit branch -- running the configured bug-assess-command / bug-fix-command / bug-test-command (from config.md) against a finding instead of in-session assessment; identical high-risk carve-outs (security/auth/data-deletion/architecture pause, no flag skips it) and identical review-pause behavior (REVIEW_BEFORE_FIX, --silent) as the direct mechanism; identical batching (one restart/retest per scenario's bugs), per-bug commit granularity, retry budget, and restart-failure threshold as UAT-04 -- this slice only swaps WHO performs the assess/fix/test step, not the surrounding cycle's structure. Scope explicitly deferred: none -- this is the last bug-fix-cycle slice, delegating to Spec Kit is the only mechanism variant beyond direct (UAT-04, done). Dependencies: UAT-04 (done), UAT-03 (done). Relevant existing specification sources: SKILL.md Phase 4 (bug-fix-mechanism: spec-kit branch); config.md.example; specs/005-bug-fix-cycle-direct/. Completion evidence target: expected to land specified-but-not-live-verified -- demo-app deliberately uses bug-fix-mechanism: direct (see docs/design-history.md D6), so there is no real Spec Kit bug-workflow extension installed anywhere in this repo's own tooling to demonstrate against live. Text-tracing against SKILL.md and a constructed example config.md is the achievable completion evidence for this slice; live verification is called out explicitly as blocked, not silently skipped."
 
@@ -247,6 +247,7 @@ silently proceeding.
   `config.md` with three plausible command values — live verification is
   explicitly blocked, not silently skipped, and is called out as an open item
   for whoever next has access to a real installed extension.
+  *(Update 2026-08-20: environment unblocked — Spec Kit's `bug` extension is real and installable; the Phase 4 delegation run itself is still open. See quickstart.md.)*
 - **This is the last bug-fix-cycle slice**: `UAT-04` (direct) and this feature
   (spec-kit) are the only two `bug-fix-mechanism` values this product supports;
   no further mechanism variant is anticipated or deferred.

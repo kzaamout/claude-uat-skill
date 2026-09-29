@@ -18,21 +18,21 @@ not building a new mechanism.
 **Alternatives considered**: Writing a wholly new, separate setup routine to house
 the failure-handling behavior in isolation — rejected as a direct violation of
 Constitution Principle V (Reuse Before Reinvention); there is no reason to duplicate
-an already-correct, already-battle-tested six-step flow to add one new failure-path
+an already-correct, already-battle-tested seven-step flow to add one new failure-path
 clause to it.
 
 ## Decision: No automated test/type-check/lint runner applies in the traditional sense
 
 **Rationale**: There is no source code to type-check or unit-test — `SKILL.md` is
 prose that an LLM agent interprets at invocation time. The applicable automated
-check is a Markdown lint pass over the edited section (catching broken structure,
+check is a manual structural check (no manual structural check (no Markdown linter is installed)er is installed) over the edited section (catching broken structure,
 heading-level mistakes, etc.), and the closest available equivalent to a test suite
 is live invocation against constructed scenarios (see `quickstart.md`), since this
 product's actual job elsewhere is exercising other projects this same way.
 
 **Alternatives considered**: Skipping Constitution Principle VIII's gate entirely as
 "not applicable" — rejected; the plan documents an explicit, honest interpretation
-of the gate instead (Markdown lint + quickstart validation) rather than silently
+of the gate instead (manual structural check (no Markdown linter is installed) + quickstart validation) rather than silently
 treating a durable principle as inapplicable to this sub-project.
 
 ## Decision: Best-effort, per-item failure reporting (not atomic rollback) for the write step
@@ -45,5 +45,8 @@ mechanism would add real implementation complexity for a rare, easily-recovered
 failure mode (disk full, permissions) in a one-time local wizard.
 
 **Alternatives considered**: Full atomic rollback (Option A) and fail-fast-no-rollback
-(Option C) — both considered and rejected during the clarification session; see
-`spec.md` for the full comparison.
+(Option C) — both considered and rejected during the clarification session: Option A
+because a rollback mechanism adds real complexity for a rare, easily-recovered
+failure mode in a wizard that is already required to be safely re-runnable
+(FR-012); Option C because stopping at the first failure leaves the remaining items
+unattempted and gives the user no per-item account of what was actually written.

@@ -8,6 +8,8 @@ documents text-tracing against `SKILL.md`/`marketplace.json`, the achievable
 completion evidence for this slice; live verification of the actual `/plugin`
 flow remains an open item for the user or a fresh session with real access.
 
+*(Superseded 2026-08-20 — live verification achieved via the non-interactive `claude plugin` CLI; see quickstart.md "Done when" and D12.)*
+
 Each scenario maps to acceptance scenarios in [spec.md](./spec.md).
 
 ## Scenario 1 — Two commands install the skill, no manual copying

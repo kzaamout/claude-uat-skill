@@ -46,6 +46,11 @@ The project-specific script whose placeholders (`PROJECT_DIR`, `START_COMMAND`,
 edits the placeholder values only — it does not change the script's logic, and does
 not execute `start`/`stop`/`wait-ready` itself (spec `FR-010`).
 
+*(Superseded 2026-09-07 by `UAT-13`: the approved `START_COMMAND`/`STOP_COMMAND`/`PORT`
+values are written to `scripts/dev.env`; `scripts/dev.sh` is a placeholder-free
+managed engine placed by `sync-managed.sh --apply` and carries no project values —
+the engine derives the project path itself — see `UAT-13` FR-002/FR-005/FR-010.)*
+
 ## Write Outcome (new, from FR-013)
 
 Not a persisted entity — the per-invocation result of the write step, used only to
@@ -56,6 +61,12 @@ drive the failure report the user sees.
 | item | which artifact was being written (`config.md`, `scripts/dev.sh`, or one of the four `uat/` subdirectories) |
 | result | `succeeded` or `failed` |
 | reason (if failed) | the specific, named cause — never a generic "write failed" |
+
+*(The item list predates `UAT-11`, D11 and `UAT-13`: today's write step also reports
+`scripts/dev.env` (which now holds the approved values — `UAT-13` FR-002/FR-005),
+the managed `scripts/dev.sh` as `created`/`updated`/`in-sync`, `uat/scenarios/_template.md`,
+and any `.gitignore` entries appended for `dev.log`/`.webapp-uat.pid` — see SKILL.md
+Setup mode step 6's example report. The rule below applies to every item unchanged.)*
 
 **Rule** (spec `FR-013`): a `failed` item never rolls back an already-`succeeded` one;
 the invocation is safe to re-run afterward to retry only what's outstanding.

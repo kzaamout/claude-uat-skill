@@ -5,15 +5,18 @@ No `NEEDS CLARIFICATION` markers remained in the Technical Context, and
 already-deliberate, already-written `SKILL.md` behavior rather than inventing new
 scope.
 
-## Decision: One targeted addition to Phase 5, Phase 4 expected to need no change
+## Decision: Two targeted additions — Phase 5 (FR-013) and Phase 4 step 5 (FR-011a)
 
 **Rationale**: Re-reading the current Phase 4 text against every FR in `spec.md`
 found FR-001 through FR-012 already present, most nearly verbatim (the multi-bug
 batching language, the high-risk carve-out, the two-consecutive-restart-failure
-threshold, the per-bug retry budget). The one gap: FR-013 requires the final report
+threshold, the per-bug retry budget). Two gaps: FR-013 requires the final report
 to distinguish a whole-run stop (restart-failure threshold) from a per-bug unresolved
 marking (retry budget exhausted) — Phase 5's current report language has a single
-undivided "unresolved" bucket with no such distinction.
+undivided "unresolved" bucket with no such distinction; and FR-011a — Phase 4 step
+5's retry cycles did not say each retry re-applies the high-risk/routine pause gates
+(surfaced by `/speckit-implement`'s diff-first step, T002, after this document was
+first drafted; added by T010).
 
 **Alternatives considered**: A new standalone "Bug-Fix Reporting" section separate
 from Phase 5 — rejected per Constitution Principle V (Reuse Before Reinvention); this
@@ -21,7 +24,7 @@ is a small addition to an existing bullet, not a new section's worth of scope.
 
 ## Decision: No automated test/type-check/lint runner applies, same as prior features
 
-**Rationale**: No compiled source. Markdown lint + `quickstart.md`'s scenarios stand
+**Rationale**: No compiled source. Manual structural check (no Markdown linter is installed) + `quickstart.md`'s scenarios stand
 in for the constitution's Principle VIII gate.
 
 ## Decision: "Assessed scope, not surface category" for the high-risk trigger (Edge Case 1)

@@ -7,9 +7,10 @@ Manual validation runbook for this feature — same rationale as `UAT-01`'s
 git-repo fixtures (files on disk). This feature needs a **real running target app**
 with Chrome connected via `/chrome`, since it exercises live browser execution,
 accessibility audits, and console/network capture — none of which can be verified by
-reading text alone. **No such app exists in this repo yet** (the `demo-app/` work
-from the broader generalization plan is still unbuilt). Until it does, treat
-Scenarios 1-11 below as the runbook to execute once a target app exists, and rely on
+reading text alone. **At formalization time (2026-08-16) no such app existed in this
+repo yet** — `demo-app/` was built later that day (D6) and a first live run happened
+the same evening (see the live-verification record under "Done when"). Before that,
+Scenarios 1-11 below were the runbook to execute once a target app existed, with
 tracing `SKILL.md`'s text against each scenario's expected outcome (the same method
 used for `UAT-01`'s already-existing, non-execution-dependent behavior) as the
 interim verification method for anything that doesn't require a live browser to
@@ -138,5 +139,20 @@ app + Chrome**, plus a way to force a `/chrome` disconnect on demand.
 ## Done when
 
 All 11 scenarios produce the expected outcome above. Scenarios requiring a live
-target app are blocked until `demo-app/` (or an equivalent throwaway target) exists
-— tracked as a dependency, not silently skipped.
+target app were blocked until `demo-app/` (or an equivalent throwaway target)
+existed — tracked as a dependency, not silently skipped.
+
+**Live-verification record (2026-08-16, commit 50cbe5c)**: `demo-app` was built that
+day (D6) and a live run of `webapp-uat` against it — "not just text-tracing" — is
+recorded in commit 50cbe5c ("Findings from live-verifying UAT-02/05/06 against
+demo-app"). That commit records: two real gaps found — `SKILL.md` Phase 2 step 3 had
+no guidance for a boundary/negative-path case whose server-side check is blocked by
+the app's own client-side validation (`UAT-003`'s title-too-short case; guidance
+added: issue the equivalent request directly in the authenticated browser session),
+and the `Skill` tool always loads the outer repo's copy of the skill when invoked
+from a session rooted above a nested project (recorded as D8) — plus two `demo-app`
+fixes made by that run (color-contrast, attachment-size display) and the statement
+that the run "confirmed the rest of UAT-02/UAT-06's behavior holds." It does not
+record scenario-by-scenario results against this runbook, so no individual scenario
+above is marked live-verified on its strength; Scenario 9 (adversarial content) in
+particular is not claimed.

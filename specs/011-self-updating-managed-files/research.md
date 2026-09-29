@@ -76,7 +76,7 @@ records each decision with its rationale and the alternatives weighed.
 - **Injected commands never prompt; a permission result other than "allow" aborts
   the invocation** → the skill declares
   `allowed-tools: Bash(bash ${CLAUDE_SKILL_DIR}/scripts/sync-managed.sh *)` and the
-  injected line is the bare `bash "${CLAUDE_SKILL_DIR}/scripts/sync-managed.sh" --check`
+  injected line is the bare `bash ${CLAUDE_SKILL_DIR}/scripts/sync-managed.sh --check`
   with no command substitution or `||` that could defeat the prefix match. The
   script derives the project root itself.
 - `${CLAUDE_SKILL_DIR}` is substituted in skill markdown and `allowed-tools` for

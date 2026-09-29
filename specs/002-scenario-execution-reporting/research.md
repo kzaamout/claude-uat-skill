@@ -22,7 +22,7 @@ phases to add one classification clarification.
 ## Decision: No automated test/type-check/lint runner applies, same as `UAT-01`
 
 **Rationale**: No source code to type-check or unit-test. The applicable automated
-check is a Markdown lint pass over the edited section, and the closest equivalent to
+check is a manual structural check (no manual structural check (no Markdown linter is installed)er is installed) over the edited section, and the closest equivalent to
 a test suite is live invocation against constructed scenarios (see `quickstart.md`).
 
 ## Decision: App-crash-vs-`TEST_ENVIRONMENT` disambiguation (FR-009a)
@@ -36,5 +36,9 @@ attention and never reach Phase 4's (future) fix cycle.
 
 **Alternatives considered**: Classifying all app-level unresponsiveness as
 `TEST_ENVIRONMENT` (Option A), and a cause-dependent split based on prior restart
-history (Option C) — both considered and rejected during the clarification session;
-see `spec.md` for the full comparison.
+history (Option C) — both considered and rejected during the clarification session:
+Option A because an app crash is a product failure that would then get
+comparatively little attention and never reach Phase 4's fix cycle; Option C because
+it would make the category depend on restart history rather than on the nature of
+the failure itself, where the clarified rule's single fixed boundary is simpler to
+apply and to explain in a report.

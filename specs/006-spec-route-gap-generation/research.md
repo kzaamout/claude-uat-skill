@@ -30,7 +30,7 @@ sections' worth of scope.
 
 ## Decision: No automated test/type-check/lint runner applies, same as prior features
 
-**Rationale**: No compiled source. Markdown lint + `quickstart.md`'s scenarios stand
+**Rationale**: No compiled source. A manual structural check (no Markdown linter is installed) + `quickstart.md`'s scenarios stand
 in for the constitution's Principle VIII gate.
 
 ## Decision: Screen-vs-route filtering stays Phase 0.5's concern, not re-validated here

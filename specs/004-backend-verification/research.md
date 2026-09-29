@@ -23,7 +23,7 @@ separate phase.
 
 ## Decision: No automated test/type-check/lint runner applies, same as prior features
 
-**Rationale**: No compiled source. Markdown lint + `quickstart.md`'s scenarios stand
+**Rationale**: No compiled source. Manual structural check (no Markdown linter is installed) + `quickstart.md`'s scenarios stand
 in for the constitution's Principle VIII gate.
 
 ## Decision: FR-008's classification rule mirrors Phase 3's existing app-crash-vs-TEST_ENVIRONMENT precedent

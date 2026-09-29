@@ -1,12 +1,14 @@
 # Feature Specification: Self-Updating Managed Files
 
-**Feature Branch**: `011-self-updating-managed-files`
+**Feature Branch**: `011-self-updating-managed-files` (no branch was created; work landed directly on `main`)
 
 **Created**: 2026-09-07
 
-**Status**: Draft
+**Status**: Implemented — converged 2026-09-07
 
 **Input**: User description: "UAT-13 -- Self-Updating Managed Files (plugin-update propagation). User outcome: a user who installed webapp-uat as a plugin runs `claude plugin marketplace update webapp-uat-marketplace` + `claude plugin update webapp-uat@webapp-uat-marketplace`, restarts Claude Code, and the next `/webapp-uat` invocation brings every skill-owned file living in the project's own tree (`scripts/dev.sh`, `uat/scenarios/_template.md`) to the installed skill's version with zero manual merging and without touching any project-owned data (`scripts/dev.env`, `config.md`, `discovered-environment.md`, scenarios, fixtures). Manual (copy-by-hand) installs get the same behavior after re-copying the skill folder. Root cause being fixed: today `scripts/dev.sh` mixes skill logic (pidfile/SIGINT/wait-ready loop) with four project values filled in by setup (PROJECT_DIR, START_COMMAND, STOP_COMMAND, PORT), so it can never be overwritten; a plugin update refreshes the bundled `templates/` in the plugin cache but nothing propagates them into the project tree (setup copies only when the file is missing). Scope included: (1) split dev.sh into a placeholder-free, skill-owned engine (`scripts/dev.sh`, same `start|stop|wait-ready` interface, unchanged exit codes, derives the project root from its own location instead of a configured PROJECT_DIR) plus a project-owned committed values file `scripts/dev.env` (START_COMMAND, STOP_COMMAND, PORT, optional WAIT_TIMEOUT default, optional READY_COMMAND to replace the curl health check) that the engine sources; setup proposes/writes dev.env from a bundled `dev.env.example` using its existing discovery + confirm-before-write flow. (2) A managed-file contract: every skill-owned file placed in the project tree carries a first-lines marker ('webapp-uat managed file -- do not edit; overwritten on skill update; remove this line to take ownership'); the skill overwrites a file only when the marker is present; a marker-less file is left untouched and reported once per run. (3) A deterministic bundled sync script (`${CLAUDE_SKILL_DIR}/scripts/sync-managed.sh <project-root> --check|--apply`): byte-compares each bundled managed file against the project copy; `--check` only reports (per-file status: in sync / update available / unmanaged / missing) and always exits 0; `--apply` copies every differing marker-bearing file and reports what changed; no version numbers, no LLM judgment. (4) Invocation points: SKILL.md runs `--check` at load time via dynamic context injection so the drift state is visible before any phase; Phase 0 pre-flight runs `--apply` before the clean-working-tree check and, if anything changed, commits the result as one chore commit whose message names the files (this commit happens under `--silent` too since managed files contain no project data); Setup mode's write step runs `--apply` as one of its items (covers first install and re-runs). (5) Every reference the skill makes to its own bundled files (templates, `vendor/axe.min.js`, the sync script) uses Claude Code's `${CLAUDE_SKILL_DIR}` substitution instead of a project-relative or 'this skill's own folder' phrasing -- fixes a latent D12-class defect: SKILL.md's axe-core path `.claude/skills/webapp-uat/vendor/axe.min.js` does not exist in the project tree for a plugin install (NR-026 must be corrected accordingly). (6) One-time legacy migration: a `scripts/dev.sh` with no marker but with the old four-variable block is legacy; Setup mode (and Phase 0 when not `--silent`) extracts the four values, proposes `dev.env` + the engine replacement, and writes on confirmation; under `--silent` a legacy dev.sh is left as-is (it still works -- the interface is unchanged) and the final report notes that setup will migrate it. (7) This repo's own copy-pairs: `templates/dev.sh.template` becomes `templates/dev.sh` (no placeholders left), `templates/dev.env.example` and root `scripts/dev.env.example` are added, root reference copies stay byte-identical, `scripts/check-sync.sh` updated to the new pair list. (8) Docs: README gains an 'Updating' section (both install paths, the two plugin commands, restart, what the next run does, what is never touched) and updated install/structure text; SETUP.md step 3 covers dev.env; USAGE.md Phase 0 + file reference; `docs/requirements.md` new NR entries; `docs/design-history.md` D13; `docs/roadmap.md` UAT-13. Scope explicitly deferred: a plugin SessionStart hook that syncs on every session start (writes into every project with the plugin enabled -- rejected); an explicit `/webapp-uat update` command (Phase 0 + setup cover it); release tags / version fields (byte comparison suffices); migrating demo-app's own project-specific dev.sh to the engine+dev.env shape (separate repo, follow-up). Dependencies: UAT-01 (extends Setup mode), UAT-11 (plugin install mechanics; D12 location rule for per-project files). Verified facts this rests on (official Claude Code docs, 2026-09-06): `${CLAUDE_SKILL_DIR}` is substituted in skill markdown and `allowed-tools` for plugin, project, and personal skills; dynamic context injection runs before Claude sees the skill body, never prompts for permission, and a non-zero exit aborts the invocation (hence `--check` must always exit 0); `claude plugin update` does not refresh the marketplace clone, so `claude plugin marketplace update` must run first; plugin version for this marketplace is the repo commit SHA, so every commit is an update. Completion evidence target: in a scratch target repo with a project-scope plugin install, `/webapp-uat setup` lands the engine dev.sh (with marker), dev.env, and _template.md; after installing a newer commit whose bundled files differ, the next `/webapp-uat` run's Phase 0 overwrites both managed files, leaves dev.env/config.md byte-identical, and produces exactly one chore commit; a copy with the marker removed is left untouched and reported; a legacy four-variable dev.sh is migrated by setup with its values preserved in dev.env; `scripts/check-sync.sh` passes."
+
+[Editorial notes, 2026-09-28 — the quoted description above is kept as written; what landed differs in three details: (a) item (8)'s "`docs/requirements.md` new NR entries" landed as a Part 1 `### UAT-13` section (FR-001–FR-014, traced to this spec), not as Part 2 NR entries — Part 2 still ends at NR-027; (b) the sync script's CLI grew `--legacy-values` and `--print <bundled path>`, and its `<project-root>` argument is optional (derived from `git rev-parse --show-toplevel`, falling back to `pwd`); (c) item (5)'s `vendor/axe.min.js` (2026-09-28: axe-core now loads via `script.src` from the CDN; `vendor/axe.min.js` removed; `--print` still serves `USAGE.md` and `templates/dev.env.example`).]
 
 ## Background
 
@@ -133,7 +135,8 @@ start command, stop command, and port, and that start / wait-ready / stop still 
 **Acceptance Scenarios**:
 
 1. **Given** an old-style wrapper with four filled-in values, **When** setup runs,
-   **Then** it reports the wrapper as legacy, shows the three values it will keep,
+   **Then** it reports the wrapper as legacy, shows the values it keeps (start
+   command, stop command, port, and wait timeout when the legacy file set one),
    proposes the values file and the replacement wrapper, and writes both only on
    confirmation.
 2. **Given** an old-style wrapper, **When** an attended `/webapp-uat` run reaches
@@ -224,12 +227,13 @@ setup and confirm it offers to re-adopt the file and only does so on confirmatio
   already uses, and MUST NOT write project values into the wrapper. Setup's write step
   MUST also place or refresh every managed file as one of its items.
 - **FR-006**: At every skill invocation, before any mode or phase runs, a per-file
-  status for each managed file — *in sync*, *update available*, *unmanaged*, or
-  *missing* — MUST be computed and, whenever any file is not *in sync*, shown to the
-  user before anything else happens; when every file is in sync the invocation stays
-  silent about managed files. This status check MUST be deterministic (content
-  comparison, no judgment), MUST never prompt, and MUST never block or abort the
-  invocation, whatever it finds.
+  status for each managed file — *in sync*, *update available*, *unmanaged*, *legacy*
+  (a marker-less `scripts/dev.sh` carrying the previous four-value block; a
+  refinement of *unmanaged*), or *missing* — MUST be computed and, whenever any file
+  is not *in sync*, shown to the user before anything else happens; when every file
+  is in sync the invocation stays silent about managed files. This status check MUST
+  be deterministic (content comparison, no judgment), MUST never prompt, and MUST
+  never block or abort the invocation, whatever it finds.
 - **FR-007**: Pre-flight MUST apply pending managed-file updates before its
   clean-working-tree check: overwrite each marker-bearing file whose content differs
   from the bundled copy, create each missing managed file, and touch nothing else.
@@ -247,16 +251,22 @@ setup and confirm it offers to re-adopt the file and only does so on confirmatio
   managed version and do so only on confirmation; `--silent` runs MUST never replace
   it.
 - **FR-010**: A marker-less wrapper that carries the previous four-value block MUST be
-  recognized as legacy. Setup, and attended pre-flight, MUST show the three values
-  that will be kept (start command, stop command, port), propose the values file plus
-  the replacement wrapper, and write on confirmation only. Declining MUST leave the
-  legacy wrapper in use. `--silent` runs MUST leave it as-is and state in the final
-  report that setup will migrate it.
+  recognized as legacy. Setup, and attended pre-flight, MUST show the values it keeps
+  (start command, stop command, port, and wait timeout when the legacy file set one),
+  propose the values file plus the replacement wrapper, and write on confirmation
+  only. Declining MUST leave the legacy wrapper in use. `--silent` runs MUST leave it
+  as-is and state in the final report that setup will migrate it.
 - **FR-011**: Every reference the skill makes to a file bundled inside its own folder
   (templates, the accessibility script, the sync mechanism) MUST resolve correctly for
   plugin, project-level, and manual installs alike, without assuming the skill folder
   is inside the project tree. The accessibility script reference MUST be corrected
-  accordingly, and the corresponding existing requirement (NR-026) amended.
+  accordingly, and the corresponding existing requirement (NR-026) amended. For a
+  plugin install the skill folder is outside the session's working directories and
+  direct reads there are blocked; bundled files that the skill must read (`USAGE.md`
+  for `--help`, `templates/dev.env.example`) MUST be readable through the
+  pre-authorized bundled script (`sync-managed.sh --print <path>`). *(2026-09-28: the
+  accessibility script itself now loads via `script.src` from the CDN;
+  `vendor/axe.min.js` removed.)*
 - **FR-012**: The final report MUST list, in a run where any of these occurred:
   managed files updated, managed files reported unmanaged, a legacy wrapper left
   unmigrated. A run where none occurred MUST NOT mention managed files.
@@ -283,7 +293,8 @@ setup and confirm it offers to re-adopt the file and only does so on confirmatio
 - **Bundled source**: The copy of a managed file that ships inside the installed
   skill; the single source of truth for what the project copy should contain.
 - **Managed-file status**: One of *in sync*, *update available*, *unmanaged*,
-  *missing*, computed per file by content comparison.
+  *legacy* (`scripts/dev.sh` only — a refinement of *unmanaged*), *missing*,
+  computed per file by content comparison.
 - **Legacy wrapper**: A marker-less wrapper containing the previous four-value block;
   eligible for one-time migration, otherwise treated as unmanaged.
 
@@ -302,7 +313,7 @@ setup and confirm it offers to re-adopt the file and only does so on confirmatio
 - **SC-004**: A fresh setup on a plugin install yields a working start / wait-ready /
   stop with zero hand edits to the wrapper.
 - **SC-005**: A legacy install migrates with 100% of its kept values (start command,
-  stop command, port) preserved and start / wait-ready / stop working afterwards.
+  stop command, port, wait timeout when set) preserved and start / wait-ready / stop working afterwards.
 - **SC-006**: A file whose marker was removed survives 100% of update runs unchanged
   and is reported in every one of them.
 - **SC-007**: The accessibility check runs successfully on a plugin install where the
@@ -342,6 +353,10 @@ setup and confirm it offers to re-adopt the file and only does so on confirmatio
   submodule) must be re-synced for the repository's sync-check to pass; the demo
   app's own project-specific wrapper stays in its legacy shape until a follow-up in
   that repo, and this feature's legacy handling keeps it working meanwhile.
+  (2026-09-28: demo-app's `uat/scenarios/_template.md` also carried no marker — it
+  predates the marker and was never a "marker removed" case — so the re-synced skill
+  reported it `unmanaged`; it was re-adopted with the marker on 2026-09-28.
+  `demo-app/scripts/dev.sh` stays legacy-shaped on purpose.)
 - The values file is committed to the project, since it contains shared,
   machine-independent values; the per-machine absolute project path it replaces is
   no longer needed anywhere.

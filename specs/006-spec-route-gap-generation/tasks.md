@@ -24,7 +24,7 @@ Primary file: `.claude/skills/webapp-uat/SKILL.md` (Generation mode, steps 1-2).
 
 ## Phase 1: Setup
 
-- [X] T001 Confirm `.claude/skills/webapp-uat/SKILL.md` is on a clean git working tree (or only this session's own prior work) before this feature's edits begin
+- [x] T001 Confirm `.claude/skills/webapp-uat/SKILL.md` is on a clean git working tree (or only this session's own prior work) before this feature's edits begin
 
 ---
 
@@ -32,7 +32,7 @@ Primary file: `.claude/skills/webapp-uat/SKILL.md` (Generation mode, steps 1-2).
 
 **⚠️ CRITICAL**: No user story work should begin until this is confirmed
 
-- [X] T002 Diff `.claude/skills/webapp-uat/SKILL.md`'s current Generation mode (steps 1-2) against `specs/006-spec-route-gap-generation/spec.md`'s FR-001–FR-012 and `data-model.md`'s four entities. **Drift found: exactly the two anticipated gaps.** FR-001/002/003/004/005/006/007/011 all match existing text closely, several near-verbatim. Missing: (1) FR-008/FR-009 — step 1 states the spec-dir-unconfigured degradation but never the symmetric routing-source-undiscoverable case, nor the neither-met case; (2) FR-010/FR-012 — step 2's `--priority` bullet ties priority only to boundary-derived treatment, not spec-derived/route-gap-derived broadly, and never addresses a zero-eligible-flows outcome.
+- [x] T002 Diff `.claude/skills/webapp-uat/SKILL.md`'s current Generation mode (steps 1-2) against `specs/006-spec-route-gap-generation/spec.md`'s FR-001–FR-012 and `data-model.md`'s four entities. **Drift found: exactly the two anticipated gaps.** FR-001/002/003/004/005/006/007/011 all match existing text closely, several near-verbatim. Missing: (1) FR-008/FR-009 — step 1 states the spec-dir-unconfigured degradation but never the symmetric routing-source-undiscoverable case, nor the neither-met case; (2) FR-010/FR-012 — step 2's `--priority` bullet ties priority only to boundary-derived treatment, not spec-derived/route-gap-derived broadly, and never addresses a zero-eligible-flows outcome.
 
 **Checkpoint**: Foundation confirmed — story work can begin
 
@@ -44,11 +44,11 @@ Primary file: `.claude/skills/webapp-uat/SKILL.md` (Generation mode, steps 1-2).
 
 ### Tests for User Story 1 (MANDATORY per constitution Principle VIII)
 
-- [X] T003 [P] [US1] Trace `spec.md` US1's 4 acceptance scenarios against `.claude/skills/webapp-uat/SKILL.md`'s Generation mode step 1 text; record pass/fail — **all 4 pass** (folded into T002)
+- [x] T003 [P] [US1] Trace `spec.md` US1's 4 acceptance scenarios against `.claude/skills/webapp-uat/SKILL.md`'s Generation mode step 1 text; record pass/fail — **all 4 pass** (folded into T002)
 
 ### Implementation for User Story 1
 
-- [X] T004 [US1] If T003 finds any gap, update Generation mode step 1 accordingly — no gap found, no change needed
+- [x] T004 [US1] If T003 finds any gap, update Generation mode step 1 accordingly — no gap found, no change needed
 
 **Checkpoint**: Spec-derived drafting and persona-variant behavior verified, no changes required
 
@@ -60,11 +60,11 @@ Primary file: `.claude/skills/webapp-uat/SKILL.md` (Generation mode, steps 1-2).
 
 ### Tests for User Story 2 (MANDATORY per constitution Principle VIII)
 
-- [X] T005 [P] [US2] Trace `spec.md` US2's 3 acceptance scenarios against `.claude/skills/webapp-uat/SKILL.md`'s Generation mode route-gap-derived text; record pass/fail — **all 3 pass** (folded into T002)
+- [x] T005 [P] [US2] Trace `spec.md` US2's 3 acceptance scenarios against `.claude/skills/webapp-uat/SKILL.md`'s Generation mode route-gap-derived text; record pass/fail — **all 3 pass** (folded into T002)
 
 ### Implementation for User Story 2
 
-- [X] T006 [US2] If T005 finds any gap, update Generation mode accordingly — no gap found, no change needed
+- [x] T006 [US2] If T005 finds any gap, update Generation mode accordingly — no gap found, no change needed
 
 **Checkpoint**: Route-gap stub drafting and no-duplicate-stub behavior verified, no changes required
 
@@ -76,13 +76,13 @@ Primary file: `.claude/skills/webapp-uat/SKILL.md` (Generation mode, steps 1-2).
 
 ### Tests for User Story 3 (MANDATORY per constitution Principle VIII)
 
-- [X] T007 [P] [US3] Trace `spec.md` US3's 3 acceptance scenarios against `.claude/skills/webapp-uat/SKILL.md`'s Generation mode degradation text; record pass/fail — **AC1 (spec-dir-unconfigured degradation) passes; AC2 (routing-source-undiscoverable degradation) and AC3 (neither-met case) confirmed missing**, as anticipated (folded into T002)
+- [x] T007 [P] [US3] Trace `spec.md` US3's 3 acceptance scenarios against `.claude/skills/webapp-uat/SKILL.md`'s Generation mode degradation text; record pass/fail — **AC1 (spec-dir-unconfigured degradation) passes; AC2 (routing-source-undiscoverable degradation) and AC3 (neither-met case) confirmed missing**, as anticipated (folded into T002)
 
 ### Implementation for User Story 3
 
-- [X] T008 [US3] Add FR-008's symmetric degradation case to Generation mode step 1 — when Phase 0.5 discovery found no routing source, route-gap-derived generation is skipped, noted explicitly in output, and spec-derived generation still runs if `spec-dir` is configured — done
-- [X] T009 [US3] Add FR-009's neither-prerequisite-met case to Generation mode step 1 — when neither `spec-dir` nor a discovered routing source is available, `generate` completes with an explicit note that no drafts were produced, rather than erroring — done
-- [X] T010 [US3] Re-trace AC2/AC3 against the updated text to confirm both land correctly and read as a direct, symmetric extension of the existing spec-dir-unconfigured case, not a contradiction of it — pass, reads as a natural symmetric extension
+- [x] T008 [US3] Add FR-008's symmetric degradation case to Generation mode step 1 — when Phase 0.5 discovery found no routing source, route-gap-derived generation is skipped, noted explicitly in output, and spec-derived generation still runs if `spec-dir` is configured — done
+- [x] T009 [US3] Add FR-009's neither-prerequisite-met case to Generation mode step 1 — when neither `spec-dir` nor a discovered routing source is available, `generate` completes with an explicit note that no drafts were produced, rather than erroring — done
+- [x] T010 [US3] Re-trace AC2/AC3 against the updated text to confirm both land correctly and read as a direct, symmetric extension of the existing spec-dir-unconfigured case, not a contradiction of it — pass, reads as a natural symmetric extension
 
 **Checkpoint**: Independent per-source degradation (both directions) and the neither-met case verified, including the two new additions
 
@@ -94,13 +94,13 @@ Primary file: `.claude/skills/webapp-uat/SKILL.md` (Generation mode, steps 1-2).
 
 ### Tests for User Story 4 (MANDATORY per constitution Principle VIII)
 
-- [X] T011 [P] [US4] Trace `spec.md` US4's 3 acceptance scenarios against `.claude/skills/webapp-uat/SKILL.md`'s Generation mode `--priority` and `Source:` tagging text; record pass/fail — **AC2 (universal `Source:` tagging) passes; AC1 (priority scoping tied only to boundary-derived treatment, not spec-derived/route-gap-derived broadly) and AC3 (zero-eligible-flows outcome, and independence from a narrow `scope` path) confirmed missing**, as anticipated (folded into T002)
+- [x] T011 [P] [US4] Trace `spec.md` US4's 3 acceptance scenarios against `.claude/skills/webapp-uat/SKILL.md`'s Generation mode `--priority` and `Source:` tagging text; record pass/fail — **AC2 (universal `Source:` tagging) passes; AC1 (priority scoping tied only to boundary-derived treatment, not spec-derived/route-gap-derived broadly) and AC3 (zero-eligible-flows outcome, and independence from a narrow `scope` path) confirmed missing**, as anticipated (folded into T002)
 
 ### Implementation for User Story 4
 
-- [X] T012 [US4] Broaden Generation mode step 2's `--priority` bullet (FR-010) to scope all active sources (spec-derived and route-gap-derived, not boundary-derived alone) to the requested priority tiers, and to state explicitly that it applies across the full `spec-dir`/routing source without requiring a narrow `scope` path — done
-- [X] T013 [US4] Add FR-012's zero-eligible-flows outcome to the same bullet — `--priority` scoping that excludes every flow completes with zero drafts and an explicit note, not an error, matching US3's neither-met treatment — done
-- [X] T014 [US4] Re-trace AC1/AC3 against the updated text to confirm both land correctly and don't contradict the bullet's existing boundary-derived-scoping language — pass, reads as a broadening not a replacement
+- [x] T012 [US4] Broaden Generation mode step 2's `--priority` bullet (FR-010) to scope all active sources (spec-derived and route-gap-derived, not boundary-derived alone) to the requested priority tiers, and to state explicitly that it applies across the full `spec-dir`/routing source without requiring a narrow `scope` path — done
+- [x] T013 [US4] Add FR-012's zero-eligible-flows outcome to the same bullet — `--priority` scoping that excludes every flow completes with zero drafts and an explicit note, not an error, matching US3's neither-met treatment — done
+- [x] T014 [US4] Re-trace AC1/AC3 against the updated text to confirm both land correctly and don't contradict the bullet's existing boundary-derived-scoping language — pass, reads as a broadening not a replacement
 
 **Checkpoint**: Priority scoping (broadened) and universal source tagging verified, including the two new additions
 
@@ -108,9 +108,9 @@ Primary file: `.claude/skills/webapp-uat/SKILL.md` (Generation mode, steps 1-2).
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [X] T015 [P] Perform a manual structural check of every `SKILL.md` section touched by T008/T009/T012/T013 — no Markdown linter installed (constitution Principle VII); confirm all four additions read as coherent extensions of Generation mode steps 1-2, not disconnected bolt-ons — pass, clean Markdown, verified by direct re-read of SKILL.md lines 209-241
-- [X] T016 [P] Re-evaluate `specs/006-spec-route-gap-generation/checklists/readiness.md`'s open items (CHK001, CHK002, CHK003, CHK007, CHK010, CHK015) against the final edited `SKILL.md` text — none required a spec change; all six remain genuine open questions appropriate for future refinement, none safety-relevant enough to block this slice (consistent with `/speckit-analyze`'s finding of zero CRITICAL/HIGH issues)
-- [X] T017 Record which `quickstart.md` scenarios remain unverified beyond text-tracing — every one of T003/T005/T007/T011's traces confirms what `SKILL.md`'s instructions say, not a live-observed `generate` run. **Scenario 2 and Scenario 3 Part A are live-verifiable against `demo-app` as-is (discoverable routing, no `spec-dir`). Scenario 1, Scenario 3 Part B/C, and Scenario 4 need a project with a real `spec-dir` (or a deliberately routing-undiscoverable/prerequisite-free setup) constructed for the purpose.** Tracked explicitly, not silently treated as done.
+- [x] T015 [P] Perform a manual structural check of every `SKILL.md` section touched by T008/T009/T012/T013 — no Markdown linter installed (constitution Principle VIII); confirm all four additions read as coherent extensions of Generation mode steps 1-2, not disconnected bolt-ons — pass, clean Markdown, verified by direct re-read of SKILL.md, Generation mode steps 1–2
+- [x] T016 [P] Re-evaluate `specs/006-spec-route-gap-generation/checklists/readiness.md`'s open items (CHK001, CHK002, CHK003, CHK007, CHK010, CHK015) against the final edited `SKILL.md` text — none required a spec change; all six remain genuine open questions appropriate for future refinement, none safety-relevant enough to block this slice (consistent with `/speckit-analyze`'s finding of zero CRITICAL/HIGH issues)
+- [x] T017 Record which `quickstart.md` scenarios remain unverified beyond text-tracing — every one of T003/T005/T007/T011's traces confirms what `SKILL.md`'s instructions say, not a live-observed `generate` run. **Scenario 2 and Scenario 3 Part A are live-verifiable against `demo-app` as-is (discoverable routing, no `spec-dir`). Scenario 1, Scenario 3 Part B/C, and Scenario 4 need a project with a real `spec-dir` (or a deliberately routing-undiscoverable/prerequisite-free setup) constructed for the purpose.** Tracked explicitly, not silently treated as done.
 
 ---
 

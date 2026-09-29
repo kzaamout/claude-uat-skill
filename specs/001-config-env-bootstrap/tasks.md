@@ -4,7 +4,7 @@
 **Prerequisites**: plan.md, spec.md, data-model.md, contracts/setup-interaction-contract.md, quickstart.md
 
 **Tests**: Per `plan.md`'s Constitution Check (Principle VIII), this feature has no
-compiled source to unit-test — `quickstart.md`'s 7 manual scenarios are the
+compiled source to unit-test — `quickstart.md`'s 11 manual scenarios are the
 documented, repeatable check standing in for an automated test suite. Story phases
 below run the relevant quickstart scenario(s) as their "test" step before/after the
 corresponding edit, per the existing tasks-template convention.
@@ -34,7 +34,7 @@ tree — see `plan.md`'s Project Structure section. Primary file:
 
 **Purpose**: Confirm a clean starting point before editing shared instruction files
 
-- [X] T001 Confirm `.claude/skills/webapp-uat/SKILL.md` and `.claude/skills/webapp-uat/SETUP.md` are on a clean git working tree (no uncommitted unrelated changes) before this feature's edits begin
+- [x] T001 Confirm `.claude/skills/webapp-uat/SKILL.md` and `.claude/skills/webapp-uat/SETUP.md` are on a clean git working tree (no uncommitted unrelated changes) before this feature's edits begin
 
 ---
 
@@ -45,7 +45,7 @@ from what `spec.md`/`data-model.md` assume, before adding FR-013 on top of it
 
 **⚠️ CRITICAL**: No user story work should begin until this is confirmed
 
-- [X] T002 Diff `.claude/skills/webapp-uat/SKILL.md`'s current Setup mode section (steps 1-7) against `specs/001-config-env-bootstrap/spec.md`'s FR-001–FR-012 and `data-model.md`'s Configuration Draft table. **Drift found and fixed**: `project-name` was in `data-model.md`'s Configuration Draft table but never actually asked for anywhere in `SKILL.md`'s Setup mode steps, despite `config.md.example` listing it as required — added to step 5 (always `needs-your-input`, asked directly, since nothing in the repo can supply it). Every other field (FR-001–012) matched exactly, including FR-010's wording almost verbatim.
+- [x] T002 Diff `.claude/skills/webapp-uat/SKILL.md`'s current Setup mode section (steps 1-7) against `specs/001-config-env-bootstrap/spec.md`'s FR-001–FR-012 and `data-model.md`'s Configuration Draft table. **Drift found and fixed**: `project-name` was in `data-model.md`'s Configuration Draft table but never actually asked for anywhere in `SKILL.md`'s Setup mode steps, despite `config.md.example` listing it as required — added to step 5 (always `needs-your-input`, asked directly, since nothing in the repo can supply it). Every other field (FR-001–012) matched exactly, including FR-010's wording almost verbatim.
 
 **Checkpoint**: Foundation confirmed — story work can begin
 
@@ -62,13 +62,13 @@ if the write step partially fails, without needing a rollback.
 
 ### Tests for User Story 1 (MANDATORY per constitution Principle VIII)
 
-- [X] T003 [P] [US1] Run `specs/001-config-env-bootstrap/quickstart.md` Scenarios 1-4, 8, 10, and 11 (most-specific-evidence detection across all three tiers, guessed port, Spec-Kit-not-guessed commands, cancel-leaves-nothing-written, spec-dir detected) against the current `.claude/skills/webapp-uat/SKILL.md` and record pass/fail per scenario — **all pass** after two real findings fixed during this task: `project-name` was missing from Setup mode's draft entirely (fixed in T002), and Scenario 11's original `Procfile` fixture didn't match FR-002's actual detection criterion (`Procfile` dropped from that tier — see `docs/design-history.md` D5, spec.md updated, Scenario 11 corrected to a `Makefile` fixture)
+- [x] T003 [P] [US1] Run `specs/001-config-env-bootstrap/quickstart.md` Scenarios 1-4, 8, 10, and 11 (most-specific-evidence detection across all three tiers, guessed port, Spec-Kit-not-guessed commands, cancel-leaves-nothing-written, spec-dir detected) against the current `.claude/skills/webapp-uat/SKILL.md` and record pass/fail per scenario — **all pass** after two real findings fixed during this task: `project-name` was missing from Setup mode's draft entirely (fixed in T002), and Scenario 11's original `Procfile` fixture didn't match FR-002's actual detection criterion (`Procfile` dropped from that tier — see `docs/design-history.md` D5, spec.md updated, Scenario 11 corrected to a `Makefile` fixture)
 
 ### Implementation for User Story 1
 
-- [X] T004 [US1] Add FR-013's best-effort, per-item write-failure reporting to `.claude/skills/webapp-uat/SKILL.md`'s Setup mode step 6, matching `contracts/setup-interaction-contract.md` §3's write-outcome-report contract
-- [X] T005 [US1] Add a one-line mention to `.claude/skills/webapp-uat/SETUP.md`'s step 2 checklist noting that a partial write failure during setup is safe to retry by re-running `/webapp-uat setup` (unconditional — `SETUP.md` already documents other Setup-mode specifics like `bug-assess-command`'s manual fill-in, so this follows the same existing pattern rather than being a judgment call)
-- [X] T006 [US1] Run `specs/001-config-env-bootstrap/quickstart.md` Scenario 5 (write-step partial failure) against the updated `SKILL.md` to validate FR-013 — **pass**: per-item report, specific failure reason, no rollback of successes, and retry-only-outstanding-on-rerun all match the new step 6 text exactly
+- [x] T004 [US1] Add FR-013's best-effort, per-item write-failure reporting to `.claude/skills/webapp-uat/SKILL.md`'s Setup mode step 6, matching `contracts/setup-interaction-contract.md` §3's write-outcome-report contract
+- [x] T005 [US1] Add a one-line mention to `.claude/skills/webapp-uat/SETUP.md`'s step 2 checklist noting that a partial write failure during setup is safe to retry by re-running `/webapp-uat setup` (unconditional — `SETUP.md` already documents other Setup-mode specifics like `bug-assess-command`'s manual fill-in, so this follows the same existing pattern rather than being a judgment call)
+- [x] T006 [US1] Run `specs/001-config-env-bootstrap/quickstart.md` Scenario 5 (write-step partial failure) against the updated `SKILL.md` to validate FR-013 — **pass**: per-item report, specific failure reason, no rollback of successes, and retry-only-outstanding-on-rerun all match the new step 6 text exactly
 
 **Checkpoint**: User Story 1 fully functional and independently verifiable
 
@@ -83,11 +83,11 @@ silently overwrites anything.
 
 ### Tests for User Story 2 (MANDATORY per constitution Principle VIII)
 
-- [X] T007 [P] [US2] Run `specs/001-config-env-bootstrap/quickstart.md` Scenario 6 (safe re-run, current-vs-proposed comparison) against `.claude/skills/webapp-uat/SKILL.md` and record pass/fail — **pass**: step 7's "show current next to proposed, ask before replacing anything" covers the comparison and confirm-gate; per-field approval granularity (spec AS3) is a reasonable, non-contradicted reading rather than an explicit guarantee — noted, not treated as a gap
+- [x] T007 [P] [US2] Run `specs/001-config-env-bootstrap/quickstart.md` Scenario 6 (safe re-run, current-vs-proposed comparison) against `.claude/skills/webapp-uat/SKILL.md` and record pass/fail — **pass**: step 7's "show current next to proposed, ask before replacing anything" covers the comparison and confirm-gate; per-field approval granularity (spec AS3) is a reasonable, non-contradicted reading rather than an explicit guarantee — noted, not treated as a gap
 
 ### Implementation for User Story 2
 
-- [X] T008 [US2] If T007 finds any gap against `spec.md` User Story 2's acceptance scenarios, update `.claude/skills/webapp-uat/SKILL.md`'s Setup mode step 7 accordingly — no gap found, no change needed
+- [x] T008 [US2] If T007 finds any gap against `spec.md` User Story 2's acceptance scenarios, update `.claude/skills/webapp-uat/SKILL.md`'s Setup mode step 7 accordingly — no gap found, no change needed
 
 **Checkpoint**: User Stories 1 AND 2 both independently verified
 
@@ -102,11 +102,11 @@ never silently guessed.
 
 ### Tests for User Story 3 (MANDATORY per constitution Principle VIII)
 
-- [X] T009 [P] [US3] Run `specs/001-config-env-bootstrap/quickstart.md` Scenarios 7 and 9 (ambiguous root; unrecognized project; spec-dir absent) against `.claude/skills/webapp-uat/SKILL.md` and record pass/fail — **pass**: step 1 matches AS1, step 2's "nothing recognizable → needs your input" matches AS2, step 4 matches AS3 almost verbatim
+- [x] T009 [P] [US3] Run `specs/001-config-env-bootstrap/quickstart.md` Scenarios 7 and 9 (ambiguous root; unrecognized project; spec-dir absent) against `.claude/skills/webapp-uat/SKILL.md` and record pass/fail — **pass**: step 1 matches AS1, step 2's "nothing recognizable → needs your input" matches AS2, step 4 matches AS3 almost verbatim
 
 ### Implementation for User Story 3
 
-- [X] T010 [US3] If T009 finds any gap against `spec.md` User Story 3's acceptance scenarios, update `.claude/skills/webapp-uat/SKILL.md`'s Setup mode steps 1-2 (root/start-stop) and/or step 4 (spec-dir detection) accordingly — no gap found, no change needed
+- [x] T010 [US3] If T009 finds any gap against `spec.md` User Story 3's acceptance scenarios, update `.claude/skills/webapp-uat/SKILL.md`'s Setup mode steps 1-2 (root/start-stop) and/or step 4 (spec-dir detection) accordingly — no gap found, no change needed
 
 **Checkpoint**: All three user stories independently functional
 
@@ -117,9 +117,9 @@ never silently guessed.
 **Purpose**: Close out the constitution's quality gate and this feature's own
 checklist findings
 
-- [X] T011 [P] Perform a manual structural check (heading hierarchy, list formatting, no broken internal links) of every section of `.claude/skills/webapp-uat/SKILL.md` touched by T004/T005/T008/T010 — this repo has no Markdown linter installed yet, and adopting one is out of scope for this slice (constitution Principle VII); this manual check is the documented substitute per `plan.md`'s Constitution Check. **Also confirm FR-010 here**: read the entire Setup mode section end-to-end and verify it contains no invocation of `scripts/dev.sh start`, `stop`, or `wait-ready` anywhere in its steps — **pass**: the only occurrence of those three words anywhere in the section is inside the explicit denial sentence itself ("Does not run `scripts/dev.sh start/stop/wait-ready` itself"); structure clean, fenced code block properly closed, `docs/design-history.md` D5 link valid
-- [X] T012 [P] Re-evaluate `specs/001-config-env-bootstrap/checklists/readiness.md` CHK007 and CHK008 (write-outcome-report and confidence-label consistency) against the final edited text and update their checkbox state — already checked off pre-implementation and re-confirmed here: the project-name and Procfile fixes didn't touch FR-013/write-outcome-report or the confidence-label scheme, both still hold
-- [X] T013 Run all 11 `specs/001-config-env-bootstrap/quickstart.md` scenarios end-to-end in one final pass as this feature's done-check — **all 11 pass** against the final `SKILL.md` text (verified individually across T003/T006/T007/T009); two real product findings were surfaced and fixed along the way (`project-name` missing from the draft entirely; `Procfile` detection unreachable as originally worded) rather than being rubber-stamped
+- [x] T011 [P] Perform a manual structural check (heading hierarchy, list formatting, no broken internal links) of every section of `.claude/skills/webapp-uat/SKILL.md` touched by T004/T005/T008/T010 — this repo has no Markdown linter installed yet, and adopting one is out of scope for this slice (constitution Principle VIII); this manual check is the documented substitute per `plan.md`'s Constitution Check. **Also confirm FR-010 here**: read the entire Setup mode section end-to-end and verify it contains no invocation of `scripts/dev.sh start`, `stop`, or `wait-ready` anywhere in its steps — **pass**: the only occurrence of those three words anywhere in the section is inside the explicit denial sentence itself ("Does not run `scripts/dev.sh start/stop/wait-ready` itself"); structure clean, fenced code block properly closed, `docs/design-history.md` D5 link valid
+- [x] T012 [P] Re-evaluate `specs/001-config-env-bootstrap/checklists/readiness.md` CHK007 and CHK008 (write-outcome-report and confidence-label consistency) against the final edited text and update their checkbox state — already checked off pre-implementation and re-confirmed here: the project-name and Procfile fixes didn't touch FR-013/write-outcome-report or the confidence-label scheme, both still hold
+- [x] T013 Run all 11 `specs/001-config-env-bootstrap/quickstart.md` scenarios end-to-end in one final pass as this feature's done-check — **all 11 pass** against the final `SKILL.md` text (verified individually across T003/T006/T007/T009); two real product findings were surfaced and fixed along the way (`project-name` missing from the draft entirely; `Procfile` detection unreachable as originally worded) rather than being rubber-stamped
 
 ---
 
@@ -200,4 +200,4 @@ in parallel — they don't share a file-write dependency until Polish.
 Appended by `/speckit-converge` (2026-08-15). One MEDIUM finding — see the
 Convergence Findings report for full detail.
 
-- [X] T014 Make `.claude/skills/webapp-uat/SKILL.md` step 7 explicit that approval of a re-run's proposed changes is per-field, not all-or-nothing for the whole diff, so it unambiguously satisfies `spec.md` US2/AC3 ("only the approved values are updated in `config.md`") per US2/AC3 (partial) — done: step 7 now states approval is per-field explicitly, unchanged fields left as-is
+- [x] T014 Make `.claude/skills/webapp-uat/SKILL.md` step 7 explicit that approval of a re-run's proposed changes is per-field, not all-or-nothing for the whole diff, so it unambiguously satisfies `spec.md` US2/AC3 ("only the approved values are updated in `config.md`") — done: step 7 now states approval is per-field explicitly, unchanged fields left as-is

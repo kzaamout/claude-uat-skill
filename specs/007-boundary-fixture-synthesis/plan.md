@@ -71,7 +71,7 @@ list; spec-derived and route-gap-derived generation are `UAT-07`, already done.
 | V. Reuse Before Reinvention | PASS | Fixture synthesis stays a single mechanism in Phase 0, not duplicated in Generation mode — confirmed, not just assumed, by re-reading Phase 0's existing text. |
 | VI. Usability Is Not Optional | PASS | Explicit, non-blocking degradation (FR-011/FR-012) instead of erroring or drafting ungrounded generic cases is itself a usability requirement. |
 | VII. Deliberate Dependencies | PASS (trivial) | No new framework/library/dependency. |
-| VIII. Automated Quality Gates | PASS, same documented interpretation as prior slices | No compiled source; Markdown lint + quickstart stand in. |
+| VIII. Automated Quality Gates | PASS, same documented interpretation as prior slices | No compiled source; manual structural check (no Markdown linter is installed) + quickstart stand in. |
 | IX. Human Approval Before Consequential Change | PASS (N/A-by-design) | Boundary-derived drafts and fixture synthesis both flow into the same existing approval gates (Phase 1, Phase 0's batched fixture approval) — this feature only affects what gets proposed, not approval itself. |
 
 No violations requiring Complexity Tracking justification.

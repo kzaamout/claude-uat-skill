@@ -36,7 +36,7 @@ in `spec.md` itself.
 ## Scenario Coverage
 
 - [ ] CHK011 Are requirements defined for a scenario producing more than one finding in a single run (e.g. both a `BUG` and separate `UX_FRICTION`)? [Gap, Coverage]
-- [ ] CHK012 Are requirements defined for the axe-core CDN failing to load (already flagged as a known, un-fixed gap in Edge Cases) beyond just naming it as out of scope? [Gap, Exception Flow]
+- [x] CHK012 Are requirements defined for the axe-core CDN failing to load (already flagged as a known, un-fixed gap in Edge Cases) beyond just naming it as out of scope? [Gap, Exception Flow] — **Resolved outside this slice**: D9 (2026-08-19) replaced the CDN `<script src>` with an inline-injected vendored copy; on 2026-09-28 the snippet became a `script.src` load of the pinned cdnjs 4.10.0 URL with an SRI integrity hash, an onload/onerror promise, one retry from jsdelivr, and an explicit "accessibility check not run" note if both fail — the load-failure path is now defined.
 
 ## Edge Case Coverage
 
@@ -49,7 +49,7 @@ in `spec.md` itself.
 
 ## Dependencies & Assumptions
 
-- [x] CHK016 Is the assumption that axe-core's CDN is reachable from every target environment documented as a risk, given the known unresolved gap? [Assumption, Spec Assumptions] — already explicit in Edge Cases: "a known, pre-existing gap... carried forward rather than silently fixed."
+- [x] CHK016 Is the assumption that axe-core's CDN is reachable from every target environment documented as a risk, given the known unresolved gap? [Assumption, Spec Assumptions] — already explicit in Edge Cases: "a known, pre-existing gap... carried forward rather than silently fixed." **Update**: the gap itself has since been closed — D9 (2026-08-19), then the 2026-09-28 `script.src` + SRI + jsdelivr-retry form with an explicit not-run note; see CHK012.
 - [ ] CHK017 Is the dependency on `UAT-01`'s output (`config.md`, working `scripts/dev.sh`) actually verified at the start of this feature's own flow, or only assumed present? [Dependency, Spec Assumptions]
 
 ## Ambiguities & Conflicts
@@ -61,8 +61,10 @@ in `spec.md` itself.
 Reviewed at the `/speckit-implement` checklist gate, same process as `UAT-01`. 5/18
 resolved in substance (CHK007, CHK008, CHK010, CHK016, CHK018) and checked off
 above. The remaining 13 are real gaps, but every one is a low-impact edge case or
-scoped to a not-yet-built dependency (`UAT-11`-adjacent, or `demo-app/`) — none
-contradict or block this feature's three user stories. **Decision**: proceed to
+scoped to a dependency not yet built at this gate (`UAT-11`-adjacent, or
+`demo-app/` — both since built: `demo-app` later on 2026-08-16 per D6, `UAT-11`
+live-verified 2026-08-20) — none contradict or block this feature's three user
+stories. **Decision**: proceed to
 implementation despite the FAIL status; if implementation work actually runs into
 one of the 13, stop and raise it for discussion rather than resolving or ignoring it
 silently — same standing instruction as `UAT-01`.

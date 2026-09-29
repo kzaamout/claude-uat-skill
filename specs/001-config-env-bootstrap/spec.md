@@ -1,10 +1,10 @@
 # Feature Specification: Config & Environment Bootstrap
 
-**Feature Branch**: `001-config-env-bootstrap`
+**Feature Branch**: `001-config-env-bootstrap` (no branch was created; work landed directly on `main`)
 
 **Created**: 2026-08-14
 
-**Status**: Draft
+**Status**: Implemented — converged 2026-08-16
 
 **Input**: User description: "UAT-01 — Config & Environment Bootstrap. User outcome: point the skill at a repo and get a working config.md plus a verified start/stop/health-check wiring, without hunting down values by hand. Scope included: repo-root detection; start/stop/port detection using a most-specific-evidence-first rule; bug-fix-mechanism detection (spec-kit vs. direct); spec-dir detection; detected/guessed/needs-your-input labeling on every proposed value; a propose-then-confirm-then-write flow that never writes without approval; safe re-run against an already-configured project. Scope explicitly deferred: actually starting/stopping the target app during setup itself (stays a manual, later verification step); config-schema validation beyond existence (a separate capability). Relevant specification sources: SKILL.md's Setup mode section (steps 1-7), SETUP.md, config.md.example."
 
@@ -32,7 +32,7 @@ A user has just installed the skill into their project and has no `config.md` ye
 3. **Given** a repo with no `PORT` value discoverable anywhere, **When** setup runs, **Then** the draft proposes port `3000`, explicitly labeled **guessed**, never presented as though it were detected.
 4. **Given** a repo containing a `.specify/` directory, **When** setup runs, **Then** the draft proposes `bug-fix-mechanism: spec-kit`, and the exact command names are not guessed — the user is shown `specify extension list`'s real output and asked which three entries are correct.
 5. **Given** a repo with no `.specify/` directory and no `specify` on `PATH`, **When** setup runs, **Then** the draft proposes `bug-fix-mechanism: direct`, needing no further input.
-6. **Given** the consolidated draft has been presented, **When** the user chooses to write it, **Then** `config.md` is created, `scripts/dev.sh`'s placeholders are filled in, and any missing `uat/scenarios`, `uat/runs`, `uat/artifacts`, `uat/fixtures` directories are created.
+6. **Given** the consolidated draft has been presented, **When** the user chooses to write it, **Then** `config.md` is created, `scripts/dev.sh`'s placeholders are filled in, and any missing `uat/scenarios`, `uat/runs`, `uat/artifacts`, `uat/fixtures` directories are created. *(Superseded 2026-09-07 by `UAT-13`: the approved values are written to `scripts/dev.env`; `scripts/dev.sh` is a placeholder-free managed engine placed by `sync-managed.sh --apply` — see `UAT-13` FR-002/FR-005.)*
 7. **Given** the same draft, **When** the user chooses to cancel instead, **Then** nothing is written to disk.
 8. **Given** the user has confirmed the write, **When** one item (a file or a directory) fails to be created partway through, **Then** every item that already succeeded is retained as-is, the specific failure is reported for each item that did not succeed, and no already-written item needs to be manually undone before the process can be safely re-run to complete the rest.
 
@@ -72,9 +72,9 @@ A user runs setup against a repo where the standard detection heuristics don't a
 
 ### Edge Cases
 
-- What happens when the skill's location and the git repo root genuinely can't be reconciled (e.g., the skill folder isn't inside a git working tree at all)? The user is asked rather than the setup proceeding on an assumed root.
+- What happens when the skill's location and the git repo root genuinely can't be reconciled (e.g., the skill folder isn't inside a git working tree at all)? The user is asked rather than the setup proceeding on an assumed root. *(Superseded 2026-08-20 by D12, `docs/design-history.md`: the root is resolved with `git rev-parse --show-toplevel` from the current working directory, never from the skill's own file location — a plugin-installed skill's location resolves to the marketplace clone, not the project; see SKILL.md Setup mode step 1. The ask-don't-guess rule for a genuinely ambiguous root still stands.)*
 - What happens when a repo has multiple plausible start mechanisms at once (e.g., both a `run.sh`+compose pair and a `package.json` dev script)? The most-specific-evidence order applies: `run.sh`/`start.sh` + compose takes precedence over a bare `package.json` script.
-- What happens when the user asks to write the draft but then cancels partway through reviewing it? Nothing already-written is left in a half-applied state — the write step is all-or-nothing per file.
+- What happens when the user cancels partway through reviewing the draft? Cancelling before confirming the write means nothing is written at all (FR-008). A failure after the write has been confirmed is a different case and follows FR-013's best-effort rule — whatever succeeded stays, each failure is reported per item, and re-running completes the rest; the write step is not all-or-nothing.
 - What happens when the write step itself technically fails partway through (e.g., a permissions error creating one of the `uat/` directories) after some items were already written? Whatever succeeded is retained, the specific failure is reported per item, and the process remains safe to re-run to complete what's left — not treated as requiring manual cleanup first.
 - What happens when a `.specify/` directory exists but `specify` is not actually usable (e.g., not on `PATH` despite the directory being present)? The mechanism is still proposed as `spec-kit` since the directory is the detection signal used; the exact command values still require the user's explicit input either way.
 
@@ -82,7 +82,7 @@ A user runs setup against a repo where the standard detection heuristics don't a
 
 ### Functional Requirements
 
-- **FR-001**: System MUST locate the target repo's root (e.g., via the skill's own installed location within a git working tree) and MUST ask the user rather than guess when that root is ambiguous, such as the skill sitting inside a nested package of a monorepo.
+- **FR-001**: System MUST locate the target repo's root (e.g., via the skill's own installed location within a git working tree) and MUST ask the user rather than guess when that root is ambiguous, such as the skill sitting inside a nested package of a monorepo. *(Superseded 2026-08-20 by D12, `docs/design-history.md`: root detection runs `git rev-parse --show-toplevel` from the current working directory, never from the skill's own installed location — for a plugin install that location is the marketplace clone under `~/.claude/plugins/`, whose repo root is the skill's repo, not the project's; see SKILL.md Setup mode step 1.)*
 - **FR-002**: System MUST attempt to detect the project's start/stop mechanism using a most-specific-evidence-first order: a `run.sh`/`start.sh` at the repo root alongside a Docker Compose file takes precedence over a `package.json` dev/start script, which takes precedence over a `Makefile` with recognizable dev/up/down-shaped targets. If none of these are found, the start/stop fields MUST be left blank and labeled needs-your-input rather than filled with an invented value. (`Procfile` detection was considered and deliberately dropped from this feature — see Assumptions.)
 - **FR-003**: System MUST attempt to detect a port from an environment file, a dev-server configuration file, or a container port mapping. When none is found, system MUST propose a default port value explicitly labeled as a guess, never presented with the same confidence as a detected value.
 - **FR-004**: System MUST attempt to detect whether a spec-driven bug-fix workflow tool is present (evidenced by a recognizable configuration directory or the tool being available to invoke) and, if so, propose the corresponding bug-fix mechanism; otherwise it MUST propose the mechanism that requires no external tool as the default.
@@ -90,7 +90,7 @@ A user runs setup against a repo where the standard detection heuristics don't a
 - **FR-006**: System MUST attempt to detect a specification-source directory (a conventional location containing specification files); when none is found, system MUST leave this setting unset and note which downstream capabilities will not run without it, rather than silently defaulting to a guessed path.
 - **FR-007**: System MUST present every proposed configuration value labeled with exactly one of three confidence levels — detected (with the specific supporting evidence named), guessed (a heuristic default with no real evidence behind it), or needs-your-input (nothing found, or genuinely ambiguous) — and MUST NOT present these three levels in a way that makes them appear equally reliable.
 - **FR-008**: System MUST NOT write any configuration file or modify any existing file as a result of this process until the user has explicitly confirmed doing so, choosing among writing the draft as shown, editing values first, or cancelling.
-- **FR-009**: Upon confirmed write, system MUST create the project's configuration file, fill in the placeholders of the project's start/stop/health-check script, and create any of the skill's expected working directories that don't already exist.
+- **FR-009**: Upon confirmed write, system MUST create the project's configuration file, fill in the placeholders of the project's start/stop/health-check script, and create any of the skill's expected working directories that don't already exist. *(Superseded 2026-09-07 by `UAT-13`: the start/stop/port values now go to `scripts/dev.env`; `scripts/dev.sh` is a managed engine with no placeholders, placed by `sync-managed.sh --apply` — see `UAT-13` FR-002/FR-005/FR-010.)*
 - **FR-010**: This process MUST NOT start or stop the target application itself as one of its own steps; verifying the start/stop/health-check wiring actually works is a separate, later, manual step.
 - **FR-011**: When an existing configuration file is found, system MUST NOT overwrite it silently — it MUST show the currently-set values next to the newly-proposed values and require explicit approval before replacing any of them.
 - **FR-012**: This process MUST be safe to invoke more than once against the same project without causing an unintended or unreviewed change each time.
@@ -100,7 +100,7 @@ A user runs setup against a repo where the standard detection heuristics don't a
 
 - **Configuration Draft**: The consolidated set of proposed values (start/stop/port, bug-fix mechanism and its commands, spec-source directory) presented for review in one pass, each carrying its own confidence label and, for detected values, the specific evidence that produced it.
 - **Project Configuration**: The persisted result of an approved draft — the values downstream skill behavior reads on every subsequent invocation.
-- **Start/Stop/Health-Check Wiring**: The project-specific script this feature fills in the placeholders of, but does not itself execute or validate.
+- **Start/Stop/Health-Check Wiring**: The project-specific script this feature fills in the placeholders of, but does not itself execute or validate. *(Superseded 2026-09-07 by `UAT-13`: the project-specific values live in `scripts/dev.env`; `scripts/dev.sh` is a placeholder-free managed engine — see `UAT-13` FR-002/FR-005.)*
 
 ## Success Criteria *(mandatory)*
 

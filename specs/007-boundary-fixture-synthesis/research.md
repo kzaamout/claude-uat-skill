@@ -15,7 +15,8 @@ bullet (per-flow introspection at generation time, Critical/High-only scoping, t
 generic `Source:` tagging mechanism covering it). More significantly, FR-007,
 FR-008, and FR-009 — the synthesis offer, its genuineness requirement, and
 `--silent` auto-synthesis — are *already fully specified*, not in Generation mode
-but in Phase 0's fixture-check step (lines 143-147 as of this writing): "Missing →
+but in Phase 0's fixture-check step (Phase 0 — Pre-flight, the "Verify every fixture
+referenced…" bullet): "Missing →
 offer to synthesize it (must be a genuinely valid instance of its type... not a
 placeholder file), through the same batched-approval mechanism generation uses.
 Under `--silent`, synthesize automatically and note it in the final report." This
@@ -62,7 +63,7 @@ to treat its own fixtures as reusable checked-in assets).
 ## Decision: No automated test/type-check/lint runner applies, same as prior
 features
 
-**Rationale**: No compiled source. Markdown lint + `quickstart.md`'s scenarios
+**Rationale**: No compiled source. A manual structural check (no Markdown linter is installed) + `quickstart.md`'s scenarios
 stand in for the constitution's Principle VIII gate.
 
 ## Decision: "Smallest unambiguous value" for ambiguous synthesis targets stays a

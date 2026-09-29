@@ -93,6 +93,6 @@ failure when someone reads the final report later.
 ## Decision: No automated test/type-check/lint runner applies, same as prior
 features
 
-**Rationale**: No compiled source. Markdown lint stands in for the
+**Rationale**: No compiled source. A manual structural check (no Markdown linter is installed) stands in for the
 constitution's Principle VIII gate; `quickstart.md`'s scenarios are
 text-tracing only given the stated live-verification limitation.

@@ -33,11 +33,11 @@ honestly scoped, not overstated.
 ## Scenario Coverage
 
 - [x] CHK009 Are requirements defined for a target project that already has `.claude/skills/webapp-uat/` from a prior manual copy, with the plugin then also installed? [Coverage, Edge Case] — explicit, second edge case bullet; deliberately not resolved by this feature, treated as a user-created configuration conflict Setup's existing re-run behavior surfaces.
-- [ ] CHK010 Are requirements defined for a target project on a filesystem/OS where the bundled template's file permissions (e.g. `dev.sh.template`'s executable bit) don't survive the copy? [Coverage, Gap]
+- [x] CHK010 Are requirements defined for a target project on a filesystem/OS where the bundled template's file permissions (e.g. `dev.sh.template`'s executable bit) don't survive the copy? [Coverage, Gap] — closed 2026-09-28 by UAT-13: `sync-managed.sh --apply` copies the engine and then `chmod +x`es it explicitly when the bundled copy is executable, and `scripts/test-sync-managed.sh` asserts `scripts/dev.sh` is executable after `--apply` (`specs/011-self-updating-managed-files/quickstart.md` §1).
 
 ## Edge Case Coverage
 
-- [x] CHK011 Is behavior specified for `templates/dev.sh.template` and root `scripts/dev.sh` drifting out of sync over time? [Edge Case, Spec Edge Cases] — explicit, first edge case bullet; documented as a maintenance concern, not automated.
+- [x] CHK011 Is behavior specified for `templates/dev.sh.template` and root `scripts/dev.sh` drifting out of sync over time? [Edge Case, Spec Edge Cases] — explicit, first edge case bullet; documented as a maintenance concern, not automated. *(Superseded 2026-09-28: drift is now enforced, not just documented — `scripts/check-sync.sh` runs in CI (D10) and UAT-13 FR-013 requires the copy-pairs to stay byte-identical.)*
 - [x] CHK012 Is behavior specified for a target project with both an existing manual copy and a new plugin install of the same skill? [Edge Case, Spec Edge Cases] — explicit, second edge case bullet.
 - [x] CHK013 Is behavior specified for a plugin install succeeding but the target's `templates/` directory being missing or incomplete (a broken plugin cache)? [Edge Case, Spec Edge Cases] — explicit, third edge case bullet.
 

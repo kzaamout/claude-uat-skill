@@ -57,7 +57,7 @@ both a human and Claude can read it without parsing prose.
 | `unmanaged` | Project copy exists, marker absent, not legacy | none (reports `skipped-unmanaged`) |
 | `legacy` | `scripts/dev.sh` only: marker absent, old four-value block present | none (reports `skipped-legacy`) |
 
-Values-file line: `values-file  scripts/dev.env  present` or `... missing`.
+Values-file line: `values-file       scripts/dev.env  present` or `... missing`.
 
 ## State transitions
 

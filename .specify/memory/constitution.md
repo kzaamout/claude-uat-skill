@@ -25,16 +25,31 @@ Sync Impact Report
     requested)" framing on every per-user-story Tests subsection and Polish's
     "Additional unit tests (if requested)" line (direct conflict with new Principle
     VIII); T003 now names type-checking alongside linting; Polish phase gained an
-    explicit "tests/type-check/lint must pass" gate line.
+    explicit "tests/type-check/lint must pass" gate line. (Correction 2026-09-28:
+    three "tests are OPTIONAL / if requested" lines had survived that edit — the
+    file header, the "Within Each User Story" rule, and the parallel-example
+    comment; removed then. The file is deliberately modified from upstream; its
+    hash in .specify/integrations/speckit.manifest.json is intentionally left at
+    the upstream value so `specify upgrade` flags it as user-modified instead of
+    overwriting it silently.)
   - ✅ .specify/templates/plan-template.md — Constitution Check gate already generic
     ("[Gates determined based on constitution file]"); no edit required.
   - ✅ .specify/templates/spec-template.md — P1/P2/P3 prioritized user-story
     structure and per-story Acceptance Scenarios already directly align with
     Principles III and IV; no edit required.
   - ✅ .specify/templates/checklist-template.md — reviewed, generic, no conflicts.
-  - ✅ .claude/skills/speckit-*/SKILL.md (all ten) — reviewed, generic Spec Kit
-    integration logic, no outdated principle references found.
-- Follow-up TODOs: none new this amendment.
+  - ⚠️ .claude/skills/speckit-*/SKILL.md (all ten) — reviewed; generic Spec Kit
+    integration logic. One conflict with Principle VIII stands: speckit-tasks/SKILL.md
+    still says "Tests are OPTIONAL: only generate test tasks if explicitly
+    requested". Left pristine (its manifest hash matches upstream, so `specify
+    upgrade` can replace it cleanly); the edited tasks-template.md above governs
+    what actually lands in this repo's tasks.md files.
+- Follow-up TODOs: (1) revisit speckit-tasks/SKILL.md's tests-optional wording
+  when Spec Kit is next upgraded; (2) two stale references inside the vendored
+  skills — speckit-constitution reads `.specify/templates/commands/*.md`, which this
+  skills-mode install doesn't have (commands are the SKILL.md files themselves),
+  and speckit-plan's "update agent context" script doesn't exist under
+  .specify/scripts/bash/ — both harmless, both upstream.
 -->
 
 # webapp-uat Constitution

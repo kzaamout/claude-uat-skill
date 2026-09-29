@@ -66,7 +66,7 @@ already done — this completes the fourth.
 | V. Reuse Before Reinvention | PASS | Extends the existing Phase 0/Phase 1 sections in place; resume reads existing run-directory artifacts rather than inventing a second tracking mechanism. |
 | VI. Usability Is Not Optional | PASS | Explicit reporting of automatic decisions (FR-011, FR-017) instead of silent behavior is itself a usability requirement. |
 | VII. Deliberate Dependencies | PASS (trivial) | No new framework/library/dependency. |
-| VIII. Automated Quality Gates | PASS, same documented interpretation as prior slices | No compiled source; Markdown lint + quickstart stand in. |
+| VIII. Automated Quality Gates | PASS, same documented interpretation as prior slices | No compiled source; manual structural check (no Markdown linter is installed) + quickstart stand in. |
 | IX. Human Approval Before Consequential Change | PASS (N/A-by-design) | Resume/abandon/fresh and gap-promoted scenarios both flow into existing approval gates (Phase 0's prompt, Phase 1's approve/adjust/cancel) — this feature only affects what's detected/proposed, not approval itself. |
 
 No violations requiring Complexity Tracking justification.

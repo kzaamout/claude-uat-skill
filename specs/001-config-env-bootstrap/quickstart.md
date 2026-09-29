@@ -28,7 +28,9 @@ printf '#!/bin/sh\necho starting\n' > run.sh && chmod +x run.sh
 Run `/webapp-uat setup`. Expect: start command detected as `./run.sh`, stop as
 `docker compose down`, both labeled **detected** with the file evidence named.
 Approve the write. Expect: `config.md`, filled-in `scripts/dev.sh`, and the four
-`uat/` subdirectories all created.
+`uat/` subdirectories all created. *(Superseded 2026-09-07 by `UAT-13`: expect
+`scripts/dev.env` holding the approved values and a placeholder-free managed
+`scripts/dev.sh` instead of a filled-in script — see `UAT-13` FR-002/FR-005.)*
 
 ## Scenario 2 — Guessed port, no bug-fix tooling
 
@@ -59,12 +61,17 @@ Run setup on a fresh fixture, choose Cancel at the decision step. Expect: no
 
 ```bash
 mkdir /tmp/wuat-fail && cd /tmp/wuat-fail && git init -q
-mkdir -p uat/fixtures && chmod 000 uat/fixtures   # force one item to fail
+mkdir -p uat/scenarios uat/runs uat/artifacts   # pre-create three of the four...
+chmod 555 uat   # ...then make `uat/` unwritable with `uat/fixtures` absent, so only that one item fails
 ```
-Run setup and approve the write. Expect: `config.md` and `scripts/dev.sh` (and the
-other three `uat/` subdirectories) succeed and are reported as such; `uat/fixtures`
-is reported as a named failure (permission denied), not a generic error. Restore
-permissions (`chmod 755 uat/fixtures`) and re-run setup. Expect: the already-written
+(A `chmod 000` on an already-existing `uat/fixtures` would not do it — `mkdir -p`
+succeeds silently on an existing directory; the parent has to be unwritable.)
+Run setup and approve the write. Expect: `config.md` and `scripts/dev.sh` *(today
+`scripts/dev.env` plus the managed `scripts/dev.sh` — `UAT-13`)* succeed and are
+reported as such, the three pre-created `uat/` subdirectories are reported as
+already existing, and `uat/fixtures` is reported as a named failure
+("FAILED — permission denied creating directory"), not a generic error. Restore
+permissions (`chmod 755 uat`) and re-run setup. Expect: the already-written
 items are left as-is (not rewritten or duplicated), and only the previously-failed
 item is retried successfully.
 
@@ -85,6 +92,12 @@ repo one level up (a monorepo-nested-package shape), and separately, a fixture w
 no `run.sh`/compose/`package.json`/`Makefile` at all. Expect: the root
 question is asked outright in the first case; start/stop are left blank and labeled
 **needs your input** (not guessed) in the second.
+
+*(Superseded 2026-08-20 by D12, `docs/design-history.md`: root detection now runs
+`git rev-parse --show-toplevel` from the current working directory, not from the
+skill's installed location — so for the first case, run `/webapp-uat setup` with
+the working directory inside the nested package and expect the root question from
+there; where the skill's own files live no longer affects detection.)*
 
 ## Scenario 8 — Spec-dir detected
 

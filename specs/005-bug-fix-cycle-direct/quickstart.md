@@ -8,13 +8,16 @@ Each scenario maps to acceptance scenarios in [spec.md](./spec.md).
 ## Prerequisites
 
 - `demo-app` running, `webapp-uat` configured against it, `bug-fix-mechanism: direct`
-  (already the case per `config.md`).
+  (already the case in `demo-app/.claude/skills/webapp-uat/config.md` — a local,
+  gitignored file in that repo).
 
 ## Scenario 1 — Single bug: stop, assess, fix, browser-retest, commit
 
 → validates User Story 1, all 6 acceptance scenarios
 
-Enable `DEMO_BUG_SILENT_COMMENT_FAILURE`, run the comment-length scenario. Expect:
+Enable `DEMO_BUG_SILENT_COMMENT_FAILURE`, then write a scenario (or copy `UAT-002`)
+that posts a 1001–2000-character comment — none of the six bundled `demo-app`
+scenarios (`UAT-001`..`UAT-006`) does; see `demo-app/README.md` §7 — and run it. Expect:
 app stopped before any fix; in-session assessment produced (no external tool
 invoked); fix made; existing test suite run if it covers the area, noted as
 sole verification if not; app restarted; the exact scenario re-driven in Chrome;
@@ -51,7 +54,7 @@ one undivided "unresolved" bucket in the report.
 
 ## Done when
 
-All 4 scenarios (13 acceptance criteria total) produce the expected outcome above.
+All 4 scenarios (17 acceptance criteria total) produce the expected outcome above.
 Scenario 1 runs cleanly against `demo-app` as-is. Scenario 2 needs a constructed
 multi-bug case (`demo-app`'s three bugs don't naturally co-occur in one scenario by
 default). Scenario 3 uses `demo-app`'s permission-bypass bug directly. Scenario 4

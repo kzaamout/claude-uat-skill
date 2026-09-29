@@ -1,12 +1,14 @@
 # Feature Specification: Scenario Generation — Boundary-Derived + Fixture Synthesis
 
-**Feature Branch**: `007-boundary-fixture-synthesis`
+**Feature Branch**: `007-boundary-fixture-synthesis` (no branch was created; work landed directly on `main`)
 
 **Created**: 2026-08-17
 
-**Status**: Draft
+**Status**: Implemented — converged 2026-08-17
 
 **Input**: User description: "UAT-08 -- Scenario Generation: Boundary-Derived + Fixture Synthesis. User outcome: Critical/High-priority flows get real negative-path and boundary-case scenarios derived from actual validation code (form validation, API schema, ORM model), read per-flow at generation time rather than from a global upfront catalog; and when a draft needs a fixture that doesn't exist yet, the user gets a real, valid synthesized file offered through the same approval flow rather than the run blocking on a missing file. Scope included: boundary-derived generation (Critical/High priority flows only, per-flow introspection of validation/schema/ORM code to derive max-length/required-field/enum/type-mismatch cases); consolidated structured fixture/data list across every draft (filename, extension, constraint -- not a vague summary); Phase 0 fixture-synthesis offer through the same batched-approval mechanism as other data/fixture decisions, auto-synthesized and noted (not silently skipped) under --silent. Scope explicitly deferred: spec-derived and route-gap-derived generation (UAT-07, done). Dependencies: UAT-01 (done), UAT-06 (done, run isolation/data hygiene applies to synthesized fixtures same as any other UAT-created record), UAT-07 (done, this slice extends the same Generation mode section). Relevant existing specification sources: SKILL.md Generation mode step 2 (boundary-derived bullet, already exists in some form) and step 3 (fixture/data list, already exists); Phase 0's fixture-check step; docs/design-history.md R6 (boundary-derived portion). Completion evidence target: a Critical/High-priority flow's boundary-derived drafts trace to real validation rules read from actual code (not a generic template); a synthesized fixture (e.g. an oversized PDF) is confirmed to be a real, parseable file of its claimed type, not a placeholder. demo-app deliberately ships without sample-oversized.pdf so this can be demonstrated live rather than pre-staged."
+
+[Corrected during planning — see research.md: synthesized fixture files persist as static assets; only DB rows referencing them follow UAT-06.]
 
 ## User Scenarios & Testing *(mandatory)*
 

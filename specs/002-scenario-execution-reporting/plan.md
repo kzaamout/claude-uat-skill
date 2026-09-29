@@ -27,6 +27,10 @@ interpreted application code. Same nature as `UAT-01`.
 **Primary Dependencies**: Claude Code's Skill invocation mechanism and its Chrome
 browser-automation integration (`/chrome`); axe-core (loaded via CDN at scenario-run
 time, per the existing, unmodified injection snippet) for the accessibility audit.
+*(Injection revised since: D9, 2026-08-19, vendored the file and injected it inline;
+on 2026-09-28 it became a `script.src` load of the pinned cdnjs 4.10.0 URL with an
+SRI hash, an onload/onerror promise, one retry from jsdelivr, and an explicit
+"accessibility check not run" note if both fail.)*
 
 **Storage**: Files — `uat/runs/<run-id>/test-plan.md`,
 `uat/runs/<run-id>/findings/<scenario-id>.md`, `uat/runs/<run-id>/final-report.md`,
@@ -70,8 +74,8 @@ handling in scope (consistent with `UAT-01`'s same deliberate non-resolution).
 | IV. Testable Acceptance Criteria | PASS | Every requirement traces to a Given/When/Then acceptance scenario. |
 | V. Reuse Before Reinvention | PASS | This plan extends the existing Phase 1/2/3/5 sections in place — no parallel or duplicate execution/classification/report mechanism. |
 | VI. Usability Is Not Optional | PASS | The five-category-plus-severity classification and the per-item progress line (FR-011) are usability requirements already in scope. |
-| VII. Deliberate Dependencies | PASS (trivial) | No new framework/library/dependency — axe-core (CDN-loaded) is already an existing, unmodified dependency of Phase 2. |
-| VIII. Automated Quality Gates | **PASS, same documented interpretation as `UAT-01`** | No compiled source; Markdown lint + the quickstart validation scenarios below stand in for a test/type-check/lint runner. |
+| VII. Deliberate Dependencies | PASS (trivial) | No new framework/library/dependency — axe-core (CDN-loaded) is already an existing, unmodified dependency of Phase 2. *(Loading revised since — D9 on 2026-08-19, then the 2026-09-28 `script.src` + SRI + jsdelivr-retry form; see Primary Dependencies.)* |
+| VIII. Automated Quality Gates | **PASS, same documented interpretation as `UAT-01`** | No compiled source; a manual structural check (no Markdown linter is installed) + the quickstart validation scenarios below stand in for a test/type-check/lint runner. |
 | IX. Human Approval Before Consequential Change | PASS | FR-002 already requires explicit plan approval before any app/browser action; this slice's one real edit (classification wording) is not itself architectural. |
 
 No violations requiring Complexity Tracking justification.
@@ -81,7 +85,7 @@ No violations requiring Complexity Tracking justification.
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
+specs/002-scenario-execution-reporting/
 ├── plan.md              # This file (/speckit-plan command output)
 ├── research.md          # Phase 0 output (/speckit-plan command)
 ├── data-model.md        # Phase 1 output (/speckit-plan command)

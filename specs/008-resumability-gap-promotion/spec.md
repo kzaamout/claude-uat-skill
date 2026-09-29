@@ -1,10 +1,10 @@
 # Feature Specification: Resumability & In-Run Gap Promotion
 
-**Feature Branch**: `008-resumability-gap-promotion`
+**Feature Branch**: `008-resumability-gap-promotion` (no branch was created; work landed directly on `main`)
 
 **Created**: 2026-08-17
 
-**Status**: Draft
+**Status**: Implemented — converged 2026-08-17
 
 **Input**: User description: "UAT-10 -- Resumability & In-Run Gap Promotion. User outcome: An interrupted run can be resumed or deliberately abandoned rather than silently colliding with a fresh start; a coverage gap Phase 1 review notices becomes a real, approvable scenario file immediately, not a line item someone has to separately ask for. Scope included: Phase 0 resume check (scan uat/runs/ for a directory with test-plan.md but no final-report.md -- ask resume/abandon/start fresh; defaults to abandon under --silent, noted in the report); Phase 1 gap promotion (when scenario review notices a real coverage gap, draft the actual scenario file immediately, tag Source: review-derived, include it in the same approval decision as everything else under review -- not a suggestion someone has to act on separately). Scope explicitly deferred: none identified -- this is the last of the three review/generation-adjacent slices (UAT-07, UAT-08, UAT-10) and closes out that group. Dependencies: UAT-02 (done, Phase 1 review exists), UAT-01 (done, Phase 0 exists). Relevant existing specification sources: SKILL.md Phase 0 'Resume check' (already exists in some form); Phase 1 'Gap promotion (R9)' (already exists in some form); docs/design-history.md R8 (resumability), R9 (gap promotion). Completion evidence target: an interrupted run (test-plan.md written, final-report.md never written) is detected on the next invocation and the user is asked resume/abandon/start fresh, with --silent defaulting safely to abandon; a scenario review pass that notices a screen or flow with no scenario coverage produces an actual drafted, approvable scenario file tagged review-derived in the same pass, not merely a note in the review output."
 
@@ -194,6 +194,8 @@ and included in the same approval decision, not merely mentioned in review notes
   for the pre- and post-interruption portions.
 - **FR-009**: When "start fresh" is chosen, system MUST begin a new run under a
   new `run-id` and MUST leave the interrupted run's directory untouched.
+- **FR-009a**: When "abandon" is chosen, system MUST stop the invocation entirely —
+  nothing runs — and MUST leave the interrupted run's directory unchanged.
 - **FR-010**: Under `--silent`, when an interrupted run is found, system MUST
   default to abandon-and-start-fresh automatically, without pausing for a prompt.
 - **FR-011**: Whenever this automatic `--silent` default is applied, the final

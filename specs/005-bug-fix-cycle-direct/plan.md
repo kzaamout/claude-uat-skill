@@ -9,12 +9,15 @@
 Verify and extend `webapp-uat`'s existing Phase 4 (`bug-fix-mechanism: direct`
 branch) and Phase 5 report structure in `.claude/skills/webapp-uat/SKILL.md`. This
 feature is unusually well-precedented — FR-001 through FR-012 all trace to text
-already present in Phase 4 nearly verbatim. One genuine gap identified while
-grounding this plan (not assumed, confirmed by re-reading the current text): FR-013
+already present in Phase 4 nearly verbatim. Two genuine gaps: (1) FR-013, identified
+while grounding this plan (not assumed, confirmed by re-reading the current text),
 requires the final report to distinguish a whole-run stop from the
 two-consecutive-restart-failure threshold from a per-bug unresolved marking from its
 own retry budget — Phase 5's current report structure has only a single undivided
-"unresolved" bucket, with no language separating these two distinct failure modes.
+"unresolved" bucket, with no language separating these two distinct failure modes;
+(2) FR-011a, surfaced by `/speckit-implement`'s diff-first step (T002) after this
+plan was first drafted — Phase 4 step 5's retry cycles did not say each retry
+re-applies the high-risk/routine pause gates (added by T010).
 
 ## Technical Context
 
@@ -59,7 +62,7 @@ conflate the two distinct failure-mode reports (FR-013).
 | V. Reuse Before Reinvention | PASS | Extends the existing Phase 4/Phase 5 sections in place; no new mechanism invented. |
 | VI. Usability Is Not Optional | PASS | The distinct restart-failure vs. per-bug-retry thresholds (FR-012/FR-013) exist precisely so a flaky environment doesn't get misdiagnosed as a hard bug, or vice versa — a usability/trust requirement, not just a technical one. |
 | VII. Deliberate Dependencies | PASS (trivial) | No new framework/library/dependency. |
-| VIII. Automated Quality Gates | **PASS, same documented interpretation as prior slices** | No compiled source; Markdown lint + quickstart validation stand in. |
+| VIII. Automated Quality Gates | **PASS, same documented interpretation as prior slices** | No compiled source; a manual structural check (no Markdown linter is installed) + quickstart validation stand in. |
 | IX. Human Approval Before Consequential Change | PASS | This entire feature *is* a human-approval gate for a specific class of consequential change (unattended code fixes) — the high-risk carve-out (FR-003) directly reinforces this principle. |
 
 No violations requiring Complexity Tracking justification.
@@ -82,11 +85,11 @@ specs/005-bug-fix-cycle-direct/
 
 ```text
 .claude/skills/webapp-uat/
-└── SKILL.md              # EDIT (pending diff-first confirmation): Phase 5's final
-                           #   report structure (FR-013's distinct-failure-mode
-                           #   reporting — the one anticipated gap). Phase 4 itself
-                           #   is expected to need no change (FR-001–012 already
-                           #   match).
+└── SKILL.md              # EDIT: Phase 5's final report structure (FR-013's
+                           #   distinct-failure-mode reporting — the anticipated
+                           #   gap) and Phase 4 step 5's retry-cycle text (FR-011a's
+                           #   pause-gate re-triggering — the second gap, found by
+                           #   the diff-first step, T002). FR-001–012 already match.
 
 specs/005-bug-fix-cycle-direct/
 ├── plan.md                # this file

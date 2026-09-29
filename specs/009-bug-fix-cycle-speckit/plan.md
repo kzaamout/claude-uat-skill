@@ -41,6 +41,8 @@ blocked — `demo-app` deliberately uses `bug-fix-mechanism: direct` (D6), so no
 project in this repo's own tooling has a real installed Spec Kit bug-workflow
 extension to demonstrate against.
 
+*(Update 2026-08-20: environment unblocked — Spec Kit's `bug` extension is real and installable; the Phase 4 delegation run itself is still open. See quickstart.md.)*
+
 **Target Platform**: A Claude Code CLI session with the skill installed; macOS or
 Linux.
 
@@ -68,7 +70,7 @@ shared structure (batching, thresholds, retry budget, commit granularity) is
 | V. Reuse Before Reinvention | PASS | Reuses Phase 4's shared batching/threshold/retry/commit structure rather than duplicating it per mechanism — confirmed, not assumed, by re-reading the actual current text. |
 | VI. Usability Is Not Optional | PASS | Explicit tool-invocation-failure reporting (FR-011/FR-012) instead of silent misattribution is itself a usability requirement. |
 | VII. Deliberate Dependencies | PASS (trivial) | No new framework/library/dependency — the external bug-workflow tool is the target project's own choice, not this skill's dependency. |
-| VIII. Automated Quality Gates | PASS, same documented interpretation as prior slices | No compiled source; Markdown lint + quickstart (text-tracing only, per the stated limitation) stand in. |
+| VIII. Automated Quality Gates | PASS, same documented interpretation as prior slices | No compiled source; manual structural check (no Markdown linter is installed) + quickstart (text-tracing only, per the stated limitation) stand in. |
 | IX. Human Approval Before Consequential Change | PASS (N/A-by-design) | High-risk and routine review pauses are identical to the direct mechanism's existing approval gates — this feature only affects who performs assess/fix/test, not approval itself. |
 
 No violations requiring Complexity Tracking justification.

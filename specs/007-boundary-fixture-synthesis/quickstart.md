@@ -1,7 +1,7 @@
 # Quickstart: Validating Boundary-Derived Generation + Fixture Synthesis
 
 Manual validation runbook. `demo-app` deliberately ships without
-`sample-oversized.pdf`, and has real zod validation (`lib/validation.ts`) on the
+`sample-oversized.pdf`, and has real zod validation (`src/lib/validation.ts`) on the
 document-creation flow (title 3-120 chars, body 10-5000, ≤5 tags) — enough to
 validate both this feature's real completion evidence targets directly.
 
@@ -19,13 +19,13 @@ Each scenario maps to acceptance scenarios in [spec.md](./spec.md).
 → validates User Story 1, all 4 acceptance scenarios
 
 Run `/webapp-uat generate` scoped to `demo-app`'s document-creation flow. Expect:
-drafts naming the actual constraint values read from `lib/validation.ts` (title
+drafts naming the actual constraint values read from `src/lib/validation.ts` (title
 3-120 chars, body 10-5000, ≤5 tags) — not generic "test invalid input" language;
 at least one draft per distinct constraint category present (max-length on title
-and body, the tag-count enum-like limit); each draft tagged `Source:
-boundary-derived` with its specific validation rule identifiable. Re-run against a
-flow below Critical/High priority (if one exists in the project's convention) —
-confirm no boundary-derived draft is produced for it.
+and body, the tag-count limit — an array max, closest to max-length; see CHK004);
+each draft tagged `Source: boundary-derived` with its specific validation rule
+identifiable. Re-run against a flow below Critical/High priority (if one exists in
+the project's convention) — confirm no boundary-derived draft is produced for it.
 
 ## Scenario 2 — Fixture/data needs are consolidated into one deduplicated list
 

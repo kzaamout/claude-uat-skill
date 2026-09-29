@@ -93,3 +93,12 @@ any of the three confirmations — the only way to change this is a manual edit 
 All 9 scenarios produce the expected outcome above. Scenarios 1-8 need a live
 target project with a seed-data mechanism; Scenario 9 is text-only and can be
 confirmed immediately.
+
+**Live-verification record (2026-08-16, commit 50cbe5c)**: a live run against
+`demo-app` (built the same day, D6) is recorded in commit 50cbe5c ("Findings from
+live-verifying UAT-02/05/06 against demo-app"). For this slice it records only that
+the run "confirmed the rest of UAT-02/UAT-06's behavior holds"; the two gaps it
+found (Phase 2 step 3's client-side-validation guidance; D8's nested-project `Skill`
+resolution) are outside this slice's scope, and no scenario-by-scenario results
+against this runbook are recorded — so Scenarios 1-8 are not individually ticked as
+live-verified on its strength.

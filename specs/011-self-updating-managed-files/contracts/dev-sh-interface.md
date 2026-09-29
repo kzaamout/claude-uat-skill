@@ -4,8 +4,8 @@
 
 | Command | Behavior | Exit |
 |---|---|---|
-| `start` | If `.webapp-uat.pid` names a live process: print `Already running (pid N)`, exit 0. Else `cd` to the project root (exit 1 if that fails), run `START_COMMAND` backgrounded with output to `dev.log`, write the pid, print `Started (pid N)`. | 0 / 1 |
-| `stop` | If a pidfile exists: SIGINT the pid, wait 2s, SIGINT its children; if the pid is still alive (a process backgrounded from a script ignores SIGINT), SIGTERM it and its children, wait 1s, then SIGKILL as the last resort; remove the pidfile. Then, if `STOP_COMMAND` is set, run it from the project root. Print `Stopped`. | 0 |
+| `start` | If `.webapp-uat.pid` names a live process: print `Already running (pid N)`, exit 0. Else `cd` to the project root (exit 1 if that fails), run `START_COMMAND` through `bash -c` (so `&&`, pipes, env prefixes and quoting all work), backgrounded in its own process group (job control on), output to `dev.log`; write the pid, print `Started (pid N)`. | 0 / 1 |
+| `stop` | If a pidfile exists: SIGINT the job's whole process group (plus the pid and its direct children, for a pidfile written by an older engine), wait 2s; if the pid is still alive, SIGTERM the same set, wait 1s, then SIGKILL as the last resort; remove the pidfile. Then, if `STOP_COMMAND` is set, run it from the project root. Print `Stopped`. | 0 |
 | `wait-ready` | Poll once per second up to `WAIT_TIMEOUT` times: `READY_COMMAND` (exit 0 = ready) if set, else `curl -sf http://localhost:$PORT`. Print `Ready` / `Timed out after ~Ns waiting for ...`. | 0 / 1 |
 | anything else | `Usage: … {start|stop|wait-ready}` | 1 |
 
@@ -25,6 +25,9 @@
 Steps 3–6 run before the command dispatch, so every command fails the same way on a
 missing/invalid values file.
 
+*(Amended 2026-09-28, D14: `bash -c` + process group for `start`, group signalling for
+`stop`. Interface, messages and exit codes unchanged.)*
+
 ## Managed marker
 
 Line 1 shebang, line 2:
@@ -41,7 +44,7 @@ Example (the bundled `templates/dev.env.example` documents each key inline):
 
 ```
 START_COMMAND='npm run dev'
-STOP_COMMAND='docker compose down'
+# STOP_COMMAND='docker compose down'
 PORT='3000'
 # WAIT_TIMEOUT='60'
 # READY_COMMAND='curl -sf http://localhost:3000/api/health'

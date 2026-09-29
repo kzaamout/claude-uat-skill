@@ -16,7 +16,7 @@ bash sync-managed.sh --print <bundled path>
   current directory, else the current directory.
 - The skill folder is derived from the script's own location (`../` from
   `scripts/`), never from the project.
-- Bash 3.2 compatible. Uses only `bash`, `git`, `cmp`, `grep`, `head`, `cp`, `mkdir`, `chmod`.
+- Bash 3.2 compatible. Uses only `bash`, `git`, `cmp`, `grep`, `head`, `cat`, `dirname`, `cp`, `mkdir`, `chmod`.
 
 ## `--check`
 
@@ -43,6 +43,7 @@ created           <project path>        # was missing (parent dir created)
 in-sync           <project path>
 skipped-unmanaged <project path>
 skipped-legacy    <project path>
+failed            <project path>        # copy failed (message on stderr), exit 2
 values-file       scripts/dev.env  <present|missing>
 changed: <N>
 changed-paths: <space-separated project paths, or empty>
@@ -65,8 +66,11 @@ PORT='<value>'
 WAIT_TIMEOUT='<value>'
 ```
 
-`PROJECT_DIR` is never printed. Extraction evaluates only the matching assignment
-lines in a subshell; nothing else in the legacy file runs. Exit 0.
+`PROJECT_DIR` is sourced too — so a value such as `"$PROJECT_DIR/run.sh"` expands to
+the legacy file's absolute path — but never printed. Extraction evaluates only the
+matching assignment lines in a subshell (with `set +u`); nothing else in the legacy
+file runs. Exit 0 when a non-empty `START_COMMAND` came out; otherwise a message on
+stderr and exit 2, and the caller falls back to discovery *(2026-09-28, D14)*.
 
 ## `--print <bundled path>`
 
@@ -75,8 +79,9 @@ Prints the named file from the skill folder (relative path; absolute paths and a
 on stderr). Exists because, for a plugin install, the skill folder is outside the
 project and Claude Code blocks direct reads there (`Read`, `cat`) while executing
 the pre-authorized bundled script is allowed — found during live verification
-(2026-09-07). Used for `USAGE.md` (`--help`), `vendor/axe.min.js`, and
-`templates/dev.env.example`.
+(2026-09-07). Used for `USAGE.md` (`--help`) and `templates/dev.env.example`
+(also for `vendor/axe.min.js` until 2026-09-28, when axe-core went back to a CDN
+`<script src>` and the vendored file was removed — D14).
 
 ## Usage errors
 

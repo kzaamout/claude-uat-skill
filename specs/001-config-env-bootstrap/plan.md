@@ -30,15 +30,18 @@ wizard inspects (`git`, `docker-compose.yml`/`compose.yaml`, `package.json`,
 
 **Storage**: Files only — `config.md`, `scripts/dev.sh`, and four `uat/`
 subdirectories (`scenarios`, `runs`, `artifacts`, `fixtures`) written directly to the
-target project's own filesystem. No database.
+target project's own filesystem. No database. *(Superseded 2026-09-07 by `UAT-13`:
+project values are written to `scripts/dev.env`; `scripts/dev.sh` is a
+placeholder-free managed engine placed by `sync-managed.sh --apply` — see `UAT-13`
+FR-002/FR-005.)*
 
 **Testing**: Live invocation of `/webapp-uat setup` against real and constructed
 target repos (a fresh repo, an already-configured repo, a monorepo-nested-package
 repo, and a repo with a simulated write failure), observed directly — this product
 has no separate automated test suite of its own for this behavior, since verifying
-it correctly *is* what the product does elsewhere for other projects. A Markdown
-lint pass over the edited `SKILL.md` section is the applicable automated check here
-(see Constitution Check, Principle VIII below).
+it correctly *is* what the product does elsewhere for other projects. A manual
+structural check (no Markdown linter is installed) over the edited `SKILL.md`
+section is the applicable check here (see Constitution Check, Principle VIII below).
 
 **Target Platform**: A Claude Code CLI session with the skill installed, operating
 against any target project's repo; macOS or Linux (Chrome integration — used
@@ -72,7 +75,7 @@ deliberately not resolved during `/speckit-clarify` — a single-developer CLI t
 | V. Reuse Before Reinvention | PASS | This plan explicitly extends the existing Setup mode section in place — it does not introduce a parallel or duplicate setup mechanism. |
 | VI. Usability Is Not Optional | PASS | The detected/guessed/needs-input labeling (FR-007) and per-item failure reporting (FR-013) are usability requirements, not polish. |
 | VII. Deliberate Dependencies | PASS (trivial) | No new framework, library, or major dependency is introduced by this slice. |
-| VIII. Automated Quality Gates | **PASS, with documented interpretation** | This "codebase" is Markdown agent instructions, not compiled/interpreted source — there is no applicable test runner or type checker. The gate is satisfied here by (a) a Markdown lint pass over the edited section and (b) the quickstart validation scenarios below serving as this slice's repeatable, documented check, run manually since no CI exists yet for this repo. This is recorded here rather than silently treated as not applicable. |
+| VIII. Automated Quality Gates | **PASS, with documented interpretation** | This "codebase" is Markdown agent instructions, not compiled/interpreted source — there is no applicable test runner or type checker. The gate is satisfied here by (a) a manual structural check (no Markdown linter is installed) over the edited section and (b) the quickstart validation scenarios below serving as this slice's repeatable, documented check, run manually since no CI exists yet for this repo. This is recorded here rather than silently treated as not applicable. |
 | IX. Human Approval Before Consequential Change | PASS | FR-008 already requires explicit confirmation before any write; this slice doesn't itself make an architectural change. |
 
 No violations requiring Complexity Tracking justification.
@@ -82,7 +85,7 @@ No violations requiring Complexity Tracking justification.
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
+specs/001-config-env-bootstrap/
 ├── plan.md              # This file (/speckit-plan command output)
 ├── research.md          # Phase 0 output (/speckit-plan command)
 ├── data-model.md        # Phase 1 output (/speckit-plan command)

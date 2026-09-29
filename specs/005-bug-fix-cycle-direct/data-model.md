@@ -43,5 +43,6 @@ failed app restarts.
 |---|---|
 | trigger | a bug's browser retest fails after a fix attempt (`FR-011`) |
 | budget | up to 2 further diagnose/fix cycles for that specific bug (3 total attempts) |
+| pause gates on retry | each retry cycle re-applies the same gates as the original attempt — the unconditional high-risk pause and, where applicable, the routine `REVIEW_BEFORE_FIX` pause; approval for one attempt is not standing approval for the next (`FR-011a`) |
 | exhausted | bug marked unresolved; run continues with independent scenarios (`FR-011`) |
 | reporting | MUST be distinguished in the final report from a restart-failure-threshold stop (`FR-013`) |

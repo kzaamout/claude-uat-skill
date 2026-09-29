@@ -99,6 +99,8 @@ recursively.
   the same three steps.
 - [x] Section 2 performed 2026-09-07 against a real plugin install. Evidence below.
 - [x] `docs/roadmap.md` UAT-13 marked Done.
+- [ ] §3 doc check (SC-009) — not yet performed.
+- [x] §4 submodule pushed (0f251e8), pointer bumped (d7b3f4b).
 
 ### Live verification record (2026-09-07, Claude Code 2.1.263, headless `claude -p`)
 
@@ -130,6 +132,9 @@ axe-core injection had only ever worked for manual installs; fixed with
 allowed). (2) Headless text output prints only the final message, which made the
 status block look skipped on `--help`; the trace showed it was emitted first, and
 the `--help` rule now says explicitly to print status lines before `USAGE.md`.
+
+*(2026-09-28: axe-core now loads via `script.src` from the CDN; `vendor/axe.min.js`
+removed; `--print` still serves `USAGE.md` and `templates/dev.env.example`).*
 
 Scratch marketplace and project-scope install were removed afterwards; the real
 `webapp-uat-marketplace` registration was untouched.

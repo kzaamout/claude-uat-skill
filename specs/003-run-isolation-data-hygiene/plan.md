@@ -70,7 +70,7 @@ collision handling explicitly out of scope (spec Assumptions).
 | V. Reuse Before Reinvention | PASS | Extends the existing R7/Phase 0/Phase 5 sections in place. |
 | VI. Usability Is Not Optional | PASS | The no-op-when-nothing-to-purge rule (FR-004) and differentiated decline behavior (FR-011) are both usability requirements — don't nag when there's nothing to confirm, don't silently proceed when proceeding is actually risky. |
 | VII. Deliberate Dependencies | PASS (trivial) | No new framework/library/dependency. |
-| VIII. Automated Quality Gates | **PASS, same documented interpretation as `UAT-01`/`UAT-02`** | No compiled source; Markdown lint + quickstart validation stand in. |
+| VIII. Automated Quality Gates | **PASS, same documented interpretation as `UAT-01`/`UAT-02`** | No compiled source; a manual structural check (no Markdown linter is installed) + quickstart validation stand in. |
 | IX. Human Approval Before Consequential Change | PASS | This entire feature *is* the human-approval gate for a specific class of consequential change (database writes) — directly reinforces this principle rather than needing to satisfy it incidentally. |
 
 No violations requiring Complexity Tracking justification.
@@ -80,7 +80,7 @@ No violations requiring Complexity Tracking justification.
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
+specs/003-run-isolation-data-hygiene/
 ├── plan.md              # This file (/speckit-plan command output)
 ├── research.md          # Phase 0 output (/speckit-plan command)
 ├── data-model.md        # Phase 1 output (/speckit-plan command)

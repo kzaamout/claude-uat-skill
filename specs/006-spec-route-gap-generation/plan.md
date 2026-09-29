@@ -57,7 +57,7 @@ fixture synthesis explicitly out of scope (`UAT-08`).
 | V. Reuse Before Reinvention | PASS | Extends the existing Generation mode section in place. |
 | VI. Usability Is Not Optional | PASS | Graceful, explicit degradation (FR-007–009) instead of erroring is itself a usability requirement. |
 | VII. Deliberate Dependencies | PASS (trivial) | No new framework/library/dependency. |
-| VIII. Automated Quality Gates | PASS, same documented interpretation as prior slices | No compiled source; Markdown lint + quickstart stand in. |
+| VIII. Automated Quality Gates | PASS, same documented interpretation as prior slices | No compiled source; manual structural check (no Markdown linter is installed) + quickstart stand in. |
 | IX. Human Approval Before Consequential Change | PASS (N/A-by-design) | Drafts still flow into Phase 1's existing approval gate — this feature only affects what gets proposed, not approval itself. |
 
 No violations requiring Complexity Tracking justification.
