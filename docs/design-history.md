@@ -443,6 +443,13 @@ from `claude-uat-skill` by `.gitmodules`. Its own `scripts/dev.sh` resolves
 underlying reason — the same repo may be checked out standalone or as a submodule at
 any parent path, and only self-relative resolution is correct in both cases.
 
+**Related, still open** (this paragraph sat under D8 until 2026-09-28; it belongs
+here): the submodule only fixes the *scope* of root-detection, not the underlying
+`bug-fix-mechanism: spec-kit` false-positive risk when `specify` happens to be globally
+on `PATH` without a project-local `.specify/` directory — Setup mode still proposes
+`spec-kit` from that global-`PATH` evidence alone. Worth tightening later to require a
+project-local `.specify/` directory as well, not `PATH` presence on its own.
+
 ### D7 — Plugin marketplace: point `source`/`skills` at the existing folder, no duplication
 
 Built for UAT-11 (one-command install). Two constraints shaped this: Claude Code
@@ -453,10 +460,16 @@ entry's `skills` field, when listed explicitly, can point directly at any folder
 containing `SKILL.md` at its own top level — it does **not** require the
 `<plugin-root>/skills/<name>/SKILL.md` nesting that auto-discovery uses. That second
 point matters because it meant `.claude-plugin/marketplace.json` could reference the
-existing `.claude/skills/webapp-uat/` directly (`"skills": ["./.claude/skills/webapp-uat"]`,
-`"strict": false` since that folder has no `plugin.json` of its own) — no second copy
-of `SKILL.md`/`USAGE.md`/`SETUP.md` to keep in sync, avoiding exactly the drift risk a
-naive plugin-packaging pass would have introduced.
+existing `.claude/skills/webapp-uat/` directly (`"skills": ["./.claude/skills/webapp-uat"]`)
+— no second copy of `SKILL.md`/`USAGE.md`/`SETUP.md` to keep in sync, avoiding
+exactly the drift risk a naive plugin-packaging pass would have introduced.
+
+**Correction (2026-09-28)**: the entry originally also set `"strict": false`, on the
+assumption that a folder without a `plugin.json` needed it. Per the marketplace
+reference, an entry whose plugin has no `plugin.json` *is* the manifest regardless of
+`strict`; `strict: false` only matters once a `plugin.json` exists — and then it turns
+any component field in the entry (such as `skills`) into a load failure. Removed, so
+the flag can't bite if a `plugin.json` is ever added.
 
 The first constraint is why Setup mode's step 6 now conditionally copies
 `scripts/dev.sh` and `uat/scenarios/_template.md` from `templates/` bundled inside the
@@ -506,12 +519,6 @@ re-checking whether that capability exists next time this kind of nested-project
 testing comes up, rather than assuming the workaround (verify copies match, execute
 by hand) is the permanent answer.
 
-**If revisited**: this only fixes the *scope* of root-detection, not the underlying
-`bug-fix-mechanism: spec-kit` false-positive risk when `specify` happens to be globally
-on `PATH` without a project-local `.specify/` directory — Setup mode still proposes
-`spec-kit` from that global-`PATH` evidence alone. Worth tightening later to require a
-project-local `.specify/` directory as well, not `PATH` presence on its own.
-
 ### D9 — Vendored axe-core, and batching predictable browser action sequences
 
 Raised directly by the user (2026-08-19): Phase 2 execution felt slow, specifically
@@ -540,6 +547,15 @@ demo GIF) but the user asked to leave it alone for this pass. Also not touched:
 scenario count, viewport defaults, or any check's actual coverage — this was
 scoped to tooling mechanics only, per the user's explicit framing.
 
+**Reverted 2026-09-28 (D14)** — the vendored half only. Injecting via
+`script.textContent` means the library's source has to pass through the model: read
+as a tool result (554KB on 11 lines — far past the size at which a Bash result is
+persisted to disk instead of shown) and then re-emitted inside a JavaScript tool
+call, per scenario. That never actually worked; only the CDN fallback could have run.
+The check now loads `<script src>` from the pinned cdnjs URL with an SRI hash, and the
+browser's HTTP cache makes it one fetch per run — the round-trip D9 wanted to save.
+`vendor/axe.min.js` is gone. The batching half of D9 stands.
+
 ### D10 — Sync-check enforcement, and a configurable `wait-ready` timeout
 
 Built 2026-08-19, directly downstream of the drift D7's addendum records:
@@ -549,7 +565,10 @@ Built 2026-08-19, directly downstream of the drift D7's addendum records:
   copy-pairs this repo deliberately carries: the skill's bundled
   `templates/dev.sh.template`/`_template.md` vs. their root reference copies, and
   all seven tracked files of the parent's skill folder vs. `demo-app`'s installed
-  copy. `config.md`/`discovered-environment.md` are local-only and excluded.
+  copy. `config.md`/`discovered-environment.md` are local-only and excluded. (Since
+  2026-09-28 the file list comes from `git ls-files` instead of a hand-kept list
+  that had already gone stale twice — seven files, then nine, now eight — and the
+  bundled file is `templates/dev.sh`, not `dev.sh.template`, since UAT-13.)
   Verified both directions: passes clean on the synced tree, and a deliberately
   injected one-line drift fails with exit 1 naming the pair. The check skips the
   demo-app pair with a notice when the submodule isn't checked out locally; CI
@@ -690,17 +709,70 @@ outside the session's working directories, and Claude Code blocks direct reads
 there — `Read` prompts (unanswerable headless), `cat` is refused outright, and no
 `allowed-tools` rule lifts that. Executing the pre-authorized bundled script *is*
 allowed, so `sync-managed.sh --print <bundled path>` reads on the skill's behalf;
-`--help` (USAGE.md) and the axe-core injection go through it. Before this, `--help`
-and the accessibility check silently depended on the skill folder being inside the
+`--help` (USAGE.md) and `templates/dev.env.example` go through it (the axe-core
+injection did too, until D14 moved it back to the CDN). Before this, `--help` and
+the accessibility check silently depended on the skill folder being inside the
 project — i.e. they only ever worked for manual installs.
 
 **Deliberately left alone**: `demo-app/scripts/dev.sh` (a separate repo) keeps its
 legacy shape for now. The re-synced skill copy there reports it as `legacy` and
 keeps using it — which exercises FR-010's `--silent` path for real, so it doubles as
-evidence that the migration story is optional rather than forced. Whether
-`scripts/dev.env` should eventually fold into `config.md` (one file, but then a
-Markdown key/value parser in bash) stays an open question, recorded in README's
-Known limitations.
+evidence that the migration story is optional rather than forced. (Not deliberate,
+fixed 2026-09-28: `demo-app/uat/scenarios/_template.md` also predated the marker and
+was therefore reported `unmanaged` — with a "marker removed" message for a file
+nobody had touched — on every run; it now carries the marker, the Phase 0 message
+says "no marker", and `check-sync.sh` compares it and asserts `dev.sh`'s `legacy`
+status.) Whether `scripts/dev.env` should eventually fold into `config.md` (one
+file, but then a Markdown key/value parser in bash) stays an open question, recorded
+in README's Known limitations.
+
+### D14 — Review pass: what green gates didn't catch (2026-09-28)
+
+A full read of every document and script, with every suspicious claim executed
+rather than eyeballed, while `bash -n`, the 79-check mechanism test and
+`check-sync.sh` were all green. What that green was hiding, and the decisions taken:
+
+- **axe-core could not be injected as instructed** (see D9's reversal above). A
+  `<script src>` to the pinned cdnjs 4.10.0 build with an SRI hash replaced it; a
+  one-time retry from jsdelivr and an explicit "check not run" note cover a blocked
+  network. NR-026 rewritten; `vendor/axe.min.js` removed from both repos.
+- **`START_COMMAND` was word-split** (`nohup $START_COMMAND`), so `&&`, pipes and
+  env prefixes silently broke while `STOP_COMMAND`/`READY_COMMAND` went through
+  `eval` — the repo's own legacy fixture used `docker compose up -d && npm run dev`.
+  The engine now runs `bash -c "$START_COMMAND"` under job control (`set -m`), which
+  gives the job its own process group: `stop` signals the whole group, so grandchildren
+  (`npm run dev` → `node`) die too, and SIGINT is no longer ignored by the
+  backgrounded job, which is what the D13 escalation was working around. The
+  mechanism test now starts a compound command and kills a grandchild server.
+- **`--legacy-values` exited 0 with empty output** when a legacy value referenced
+  `$PROJECT_DIR` (`set -u` inside the eval subshell). It now sources `PROJECT_DIR`
+  too (never printed) and exits 2 when no `START_COMMAND` came out; tests added for
+  that, for a quoted value, and for an empty one.
+- **CI's `bash -n` step parsed one file**: `bash -n a b c` treats `b` and `c` as
+  positional parameters. Now one invocation per script; shellcheck runs advisory;
+  demo-app's `npm test` and `tsc --noEmit` run too, so the workflow's Principle VIII
+  claim is at least partly true.
+- **Setup mode's order was self-contradictory**: the legacy check ran in step 6,
+  after the values it feeds had been approved in step 5. `--check` now runs during
+  detection, and the consolidated draft lists what will happen to each managed file
+  (spec 011 FR-005 always required that). The migration wording says four kept
+  values, since the script keeps `WAIT_TIMEOUT`; `unmanaged` is described as "no
+  marker" rather than "marker removed"; Phase 0 passes `project-dir` to the sync
+  script explicitly and offers setup when `dev.env` is missing.
+- **Smaller repairs**: `strict: false` dropped from `marketplace.json` (D7
+  correction); Spec Kit's `create-new-feature.sh` used `${word^^}` and GNU `sed
+  '\+'`, both broken on macOS bash 3.2 / BSD sed; `check-sync.sh` derives its file
+  list from git and covers demo-app's project-tree copies; `.gitignore` covers
+  `settings.local.json` and the engine's two run files; the README's "How it works"
+  table is numbered as steps 1–9 (the internal Phase -1…5 labels stay in
+  `SKILL.md`/`USAGE.md`); the GIFs are embedded; the demo instructions say to start a
+  session rooted in `demo-app/`; requirements/roadmap/runbook and every spec folder
+  had their stale claims corrected and their status lines set to Implemented.
+
+The D12/D13 lesson a third time: text-tracing passed every FR while the single most
+important runtime instruction could not physically execute. The only gate that
+catches this class is one that exercises the instruction — hence the engine test now
+runs a real compound command instead of asserting on the text that describes one.
 
 ---
 

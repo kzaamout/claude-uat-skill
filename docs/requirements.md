@@ -9,7 +9,9 @@ fixed directly without ever going through `/speckit-specify`.
 **How to read this document**:
 
 - **Part 1** lists every formalized `FR-###`, grouped by roadmap slice (`UAT-01`
-  through `UAT-11`), each traceable to its own `spec.md`. These are the
+  through `UAT-13`; `UAT-03` was fixed directly and lives in Part 2, `UAT-12` is
+  the demo app, see below), each traceable to its own `spec.md`. FR wording here is
+  condensed from each `spec.md`; the spec is authoritative. These are the
   requirements that have been through the full cycle: specify → clarify → plan →
   checklist → tasks → analyze → implement → converge.
 - **Part 2** lists requirements that are just as real and just as load-bearing,
@@ -36,12 +38,12 @@ itself, so it isn't itemized here.
 ## Part 1 — Formalized Requirements (`FR-###`, traced to a Spec Kit `spec.md`)
 
 ### UAT-01 — Config & Environment Bootstrap
-`specs/001-config-env-bootstrap/spec.md` · governs Setup mode (`SKILL.md` lines 52-127)
+`specs/001-config-env-bootstrap/spec.md` · governs Setup mode (`SKILL.md`, Setup mode section)
 
 > Point the skill at a repo and get a working `config.md` + verified
 > start/stop/health-check, without hunting down values by hand.
 
-- **FR-001**: System MUST locate the target repo's root (e.g., via the skill's own installed location within a git working tree) and MUST ask the user rather than guess when that root is ambiguous, such as the skill sitting inside a nested package of a monorepo.
+- **FR-001**: System MUST locate the target repo's root (e.g., via the skill's own installed location within a git working tree) and MUST ask the user rather than guess when that root is ambiguous, such as the skill sitting inside a nested package of a monorepo. *(Mechanism superseded 2026-08-20 by D12: the root is resolved from the current working directory, never from the skill's own file location, which for a plugin install is the marketplace clone.)*
 - **FR-002**: System MUST attempt to detect the project's start/stop mechanism using a most-specific-evidence-first order: a `run.sh`/`start.sh` at the repo root alongside a Docker Compose file takes precedence over a `package.json` dev/start script, which takes precedence over a `Makefile` with recognizable dev/up/down-shaped targets. If none of these are found, the start/stop fields MUST be left blank and labeled needs-your-input rather than filled with an invented value.
 - **FR-003**: System MUST attempt to detect a port from an environment file, a dev-server configuration file, or a container port mapping. When none is found, system MUST propose a default port value explicitly labeled as a guess, never presented with the same confidence as a detected value.
 - **FR-004**: System MUST attempt to detect whether a spec-driven bug-fix workflow tool is present and, if so, propose the corresponding bug-fix mechanism; otherwise it MUST propose the mechanism that requires no external tool as the default.
@@ -49,14 +51,14 @@ itself, so it isn't itemized here.
 - **FR-006**: System MUST attempt to detect a specification-source directory; when none is found, system MUST leave this setting unset and note which downstream capabilities will not run without it.
 - **FR-007**: System MUST present every proposed configuration value labeled with exactly one of three confidence levels — detected (with the specific supporting evidence named), guessed (a heuristic default), or needs-your-input — and MUST NOT present these three levels as equally reliable.
 - **FR-008**: System MUST NOT write any configuration file or modify any existing file until the user has explicitly confirmed doing so.
-- **FR-009**: Upon confirmed write, system MUST create the project's configuration file, fill in the placeholders of the project's start/stop/health-check script, and create any of the skill's expected working directories that don't already exist.
+- **FR-009**: Upon confirmed write, system MUST create the project's configuration file, fill in the placeholders of the project's start/stop/health-check script, and create any of the skill's expected working directories that don't already exist. *(Placeholder-filling superseded 2026-09-07 by `UAT-13`: `scripts/dev.sh` is a placeholder-free managed engine placed by `sync-managed.sh --apply`; the values go to `scripts/dev.env` — see `UAT-13` FR-002/FR-005.)*
 - **FR-010**: This process MUST NOT start or stop the target application itself as one of its own steps.
 - **FR-011**: When an existing configuration file is found, system MUST NOT overwrite it silently — it MUST show current vs. proposed and require explicit approval before replacing anything.
 - **FR-012**: This process MUST be safe to invoke more than once against the same project without causing an unintended or unreviewed change each time.
 - **FR-013**: If the write step fails partway through, system MUST retain whatever was already successfully written, MUST report the specific failure for each item that did not succeed, and MUST NOT require any already-written item to be manually undone before re-running to complete the rest.
 
 ### UAT-02 — Manual Scenario Execution, Checks, Classification & Report
-`specs/002-scenario-execution-reporting/spec.md` · governs Phase 1-3, Phase 5's report structure (`SKILL.md` lines 287-424, 495-527)
+`specs/002-scenario-execution-reporting/spec.md` · governs Phase 1-3, Phase 5's report structure (`SKILL.md`, Phases 1–3 and Phase 5)
 
 > Run one hand-written scenario in a real Chrome window and get
 > accessibility/data-integrity findings, a category+severity classification, and
@@ -82,7 +84,7 @@ itself, so it isn't itemized here.
 - **FR-017**: After the final report is written, system MUST present it and obtain an explicit choice among exactly: review only / draft a spec update / draft a new feature spec / defer selected items — and MUST NOT modify any spec file automatically regardless of which is chosen.
 
 ### UAT-04 — Bug-Fix Cycle (Direct Mechanism)
-`specs/005-bug-fix-cycle-direct/spec.md` · governs Phase 4's `direct` branch (`SKILL.md` lines 426-491, 459-471)
+`specs/005-bug-fix-cycle-direct/spec.md` · governs Phase 4's `direct` branch (`SKILL.md`, Phase 4)
 
 > A confirmed BUG finding gets stopped, assessed, optionally paused for review,
 > fixed, restarted, and retested in the browser before being considered
@@ -104,7 +106,7 @@ itself, so it isn't itemized here.
 - **FR-013**: The final report MUST distinguish a run stopped by the restart-failure threshold (FR-012) from a bug marked unresolved after exhausting its own retry budget (FR-011).
 
 ### UAT-05 — Backend Verification
-`specs/004-backend-verification/spec.md` · governs Phase 2 step 7 (`SKILL.md` lines 360-377)
+`specs/004-backend-verification/spec.md` · governs Phase 2 step 7 (`SKILL.md`, Phase 2 step 7)
 
 > A scenario's claimed data change is confirmed directly against the app's own
 > API or a discovered data store, not just inferred from what the UI showed.
@@ -120,7 +122,7 @@ itself, so it isn't itemized here.
 - **FR-009**: When a scenario's outcome plausibly spans more than one discovered data store, system MUST verify against the single primary store/API discovery identified as relevant, and MUST NOT represent that verification as covering every plausibly relevant store — a known, undeferred-to-later limitation.
 
 ### UAT-06 — Run Isolation & Data Hygiene
-`specs/003-run-isolation-data-hygiene/spec.md` · governs R7 naming, Phase 0/5 cleanup (`SKILL.md` lines 173-182, 515-521, 531-537)
+`specs/003-run-isolation-data-hygiene/spec.md` · governs R7 naming, Phase 0/5 cleanup (`SKILL.md`, Phase 0 start-of-run cleanup, Phase 5 end-of-run cleanup, R7 naming section)
 
 > Every record the skill creates is safely, automatically cleaned up at both
 > ends of a run, with collisions across runs structurally near-impossible.
@@ -138,7 +140,7 @@ itself, so it isn't itemized here.
 - **FR-011**: A declined cleanup confirmation MUST result in the purge not happening. Declining the **start-of-run** purge MUST block the run from proceeding; declining the **end-of-run** purge MUST NOT block the run from completing.
 
 ### UAT-07 — Scenario Generation: Spec-Derived + Route-Gap-Derived
-`specs/006-spec-route-gap-generation/spec.md` · governs Generation mode step 1-2 (`SKILL.md` lines 227-268)
+`specs/006-spec-route-gap-generation/spec.md` · governs Generation mode step 1-2 (`SKILL.md`, Generation mode)
 
 > Run `/webapp-uat generate` and get draft scenarios traced back to real
 > acceptance criteria, plus stub coverage for screens nothing tests at all yet.
@@ -157,7 +159,7 @@ itself, so it isn't itemized here.
 - **FR-012**: When `--priority` scoping results in zero eligible flows, system MUST complete with zero drafts and an explicit note, not an error.
 
 ### UAT-08 — Scenario Generation: Boundary-Derived + Fixture Synthesis
-`specs/007-boundary-fixture-synthesis/spec.md` · governs Generation mode step 2's boundary-derived bullet, step 3, Phase 0's fixture check (`SKILL.md` lines 248-284, 143-147)
+`specs/007-boundary-fixture-synthesis/spec.md` · governs Generation mode step 2's boundary-derived bullet, step 3, Phase 0's fixture check (`SKILL.md`, Generation mode steps 2–3, Phase 0 fixture bullet)
 
 > Critical/High-priority flows get real negative-path and boundary-case
 > scenarios derived from actual validation code, and a missing fixture gets
@@ -177,7 +179,7 @@ itself, so it isn't itemized here.
 - **FR-012**: When a Critical/High-priority flow has zero discoverable validation constraints, system MUST complete without drafting a boundary-derived scenario for that flow, and this MUST NOT be treated as an error.
 
 ### UAT-09 — Bug-Fix Cycle (Spec-Kit Mechanism)
-`specs/009-bug-fix-cycle-speckit/spec.md` · governs Phase 4's `spec-kit` branch, Phase 5's report (`SKILL.md` lines 435-457, 486-488, 502-508) · **specified but not live-verified** — see Part 3
+`specs/009-bug-fix-cycle-speckit/spec.md` · governs Phase 4's `spec-kit` branch, Phase 5's report (`SKILL.md`, Phase 4 `spec-kit` branch, Phase 5) · **specified; the delegation run itself is not yet live-verified** — see Part 3
 
 > Same fix cycle as `UAT-04`, but delegated to an installed Spec Kit
 > bug-workflow extension's assess/fix/test commands instead of Claude fixing
@@ -198,7 +200,7 @@ itself, so it isn't itemized here.
 - **FR-013**: A discrepancy between `<bug-test-command>`'s own result and the subsequent browser retest's result MUST be noted as additional context in the commit/report, and MUST NOT override the browser retest as what actually closes a bug out.
 
 ### UAT-10 — Resumability & In-Run Gap Promotion
-`specs/008-resumability-gap-promotion/spec.md` · governs Phase 0's resume check, Phase 1's gap promotion (`SKILL.md` lines 148-169, 291-298)
+`specs/008-resumability-gap-promotion/spec.md` · governs Phase 0's resume check, Phase 1's gap promotion (`SKILL.md`, Phase 0 resume check, Phase 1 gap promotion)
 
 > An interrupted run can be resumed or deliberately abandoned rather than
 > silently colliding with a fresh start; a coverage gap Phase 1 review notices
@@ -223,7 +225,7 @@ itself, so it isn't itemized here.
 - **FR-017**: When a resumed run's `test-plan.md` references a scenario file no longer present on disk, system MUST report that scenario as unable to resume/execute, explicitly, rather than silently omitting it or aborting the entire resume.
 
 ### UAT-11 — One-Command Install
-`specs/010-one-command-install/spec.md` · governs `.claude-plugin/marketplace.json`, Setup mode step 6 (`SKILL.md` lines 93-119) · **specified but not live-verified** — see Part 3
+`specs/010-one-command-install/spec.md` · governs `.claude-plugin/marketplace.json`, Setup mode step 6 (`SKILL.md`, Setup mode step 6) · **live-verified 2026-08-20** via the non-interactive `claude plugin` CLI (`docs/design-history.md` D12); only the interactive `/plugin` wrapper itself remains unexercised
 
 > A stranger installs the skill in a project with two native Claude Code
 > commands, no manual file-copying required, despite Claude Code plugins being
@@ -237,8 +239,6 @@ itself, so it isn't itemized here.
 - **FR-006**: If one item in the write step fails, every other item that succeeded MUST remain exactly as written.
 - **FR-007**: Every write-step item MUST be reported individually with its own specific outcome.
 - **FR-008**: Re-running setup after a partial failure MUST retry only the outstanding items — MUST NOT re-touch already-written items.
-
----
 
 ### UAT-13 — Self-Updating Managed Files
 `specs/011-self-updating-managed-files/spec.md` · governs `SKILL.md`'s "Managed files" block, Phase 0's first bullet, Setup mode step 6, `scripts/sync-managed.sh`, `templates/dev.sh` + `templates/dev.env.example` · **built 2026-09-07, automated gates green** — live-verification status in `docs/roadmap.md`
@@ -275,8 +275,8 @@ mechanism/infrastructure details a formalized feature depends on without itself
 ever getting its own `spec.md`.
 
 ### 2.1 — UAT-03: Invocation Parsing & Flag Semantics
-Governs `SKILL.md` Phase -1 (lines 18-48) and Phase 0's config-validation check
-(lines 131-137). No `specs/` directory exists for this slice.
+Governs `SKILL.md` Phase -1 and Phase 0's config-validation bullet. No `specs/`
+directory exists for this slice.
 
 - **NR-001**: When the invocation includes `--help` anywhere, system MUST stop reading its own operating logic and instead read `USAGE.md` in full and print its exact contents verbatim, then stop — MUST NOT describe, summarize, or paraphrase it, and MUST NOT touch git, Chrome, or the app.
 - **NR-002**: When the first token is literally `setup`, system MUST enter setup mode — MUST run even without `config.md` present, and MUST be safe to re-run later without overwriting `config.md`/`scripts/dev.sh` without confirmation.
@@ -291,7 +291,8 @@ Governs `SKILL.md` Phase -1 (lines 18-48) and Phase 0's config-validation check
 - **NR-011**: Before any other Phase 0 step, system MUST validate `config.md`'s internal consistency — specifically, `bug-fix-mechanism: spec-kit` declared without all three of `bug-assess-command`/`bug-fix-command`/`bug-test-command` filled in MUST be caught and flagged here, asking the user to fill in the missing command(s) or switch to `direct`, rather than letting this surface opaquely mid-Phase-4 after bugs have already been found.
 
 ### 2.2 — Phase 0: General Pre-Flight Infrastructure Checks
-Governs `SKILL.md` lines 138-142. Never itemized in any `spec.md` — `UAT-01`
+Governs `SKILL.md` Phase 0's git-clean, Chrome, and `dev.sh` sanity-check bullets.
+Never itemized in any `spec.md` — `UAT-01`
 formalizes Setup mode's one-time config generation, not these per-run checks;
 `UAT-06`/`UAT-10` formalize the cleanup and resume-check parts of Phase 0
 specifically, but not these three.
@@ -301,7 +302,7 @@ specifically, but not these three.
 - **NR-014**: System MUST sanity-check that `scripts/dev.sh start`, `wait-ready`, and `stop` all work once before relying on them for the real run.
 
 ### 2.3 — Phase 0.5: Environment Discovery Mechanics
-Governs `SKILL.md` lines 186-223. Multiple formalized features (`UAT-05`,
+Governs `SKILL.md` Phase 0.5. Multiple formalized features (`UAT-05`,
 `UAT-07`) depend on *using* what this phase discovers, but the discovery
 mechanism itself — what gets investigated, how it's recorded, when it's
 reused vs. re-run — was never given its own `spec.md`.
@@ -313,8 +314,9 @@ reused vs. re-run — was never given its own `spec.md`.
 - **NR-019**: A cached `discovered-environment.md` MUST only be refreshed by deleting the file or being told to explicitly — Phase 0 MUST NOT re-discover on its own once the file exists.
 
 ### 2.4 — Phase 2: Server-Boundary Testing Workaround
-Governs `SKILL.md` lines 323-330. Added directly during live-verification
-findings triage (this session), not run through Spec Kit — a real behavior gap
+Governs `SKILL.md` Phase 2 step 3's client-side-validation bullet. Added directly
+during live-verification findings triage (2026-08-16, commit 50cbe5c), not run
+through Spec Kit — a real behavior gap
 `UAT-02`'s original `spec.md` didn't anticipate.
 
 - **NR-020**: When a scenario's steps are meant to exercise server-side enforcement (a boundary/negative-path case) but the app's own client-side validation prevents the form from submitting, system MUST NOT treat this as untestable — it MUST issue the equivalent request directly (e.g. `fetch` in the authenticated browser session's own context, carrying the same cookies/headers a real submission would) to reach the server path.
@@ -327,16 +329,16 @@ there.
 
 - **NR-022**: Setup mode's write-confirmation (config.md write, per Setup mode step 6/`UAT-01` FR-008) MUST NOT be skipped by `--silent` — it is a one-time, low-frequency prompt, not routine run-to-run friction (stated in Phase -1, not in `UAT-01`'s own `spec.md`).
 - **NR-023**: Under `--silent`, Phase 5's spec-disposition choice (review only / draft a spec update / draft a new feature spec / defer selected items) MUST default to *review only* rather than touching a spec file automatically (stated in Phase 5's prose; `UAT-02`'s FR-017 requires the choice exist and never auto-modify a spec, but doesn't itself state this specific `--silent` default value).
-- **NR-024**: All UAT-created data, once cleaned up, MUST use the file/directory layout documented in `USAGE.md`'s "File & directory reference" (`uat/scenarios/`, `uat/fixtures/`, `uat/runs/<run-id>/`, `uat/artifacts/<run-id>/<scenario-id>/`, `scripts/dev.sh`, `scripts/dev.env`) — this layout is assumed throughout every formalized feature's requirements but was never itself stated as a requirement anywhere.
+- **NR-024**: Every file this skill reads or writes in a project MUST follow the file/directory layout documented in `USAGE.md`'s "File & directory reference" (`uat/scenarios/`, `uat/fixtures/`, `uat/runs/<run-id>/`, `uat/artifacts/<run-id>/<scenario-id>/`, `scripts/dev.sh`, `scripts/dev.env`) — this layout is assumed throughout every formalized feature's requirements but was never itself stated as a requirement anywhere.
 
 ### 2.6 — Phase 2: Execution Performance
-Governs `SKILL.md` lines 318-354. Fixed directly at the user's explicit request
+Governs `SKILL.md` Phase 2 steps 3 and 5. Fixed directly at the user's explicit request
 (2026-08-19) — a tooling/mechanics-level performance pass, not a new capability,
 scoped deliberately to exclude scenario count, viewport defaults, and check
 coverage. See `docs/design-history.md` D9.
 
 - **NR-025**: Where a scenario's next several Chrome actions are already predictable (a fill-tab-type-submit sequence, or navigate-click-screenshot), system MUST issue them as one batched call rather than one round-trip per action — reserved for sequences that don't depend on intervening page state.
-- **NR-026**: The accessibility check's `axe-core` script MUST be read from this skill's own bundled copy (`${CLAUDE_SKILL_DIR}/vendor/axe.min.js` — the skill's own folder, which for a plugin install is the plugin cache, not the project tree; *amended 2026-09-07 by `UAT-13` FR-011 — the earlier project-relative path did not exist for plugin installs*) once per run and injected inline (`script.textContent`) for each scenario, rather than fetched from a CDN URL per scenario. A missing vendored file MUST fall back to the CDN URL rather than skipping the check.
+- **NR-026**: The accessibility check's `axe-core` MUST be loaded into the page with a `<script src>` pointing at the pinned cdnjs 4.10.0 build carrying an SRI `integrity` hash, injected per scenario (the browser's HTTP cache makes this one network fetch per run); it MUST NOT be pasted inline through the model. A failed load MUST be retried once from jsdelivr without the integrity attribute, and if that fails too the check MUST be recorded as not run for that scenario, never as a pass. *(Rewritten 2026-09-28, D14: the 2026-08-19 vendored/inline approach (D9) and its 2026-09-07 `${CLAUDE_SKILL_DIR}` amendment were reverted — a 554KB library cannot pass through the model's context — and `vendor/axe.min.js` was removed.)*
 
 ### 2.7 — Setup Mode: Generated-File Gitignore Proposal
 Governs `SKILL.md` Setup mode step 6. Fixed directly per the D9 precedent
@@ -361,15 +363,16 @@ ship.
   open item", `docs/design-history.md` R1). An alternative — only P0/P1
   auto-fixed, P2/P3 batched into the report instead — remains an open policy
   decision.
-- **Live verification of `UAT-09`'s spec-kit mechanism** — blocked, not
-  resolved. No project in this repo's own tooling has a real installed Spec Kit
-  bug-workflow extension; `demo-app` deliberately uses `bug-fix-mechanism:
-  direct` (`docs/design-history.md` D6). Tracked in
+- **Live verification of `UAT-09`'s spec-kit mechanism** — environment
+  unblocked 2026-08-20 (Spec Kit's `bug` extension is real and installable and
+  provides the three commands), but the actual Phase 4 delegation run against a
+  spec-kit-configured app is still open; `demo-app` deliberately uses
+  `bug-fix-mechanism: direct` (`docs/design-history.md` D6). Tracked in
   `specs/009-bug-fix-cycle-speckit/quickstart.md`.
-- **Live verification of `UAT-11`'s `/plugin` install flow** — blocked, not
-  resolved. `/plugin` is an interactive Claude Code CLI meta-command with no
-  tool access available in any session so far. Tracked in
-  `specs/010-one-command-install/quickstart.md`.
+- **The interactive `/plugin` wrapper of `UAT-11`'s install flow** — the flow
+  itself was live-verified 2026-08-20 through the non-interactive `claude plugin`
+  CLI, which drives the same machinery (D12); only the in-session `/plugin` panel
+  remains unexercised. Tracked in `specs/010-one-command-install/quickstart.md`.
 - **`config.md` internal-consistency validation depth** — currently only
   checks that `bug-fix-mechanism: spec-kit` has all three command fields filled
   in (NR-011). Deeper schema validation (e.g. `spec-dir` pointing at a directory
@@ -379,12 +382,14 @@ ship.
   run-id-suffixed naming makes their *data* collision-resistant, but two
   concurrent runs both driving Chrome/`scripts/dev.sh` against the same app
   instance is not itself guarded against.
-- **Template/root-copy drift** (`UAT-11` Assumptions,
-  `docs/design-history.md` D7) — `.claude/skills/webapp-uat/templates/
-  dev.sh.template` and the root `scripts/dev.sh` are two separate files by
-  necessity; nothing currently enforces they stay in sync.
+- **Template/root-copy drift** (`UAT-11` Assumptions, `docs/design-history.md`
+  D7) — resolved: `scripts/check-sync.sh`, run by CI on every push to `main` and
+  every PR, enforces byte-identity between the bundled `templates/` and the root
+  reference copies and between the parent skill folder and `demo-app`'s copy
+  (D10; `UAT-13` FR-013). Kept here only because `UAT-11`'s spec still lists it
+  as open.
 - **`bug-fix-mechanism: spec-kit` false-positive risk from `specify` on
-  `PATH`** (`docs/design-history.md` D8) — Setup mode currently proposes
+  `PATH`** (`docs/design-history.md` D6) — Setup mode currently proposes
   `spec-kit` from `specify` being globally on `PATH` alone, without also
   requiring a project-local `.specify/` directory as corroborating evidence.
 - **`Skill` tool invocation always resolves to the outer repo's copy**
@@ -436,7 +441,6 @@ commitment to build any of these.
 
 *Generated 2026-08-17 by reading every `specs/*/spec.md`'s Functional
 Requirements section, the full current `.claude/skills/webapp-uat/SKILL.md`,
-`USAGE.md`, `config.md.example`, and `docs/design-history.md`. Line-number
-references are to `SKILL.md` as of this document's generation and will drift as
-that file is edited — treat them as pointers to re-locate the relevant section,
-not as permanently accurate line numbers.*
+`USAGE.md`, `config.md.example`, and `docs/design-history.md`; updated 2026-09-07
+(`UAT-13`) and 2026-09-28 (review pass, D14). `SKILL.md` is cited by section name
+rather than line number so the pointers survive edits.*

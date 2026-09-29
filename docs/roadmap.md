@@ -4,8 +4,8 @@ Decomposes **webapp-uat** (this repo's actual product) into independently demons
 vertical slices. Two things deliberately excluded from the slice list below: (1) the
 README overhaul, demo recording, and LinkedIn draft — these are supporting
 deliverables, not independently demonstrable product capability, so they don't belong
-in a capability decomposition; (2) "Relevant Claude Design screens" is `None` on every
-slice — no Claude Design project exists for this product.
+in a capability decomposition; (2) no slice lists design screens — no Claude Design
+project exists for this product.
 
 Each slice's **Status** reflects what's actually been verified, not assumed. Most of
 this product's core behavior already exists as written instructions in `SKILL.md` —
@@ -101,7 +101,11 @@ implemented and converged (zero convergence findings).
   and the fix only counts as resolved after a real browser retest post-restart; a
   high-risk-category bug pauses for sign-off regardless of `--silent` or
   `--no-review-before-fix`. `demo-app`'s three seeded `DEMO_BUG_*` flags are exactly
-  what this slice needs for real completion evidence.
+  what this slice needs for real completion evidence. **Achieved 2026-08-20** for
+  the first half: `docs/gifs/uat-fix-retest-passing.gif` records the fix to the
+  silent-comment-failure bug, the app restart, and the same steps re-driven in the
+  browser (see `docs/linkedin-draft.md`'s notes). The high-risk pause has not been
+  recorded on video yet.
 
 ---
 
@@ -126,7 +130,10 @@ implemented and converged (zero convergence findings).
   against a real backend is caught by this check where a UI-only pass would have
   missed it; a project with no discoverable store degrades cleanly to a UI-only note.
   `demo-app`'s silent-comment-failure bug and API-vs-direct-DB dual verification paths
-  are built exactly for this.
+  are built exactly for this. **Achieved 2026-08-20** for the first half:
+  `docs/gifs/uat-bug-found-ui-lies.gif` shows the UI reporting "Comment added" while
+  a direct Postgres read finds no row. The no-store degradation case has not been
+  demonstrated against a real project yet.
 
 ---
 
@@ -212,7 +219,7 @@ fully implemented and converged (zero convergence findings).
   `/speckit-analyze` coverage-gap finding resolved inline, zero
   `/speckit-converge` findings. `demo-app` deliberately ships without
   `sample-oversized.pdf` and has real zod validation on its document-creation flow
-  (`lib/validation.ts`), so both this slice's completion evidence targets are
+  (`src/lib/validation.ts`), so both this slice's completion evidence targets are
   live-demonstrable against it; tracked in
   `specs/007-boundary-fixture-synthesis/quickstart.md`'s "Done when" section.
 
@@ -257,11 +264,10 @@ spec-kit-configured app; `demo-app`'s committed config stays `direct` deliberate
   restart-failure threshold's treatment); Phase 5's final report now
   distinguishes three failure modes instead of two. Text-traced against all 13
   FRs and 12 acceptance criteria, one `/speckit-analyze` finding resolved
-  inline, zero `/speckit-converge` findings. **Live verification remains
-  explicitly blocked** — tracked in
-  `specs/009-bug-fix-cycle-speckit/quickstart.md`'s "Done when" section as an
-  open item for whoever next has access to a project with a real installed Spec
-  Kit bug-workflow extension.
+  inline, zero `/speckit-converge` findings. **The delegation run itself is still
+  open** (the environment blocker was resolved 2026-08-20, see the status line
+  above) — tracked in `specs/009-bug-fix-cycle-speckit/quickstart.md`'s "Done
+  when" section.
 
 ---
 
@@ -373,7 +379,7 @@ bug on), and shipped as its own repo/submodule
 ### UAT-13 — Self-Updating Managed Files
 **Status: Done — built and live-verified 2026-09-07.** Formalized via Spec Kit
 (`specs/011-self-updating-managed-files/`), with an end-to-end automated test
-(`scripts/test-sync-managed.sh`, 79 checks, in CI) and all four user stories
+(`scripts/test-sync-managed.sh`, 91 checks since the 2026-09-28 review pass, in CI) and all four user stories
 exercised against a real project-scope plugin install through the two-command
 update path (five successive plugin updates).
 
@@ -385,14 +391,21 @@ update path (five successive plugin updates).
 - **Scope included**: `scripts/dev.sh` split into a placeholder-free managed engine
   plus a project-owned `scripts/dev.env`; the managed-file marker contract (remove
   the marker to take ownership); bundled `scripts/sync-managed.sh`
-  (`--check` / `--apply` / `--legacy-values`) run at skill load, in Phase 0 (with a
+  (`--check` / `--apply` / `--legacy-values` / `--print`) run at skill load, in Phase 0 (with a
   path-scoped auto-commit, `--silent` included), and in Setup; one-time legacy
   migration on confirmation; every skill self-reference via `${CLAUDE_SKILL_DIR}`
   (fixing the axe-core path for plugin installs); README "Updating" section;
   `bash -n` + the new test added to CI.
 - **Scope explicitly deferred**: a plugin `SessionStart` sync hook; an explicit
   `/webapp-uat update` command; version tags; migrating `demo-app`'s own
-  legacy-shaped `scripts/dev.sh` (separate repo).
+  legacy-shaped `scripts/dev.sh` (separate repo; its marker-less
+  `uat/scenarios/_template.md` was re-adopted 2026-09-28, D14).
+- **Amended 2026-09-28 (D14)**: the engine now runs `START_COMMAND` through
+  `bash -c` in its own process group (shell syntax works; `stop` reaches every
+  descendant), `--legacy-values` sources the legacy `PROJECT_DIR` and exits 2
+  instead of printing nothing, Setup mode runs `--check` before drafting so the
+  managed-file actions are part of what the user confirms, and the migration
+  wording now says four kept values (wait timeout included).
 - **Dependencies**: UAT-01 (extends Setup mode), UAT-11 (plugin install; D12).
 - **Completion evidence**: automated — `scripts/test-sync-managed.sh` and
   `scripts/check-sync.sh` green locally and in CI. Live — the record in
@@ -419,6 +432,7 @@ remaining slice that is specified-but-not-live-verified: its environment
 blocker is resolved (Spec Kit's `bug` extension is real, installable, and its
 three commands are confirmed), but the actual Phase 4 delegation run — a full
 interactive `/webapp-uat` pass against a spec-kit-configured app — is still an
-open item tracked in its `quickstart.md`. Remaining, non-roadmap work: item 5
-from the session's standing "proceed with all of them" authorization (demo
-recording + LinkedIn draft) has not yet been started.
+open item tracked in its `quickstart.md`. Supporting deliverables outside the
+slice list: `docs/demo-recording-runbook.md`, `docs/linkedin-draft.md`, and the
+three demo GIFs under `docs/gifs/` (recorded 2026-08-20) exist; the full
+terminal-plus-browser recording the runbook describes has not been made yet.

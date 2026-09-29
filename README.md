@@ -5,8 +5,10 @@ app, classifies what it finds, fixes confirmed bugs with a real browser-verified
 retest, and reports back — without needing a human to babysit every step, while
 keeping a human in the loop for anything genuinely risky.
 
-Project-agnostic: point it at any web app by filling in one `config.md`. No specific
-project, tech stack, or bug-tracking tool is assumed — see [Configuration](#configuration).
+Project-agnostic: point it at any web app by filling in a short `config.md` plus a
+`scripts/dev.env` holding your start/stop values (the setup wizard drafts both). No
+specific project, tech stack, or bug-tracking tool is assumed — see
+[Configuration](#configuration).
 
 ## Table of contents
 
@@ -87,7 +89,8 @@ once it exists).
 
 ### 1. Get the skill into your app's repo
 
-**One-command install** (recommended), from inside your app's repo:
+**Plugin install** (recommended — two commands, nothing copied by hand), from inside
+your app's repo:
 
 ```
 /plugin marketplace add kzaamout/claude-uat-skill
@@ -107,7 +110,7 @@ their own (see [Updating](#updating)); `scripts/dev.env` is yours.
 skill's source repo into your app's repo root —
 
 ```
-.claude/skills/webapp-uat/     (the whole folder — SKILL.md, USAGE.md, SETUP.md, scripts/, templates/, vendor/)
+.claude/skills/webapp-uat/     (the whole folder — SKILL.md, USAGE.md, SETUP.md, config.md.example, scripts/, templates/)
 scripts/dev.sh
 scripts/dev.env.example        (copy to scripts/dev.env and fill in — or let the wizard write it)
 uat/scenarios/_template.md
@@ -224,12 +227,13 @@ aren't in this repo, so nothing overwrites them.
 in your repo's own tree — `scripts/dev.sh` and `uat/scenarios/_template.md` — and marks
 each with a "webapp-uat managed file" line near the top. Every invocation (even
 `--help`) compares your copies with the ones bundled in the installed skill at load
-and tells you if either is out of date. Phase 0 of the next real run (and
-`/webapp-uat setup`) then overwrites the out-of-date ones and commits exactly those
-paths as one `chore(webapp-uat): update managed files (…)` commit — automatically,
-`--silent` included, because those files carry nothing of yours. The final report
-lists what was updated. Managed files are compared byte for byte, so there's nothing
-to merge and no version to bump.
+and tells you if either is out of date. Pre-flight on the next real run then
+overwrites the out-of-date ones and commits exactly those paths as one
+`chore(webapp-uat): update managed files (…)` commit — automatically, `--silent`
+included, because those files carry nothing of yours. The final report lists what
+was updated. (`/webapp-uat setup` refreshes them too, but leaves committing to you,
+alongside the `config.md` and `scripts/dev.env` it writes.) Managed files are
+compared byte for byte, so there's nothing to merge and no version to bump.
 
 **What is never touched:** `scripts/dev.env` (your start/stop values — the reason
 `scripts/dev.sh` can be replaced at all), `config.md`, `discovered-environment.md`,
@@ -243,9 +247,12 @@ so if you say yes.
 
 **Installs from before this mechanism existed** have a `scripts/dev.sh` with the four
 values written into it. The skill recognizes that as legacy and keeps using it as is;
-`/webapp-uat setup` (or any attended run) shows the values it found and offers to move
-them into `scripts/dev.env` and replace the script with the managed one. Nothing
-changes until you confirm; `--silent` runs never migrate.
+`/webapp-uat setup` (or any attended run) shows the values it keeps (start command,
+stop command, port, and wait timeout if one was set) and offers to move them into
+`scripts/dev.env` and replace the script with the managed one. Nothing changes until
+you confirm; `--silent` runs never migrate. Such installs also have a
+`uat/scenarios/_template.md` without the marker line; it is reported as unmanaged
+(no marker) until `/webapp-uat setup` re-adopts it, which it offers to do.
 
 ---
 
@@ -278,6 +285,17 @@ resolves correctly against the demo app's actual repo root instead of this one's
 [`docs/design-history.md`](docs/design-history.md) D6 for why a plain subdirectory
 didn't work here.
 
+### See it run
+
+Three short recordings against the demo app's seeded silent-comment-failure bug, in
+sequence:
+
+![A scenario running in a real Chrome window: login as the scenario's account, then the documents list](docs/gifs/uat-scenario-execution.gif)
+
+![The catch: the UI says "Comment added" but the count stays at 0, and a direct Postgres read finds no row](docs/gifs/uat-bug-found-ui-lies.gif)
+
+![After the fix and an app restart, the same steps re-driven: the comment persists and renders](docs/gifs/uat-fix-retest-passing.gif)
+
 ### Get it
 
 If you're cloning this repo fresh, pull the submodule in the same step:
@@ -294,11 +312,30 @@ git submodule update --init
 
 ### Run it, then test it
 
+Two terminals. In the first, bring the app up:
+
 ```bash
 cd demo-app
-/webapp-uat setup          # proposes config.md from what's actually in demo-app/
 ./run.sh                   # brings up Postgres, migrates, seeds, starts the dev server
 ```
+
+In the second, start a Claude Code session **rooted in `demo-app/`** — a session
+rooted at this repo would load this repo's copy of the skill instead of the demo's
+own installed copy (see [Known limitations](#known-limitations)) — and run setup
+inside it:
+
+```bash
+cd demo-app
+claude --chrome
+```
+
+```
+/webapp-uat setup          # proposes config.md from what's actually in demo-app/
+```
+
+`demo-app` still ships the pre-managed-engine `scripts/dev.sh` with its values written
+in, so setup also offers to move those values into `scripts/dev.env` and swap in the
+managed engine — accept or keep it, both work.
 
 From there, `demo-app`'s own [`README.md`](https://github.com/kzaamout/webapp-uat-demo#readme)
 has the full walkthrough: seeded accounts, what the app is built to exercise, and a
@@ -382,25 +419,29 @@ spec-dir: specs/            # optional — omit if this repo has no spec convent
 review-before-fix: on
 ```
 
-No `config.md` → the skill stops at invocation and points here instead of guessing.
+No `config.md` → the skill offers to run setup on the spot, or points here if you
+decline, instead of guessing.
 
 ---
 
 ## How it works
 
-| Phase | What happens |
+| Step | What happens |
 |---|---|
-| -1 — Invocation | Parses `--help`, `generate`, flags; resolves effective settings for this run |
-| 0 — Pre-flight | Git clean, Chrome connected, app sanity-checked, fixtures verified, resume check, environment discovery (once), start-of-run cleanup |
-| 0.5 — Discovery | First run only: inspects the app's routing, locale, test-data tooling, backend data stores; caches the result |
-| Generation (`generate` only) | Drafts scenarios from specs/schema/routes, computes the full fixture/data list |
-| 1 — Scenario review | Tightens scenarios, promotes any gap found into a real scenario on the spot, presents for approval |
-| 2 — Execution | One scenario at a time in visible Chrome: console/network/screenshot capture, accessibility audit (axe-core), data-integrity check, UI-conformance check against the scenario's own spec (if configured), backend verification |
-| 3 — Classification | Category (bug / unexpected behavior / UX friction / spec gap / test environment) plus severity (P0–P3) for bugs |
-| 4 — Bug fix cycle | Stop → assess → (optional pause) → fix → test → restart → **browser retest** → commit, per bug, batched restart per scenario |
-| 5 — Final report | Full breakdown, severity-sorted, recommendations, end-of-run cleanup, next-step options |
+| 1. Invocation | Parses `setup`, `generate`, `--help` and the flags; resolves the effective settings for this run |
+| 2. Pre-flight | Managed files brought up to date, `config.md` validated, git tree clean, Chrome connected, app sanity-checked, fixtures verified, resume check, start-of-run cleanup |
+| 3. Discovery | First run only: inspects the app's routing, locale, test-data tooling and backend data stores; caches the result for every later run |
+| 4. Generation (`generate` only) | Drafts scenarios from specs, validation code and route gaps; computes the full fixture/data list |
+| 5. Scenario review | Tightens scenarios, promotes any gap found into a real scenario on the spot, presents the plan for approval |
+| 6. Execution | One scenario at a time in visible Chrome: console/network/screenshot capture, accessibility audit (axe-core), data-integrity check, UI-conformance check against the scenario's own spec (if configured), backend verification |
+| 7. Classification | Category (bug / unexpected behavior / UX friction / spec gap / test environment) plus severity (P0–P3) for bugs |
+| 8. Bug fix cycle | Stop → assess → (optional pause) → fix → test → restart → **browser retest** → commit, per bug, with one restart per scenario |
+| 9. Final report | Full breakdown, severity-sorted, recommendations, end-of-run cleanup, next-step options |
 
-Full detail on every phase, with exact example output:
+`SKILL.md` and `USAGE.md` label these internally as Phase -1 through Phase 5
+(invocation is -1, pre-flight 0, discovery 0.5): that numbering predates the
+pre-flight steps and is kept there so the spec folders' references stay valid. Full
+detail on every step, with exact example output:
 [`USAGE.md`](.claude/skills/webapp-uat/USAGE.md).
 
 ### Where this fits in your SDLC
@@ -482,7 +523,7 @@ scenarios (`demo-app/uat/scenarios/`), each showcasing a different capability:
 | `UAT-003-document-title-too-short-rejected` | Boundary/negative-path case, client + server validation |
 | `UAT-004-search-with-no-matches-shows-empty-state` | Empty-state / data-integrity check |
 | `UAT-005-guest-cannot-edit-document` | Role-based access control, correctly enforced |
-| `UAT-006-editor-denied-direct-url-to-members` | Cross-tenant/direct-URL access control |
+| `UAT-006-editor-denied-direct-url-to-members` | Role-based direct-URL access control within a team (the control run for the seeded permission-bypass bug) |
 
 Full step-by-step instructions for running these — plus toggling each of the three
 seeded bugs and seeing this skill actually catch them — live in
@@ -492,57 +533,66 @@ seeded bugs and seeing this skill actually catch them — live in
 
 ## Project structure
 
+**In your app, after install and setup.** With a plugin install the skill folder
+itself stays in Claude Code's plugin cache; only `config.md` and
+`discovered-environment.md` land under `.claude/skills/webapp-uat/` in your tree.
+
 ```
 .claude/skills/webapp-uat/
   SKILL.md                        the skill's operating logic — never hand-edited per project
   USAGE.md                        full usage reference (also the --help output)
   SETUP.md                        one-time setup checklist
   config.md.example               template — copy to config.md and fill in
-  config.md                       your project's settings (you create this; gitignored)
-  discovered-environment.md       cached environment facts (auto-created on first run; gitignored)
-  scripts/sync-managed.sh         keeps the managed files below in sync (check / apply / legacy-values)
+  config.md                       your project's settings (setup writes it; holds an absolute
+                                    project path, so most projects gitignore it)
+  discovered-environment.md       cached environment facts (auto-created on first run)
+  scripts/sync-managed.sh         keeps the managed files below in sync (check / apply /
+                                    legacy-values / print)
   templates/                      bundled dev.sh, dev.env.example, _template.md — what setup
-                                    and Phase 0 place into a repo (the managed files)
-  vendor/axe.min.js               vendored axe-core for the accessibility audit
+                                    and pre-flight place into your tree (the managed files)
+
+scripts/
+  dev.sh                          start / stop / wait-ready engine — managed, never hand-edited
+  dev.env                         your app's start/stop values (setup writes it; committed; yours)
 
 uat/
   scenarios/
-    _template.md                  shape new scenarios should follow (managed — overwritten on update)
+    _template.md                  shape new scenarios follow (managed — overwritten on update)
     *.md                          your actual scenarios
   fixtures/                       real files scenarios reference — never descriptions
-  runs/<run-id>/
-    test-plan.md                  Phase 1 output
-    findings/*.md                 one file per finding
-    final-report.md               Phase 5 output
-  artifacts/<run-id>/<scenario-id>/
-    screenshots, evidence
+  runs/<run-id>/                  test-plan.md, findings/*.md (one per scenario), final-report.md
+  artifacts/<run-id>/<scenario-id>/   screenshots, evidence
+```
 
-scripts/
-  dev.sh                           start / stop / wait-ready engine — managed, never hand-edited
-  dev.env                          your app's start/stop values (setup writes it; committed; yours)
-  dev.env.example                  documents every dev.env key
-  check-sync.sh                    drift guard for this repo's deliberate copy-pairs (see below)
-  test-sync-managed.sh             end-to-end test of sync-managed.sh + dev.sh (CI runs it)
+**This repo only:**
 
+```
+scripts/dev.env.example            documents every dev.env key (root reference copy)
+scripts/check-sync.sh              drift guard for this repo's deliberate copy-pairs (see below)
+scripts/test-sync-managed.sh       end-to-end test of sync-managed.sh + dev.sh (CI runs it)
+uat/scenarios/_template.md         root reference copy of the bundled template
 .claude-plugin/marketplace.json    what makes `/plugin marketplace add` work against this repo
-.github/workflows/sync-check.yml   CI: bash -n, test-sync-managed.sh, check-sync.sh on every push/PR
-
-docs/                              design history, roadmap, requirements reference,
-                                    demo-recording runbook, LinkedIn draft
-specs/                             Spec Kit feature specs this skill's own development
-                                    was formalized through (one folder per roadmap slice)
-
-demo-app/                          git submodule — a separate repo (webapp-uat-demo),
-                                    see "Try it with the bundled demo app" above
+.github/workflows/sync-check.yml   CI on pushes to main and every PR: per-file bash -n, the
+                                     mechanism test, check-sync.sh, demo-app's tests + type check
+.specify/                          Spec Kit tooling (constitution, templates, scripts) used to
+.claude/skills/speckit-*/            formalize this skill's own features, plus its ten skills
+specs/                             one Spec Kit feature folder per roadmap slice
+docs/                              design history, roadmap, requirements reference, demo-recording
+                                     runbook, LinkedIn draft, the three demo GIFs, and the SDLC
+                                     swimlane diagram's .drawio source
+demo-app/                          git submodule — a separate repo (webapp-uat-demo), see
+                                     "Try it with the bundled demo app" above
 ```
 
 **A note on deliberate duplication:** this repo carries the same file in more than
 one place on purpose — the bundled `templates/` vs. the root `scripts/dev.sh` /
 `scripts/dev.env.example` / `uat/scenarios/_template.md` reference copies (a plugin
-install can only write under `.claude/`), and the parent repo's skill folder vs. `demo-app`'s own installed copy
-(a separate repo, so it needs its own copy). `scripts/check-sync.sh` — run locally
-or by the `sync-check` CI workflow on every push — fails loudly if any pair drifts,
-so the duplication stays deliberate instead of becoming silent divergence. See
+install can only write under `.claude/`), and the parent repo's skill folder vs.
+`demo-app`'s own installed copy (a separate repo, so it needs its own copy).
+`scripts/check-sync.sh` — run locally or by the `sync-check` CI workflow — fails
+loudly if any pair drifts (it also checks `demo-app`'s `_template.md` and asserts
+its `scripts/dev.sh` is still the deliberately kept legacy wrapper), so the
+duplication stays deliberate instead of becoming silent divergence. See
 [`docs/design-history.md`](docs/design-history.md) D7/D8/D10/D13.
 
 ---
@@ -562,11 +612,12 @@ so the duplication stays deliberate instead of becoming silent divergence. See
   `dev.env` into `config.md` (one file, but a Markdown parser in bash) is a
   still-open discussion; see [`docs/design-history.md`](docs/design-history.md) D13.
 - **`bug-fix-mechanism: spec-kit` can be proposed by Setup mode from a false
-  positive.** Detection currently looks for `specify` on `PATH` — a globally
-  installed CLI, not evidence that *this* project actually uses Spec Kit. A machine
-  with `specify` installed globally but no project-local `.specify/` directory gets
-  offered `spec-kit` anyway. Always review this specific proposal before accepting it;
-  see [`docs/design-history.md`](docs/design-history.md) D6.
+  positive.** Detection treats either a project-local `.specify/` directory or
+  `specify` on `PATH` as evidence — and the second is a globally installed CLI, not
+  proof that *this* project uses Spec Kit, so a machine with `specify` installed but
+  no `.specify/` here gets offered `spec-kit` anyway. Always review this specific
+  proposal before accepting it; see
+  [`docs/design-history.md`](docs/design-history.md) D6.
 - **No concurrent-run protection.** Two `/webapp-uat` invocations against the same
   project at the same time aren't guarded against — run-id-suffixed data keeps their
   *records* from colliding, but nothing stops both from trying to start/stop the app

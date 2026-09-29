@@ -1,8 +1,10 @@
 # Demo Recording Runbook
 
 For capturing a full terminal + browser screen recording of `webapp-uat` in
-one take. The Chrome-only GIF already produced
-(`webapp-uat-demo-flow.gif`) covers only the browser-visible portion — this
+one take. The three Chrome-only GIFs already produced (`docs/gifs/`:
+`uat-scenario-execution.gif`, `uat-bug-found-ui-lies.gif`,
+`uat-fix-retest-passing.gif`, recorded 2026-08-20 against the
+silent-comment-failure bug) cover only the browser-visible portion — this
 runbook is for the complete picture: the terminal side (Phase 0 pre-flight,
 Phase 1 approval, Phase 3 classification, Phase 4's fix cycle, Phase 5's
 report) interleaved with the same Chrome window.
@@ -17,16 +19,18 @@ audience; shorter can't show the full cycle (detection → fix → verified).
 2. `demo-app/.env`: enable exactly one demo bug for this recording.
    **Recommended: `DEMO_BUG_SILENT_COMMENT_FAILURE=1`** — it's the sharpest
    demo of this skill's actual differentiator (backend verification catching
-   a UI that lies about success), stronger than the accessibility bug already
-   shown in the GIF. Restart `demo-app` after editing `.env` so the flag
-   takes effect.
+   a UI that lies about success); the three existing GIFs show it at three
+   moments, and the full recording adds the terminal side. Restart `demo-app`
+   after editing `.env` so the flag takes effect.
 3. Screen layout: terminal (Claude Code session) on one side, Chrome window
    on the other, both visible simultaneously if your recording setup allows
    split-screen — otherwise, alt-tab deliberately and pause a beat each time
    so the recording doesn't feel rushed.
-4. Have `uat/scenarios/` scoped to just the comment-length scenario for this
-   recording (or point the invocation at that one file directly) — running
-   the full bundled scenario set would blow the runtime budget.
+4. Write the comment scenario first: none of the six bundled `demo-app`
+   scenarios posts a comment. Copy `UAT-002` and add a step that posts a
+   1001–2000-character comment (see `demo-app`'s README §7), e.g. as
+   `uat/scenarios/UAT-007-comment-length.md`. Point the invocation at that one
+   file — running the full bundled scenario set would blow the runtime budget.
 
 ## The recording script
 
@@ -45,9 +49,8 @@ would miss."
 
 ### 2. Invoke, watch Phase 0 (15-20s)
 
-**Run**: `/webapp-uat uat/scenarios/comment-length.md` (or whichever scenario
-file exercises comments on a document — check `uat/scenarios/` for the exact
-name).
+**Run**: `/webapp-uat uat/scenarios/UAT-007-comment-length.md` (the scenario
+written in step 4 above).
 
 **Show**: terminal output as Phase 0 runs — git-clean check, Chrome
 connection, `scripts/dev.sh` sanity check, fixture check, resume check
@@ -143,8 +146,8 @@ app."
 
 Record two shorter clips instead of one continuous take:
 - **Clip A** (Chrome only, ~30s): steps 4-5's browser side. This is
-  essentially what `webapp-uat-demo-flow.gif` already captured — reuse it or
-  re-record fresh footage of the actual bug flow instead of the a11y one.
+  essentially what `docs/gifs/uat-scenario-execution.gif` and
+  `uat-bug-found-ui-lies.gif` already captured — reuse them or re-record.
 - **Clip B** (terminal only, ~90s): steps 2-3, 6-8, sped up 1.5x, with text
   captions summarizing what's happening instead of live narration.
 
