@@ -23,7 +23,7 @@ jobs:
   sync-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
       - name: Shell syntax (every script, individually)
@@ -41,7 +41,7 @@ jobs:
         run: bash scripts/test-sync-managed.sh
       - name: Copy-pair drift guard
         run: bash scripts/check-sync.sh
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: npm

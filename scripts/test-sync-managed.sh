@@ -6,7 +6,7 @@
 # Exit 0 = ALL PASSED. CI runs this on every push (see .github/workflows/sync-check.yml).
 
 set -u
-cd "$(dirname "${BASH_SOURCE[0]}")/.."
+cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 SKILL_SRC="$PWD/.claude/skills/webapp-uat"
 
 S="$(mktemp -d "${TMPDIR:-/tmp}/webapp-uat-test.XXXXXX")"
