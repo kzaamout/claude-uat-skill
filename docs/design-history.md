@@ -634,6 +634,16 @@ not a separate prompt. Two deliberate choices:
 Direct change per the D9 precedent (small, single-behavior addition; not a
 roadmap slice), recorded here and as NR-027 in `docs/requirements.md`.
 
+**Widened (2026-09-28)**: two more files joined the list — `config.md` and
+`discovered-environment.md` under the project's `.claude/skills/webapp-uat/`.
+`config.md` carries an absolute `project-dir`, so committing it breaks every other
+clone, and the freshly written file would otherwise sit untracked and trip the very
+next run's clean-tree check; `discovered-environment.md` is a cache. Both had been
+gitignored by hand in this repo and in demo-app — exactly the trap D11 was written
+to close. `scripts/dev.env` stays off the list on purpose: it holds nothing
+machine-specific and is meant to be committed. `uat/runs/`/`uat/artifacts/` stay
+excluded for the original reason.
+
 ### D12 — Per-project files must never live in the plugin's own install location
 
 Found during live verification of `UAT-11` (2026-08-20), the first time the real

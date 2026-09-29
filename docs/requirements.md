@@ -362,11 +362,12 @@ coverage. See `docs/design-history.md` D9.
 Governs `SKILL.md` Setup mode step 6. Fixed directly per the D9 precedent
 (2026-08-20) — see `docs/design-history.md` D11 for the two deliberate scope
 decisions (coverage tested via `git check-ignore` rather than literal-line
-grepping; scope limited to the two `dev.sh`-generated files, deliberately
-excluding `uat/runs/`/`uat/artifacts/` since Phase 4 commits finding files
-from there).
+grepping; scope limited to files that carry no project data — the two
+`dev.sh`-generated files and, since 2026-09-28, the two per-project skill files —
+deliberately excluding `uat/runs/`/`uat/artifacts/` since Phase 4 commits finding
+files from there).
 
-- **NR-027**: Setup mode's write step MUST check that `dev.log` and `.webapp-uat.pid` (the files `scripts/dev.sh start` generates in the target repo) are gitignored, testing coverage with `git check-ignore` so existing patterns count, and MUST append whichever isn't covered to the repo's `.gitignore` (creating it if absent) — within the same consolidated approval and per-item outcome reporting as every other write-step item, not as a separate prompt. Already-covered entries MUST be left as-is and reported as such.
+- **NR-027**: Setup mode's write step MUST check that `dev.log` and `.webapp-uat.pid` (the files `scripts/dev.sh start` generates in the target repo) and `.claude/skills/webapp-uat/config.md` and `.claude/skills/webapp-uat/discovered-environment.md` (the per-project skill files; `config.md` carries an absolute `project-dir`) are gitignored, testing coverage with `git check-ignore` so existing patterns count, and MUST append whichever isn't covered to the repo's `.gitignore` (creating it if absent) — within the same consolidated approval and per-item outcome reporting as every other write-step item, not as a separate prompt. Already-covered entries MUST be left as-is and reported as such. `scripts/dev.env` MUST NOT be added: it holds nothing machine-specific and is meant to be committed. *(Widened to the two skill files 2026-09-28 — D11 addendum.)*
 
 ---
 

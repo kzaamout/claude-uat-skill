@@ -164,11 +164,13 @@ Write config.md and scripts/dev.env with these values / Edit first / Cancel?
 
 On approval, it writes `config.md` and `scripts/dev.env`, places the skill's managed
 files (`scripts/dev.sh`, `uat/scenarios/_template.md`) from the copies bundled in the
-installed skill, creates any missing `uat/` subdirectory, and makes sure the two files
-`scripts/dev.sh start` generates (`dev.log`, `.webapp-uat.pid`) are gitignored —
-appending them to your `.gitignore` if an existing pattern doesn't already cover
-them, since a run's leftovers would otherwise trip the clean-working-tree check the
-next run starts with. It deliberately does **not** start or stop your app itself as
+installed skill, creates any missing `uat/` subdirectory, and makes sure four files are
+gitignored — the two `scripts/dev.sh start` generates (`dev.log`, `.webapp-uat.pid`)
+and the two the skill keeps under `.claude/skills/webapp-uat/` (`config.md`, which
+holds an absolute path, and the `discovered-environment.md` cache) — appending them
+to your `.gitignore` if an existing pattern doesn't already cover them, since a run's
+leftovers or the config itself would otherwise trip the clean-working-tree check the
+next run starts with. `scripts/dev.env` is meant to be committed. It deliberately does **not** start or stop your app itself as
 part of this — that first real start/stop happens under your eyes in step 3, not
 silently during setup.
 
@@ -539,9 +541,10 @@ itself stays in Claude Code's plugin cache; only `config.md` and
   USAGE.md                        full usage reference (also the --help output)
   SETUP.md                        one-time setup checklist
   config.md.example               template — copy to config.md and fill in
-  config.md                       your project's settings (setup writes it; holds an absolute
-                                    project path, so most projects gitignore it)
-  discovered-environment.md       cached environment facts (auto-created on first run)
+  config.md                       your project's settings (setup writes it and gitignores it:
+                                    it holds an absolute project path)
+  discovered-environment.md       cached environment facts (auto-created on first run;
+                                    gitignored by setup)
   scripts/sync-managed.sh         keeps the managed files below in sync (check / apply /
                                     legacy-values / print)
   templates/                      bundled dev.sh, dev.env.example, _template.md — what setup
