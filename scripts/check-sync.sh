@@ -11,7 +11,7 @@
 # Run from anywhere; exits non-zero on any drift. CI runs this on every push.
 
 set -u
-cd "$(dirname "${BASH_SOURCE[0]}")/.."
+cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 
 SKILL=".claude/skills/webapp-uat"
 FAIL=0
@@ -35,14 +35,24 @@ check "_template.md"    "$SKILL/templates/_template.md"    "uat/scenarios/_templ
 echo ""
 if [ -f "demo-app/$SKILL/SKILL.md" ]; then
   echo "Parent skill vs. demo-app's installed copy:"
-  # Every tracked skill file. config.md and discovered-environment.md are
-  # local-only (gitignored) and deliberately excluded.
-  for f in SKILL.md USAGE.md SETUP.md config.md.example \
-           scripts/sync-managed.sh \
-           templates/dev.sh templates/dev.env.example templates/_template.md \
-           vendor/axe.min.js; do
+  # Every tracked skill file, taken from git so a newly added bundled file can't
+  # slip past this check. config.md and discovered-environment.md are local-only
+  # (gitignored) and therefore never in this list.
+  for f in $(git ls-files "$SKILL" | sed "s|^$SKILL/||"); do
     check "$f" "$SKILL/$f" "demo-app/$SKILL/$f"
   done
+  # demo-app's copies of the files the skill manages in a project tree: its
+  # _template.md must match the bundled one; its scripts/dev.sh is deliberately
+  # still the pre-UAT-13 legacy wrapper (design-history D13), so only its status
+  # is asserted, not its content.
+  check "demo-app uat/scenarios/_template.md" "$SKILL/templates/_template.md" "demo-app/uat/scenarios/_template.md"
+  st="$(bash "$SKILL/scripts/sync-managed.sh" demo-app --check | awk '$2=="scripts/dev.sh"{print $1}')"
+  if [ "$st" = "legacy" ] || [ "$st" = "in-sync" ]; then
+    echo "  in sync: demo-app scripts/dev.sh ($st)"
+  else
+    echo "  DRIFT:   demo-app scripts/dev.sh reports '$st' (expected legacy or in-sync)"
+    FAIL=1
+  fi
 else
   echo "demo-app submodule not checked out - skipping that pair."
   echo "(git submodule update --init, then re-run, for the full check)"

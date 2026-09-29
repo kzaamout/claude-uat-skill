@@ -17,7 +17,9 @@ ENGINE="$P/scripts/dev.sh"
 
 cleanup() {
   if [ -f "$P/.webapp-uat.pid" ]; then
-    kill -INT "$(cat "$P/.webapp-uat.pid")" 2>/dev/null
+    pid="$(cat "$P/.webapp-uat.pid")"
+    kill -INT -- "-$pid" 2>/dev/null
+    kill -INT "$pid" 2>/dev/null
   fi
   rm -rf "$S"
 }
@@ -149,6 +151,29 @@ PORT='4321'
 WAIT_TIMEOUT='45'"
 expect_eq "legacy-values output exact" "$out" "$expected"
 expect_no_line "PROJECT_DIR never printed" "$out" 'PROJECT_DIR=.*'
+
+echo "== legacy wrapper: values that reference \$PROJECT_DIR, contain a quote, or are empty"
+cat > "$ENGINE" <<'LEGACY'
+#!/usr/bin/env bash
+PROJECT_DIR="/Users/someone/code/my-app"
+START_COMMAND="$PROJECT_DIR/run.sh"
+STOP_COMMAND="echo it's down"
+PORT=3000
+LEGACY
+out="$(bash "$SYNC" "$P" --legacy-values 2>&1)"; rc=$?
+expect_eq "legacy-values (\$PROJECT_DIR ref) exit code" "$rc" "0"
+expect_line "\$PROJECT_DIR expanded, not dropped" "$out" "START_COMMAND='/Users/someone/code/my-app/run.sh'"
+expect_line "single quote escaped for dev.env" "$out" "STOP_COMMAND='echo it'\\\\''s down'"
+expect_no_line "PROJECT_DIR still never printed" "$out" 'PROJECT_DIR=.*'
+cat > "$ENGINE" <<'LEGACY'
+#!/usr/bin/env bash
+PROJECT_DIR="/x"
+START_COMMAND=""
+PORT=3000
+LEGACY
+out="$(bash "$SYNC" "$P" --legacy-values 2>/dev/null)"; rc=$?
+expect_eq "empty START_COMMAND exits 2" "$rc" "2"
+expect_eq "empty START_COMMAND prints nothing on stdout" "$out" ""
 cp "$S/engine.sh" "$ENGINE"
 out="$(bash "$SYNC" "$P" --legacy-values 2>&1)"; rc=$?
 expect_eq "not-legacy exit code" "$rc" "3"
@@ -195,6 +220,29 @@ EOT
   sleep 1
   if curl -sf "http://127.0.0.1:$FREE_PORT" >/dev/null 2>&1; then fail "server actually stopped"; else ok "server actually stopped"; fi
   expect_file "dev.log written" "$P/dev.log"
+
+  echo "== engine: START_COMMAND may use shell syntax; stop reaches grandchildren"
+  FREE_PORT2="$(python3 -c 'import socket;s=socket.socket();s.bind(("127.0.0.1",0));print(s.getsockname()[1])')"
+  # `true; ...` keeps each bash -c alive as a real parent (a lone simple command
+  # would be exec'd), so the server ends up two levels below the pidfile's process.
+  cat > "$P/scripts/dev.env" <<EOT
+START_COMMAND='true; FOO=1 bash -c "true; python3 -m http.server $FREE_PORT2 --bind 127.0.0.1"'
+PORT='$FREE_PORT2'
+WAIT_TIMEOUT='20'
+EOT
+  out="$(bash "$ENGINE" start 2>&1)"; rc=$?
+  expect_eq "start (shell syntax) exit code" "$rc" "0"
+  out="$(bash "$ENGINE" wait-ready 2>&1)"; rc=$?
+  expect_eq "ready (shell syntax) exit code" "$rc" "0"
+  # The access-log line is written unbuffered (stderr); python's stdout banner is
+  # block-buffered until exit, so it's the wrong thing to assert on here.
+  expect_contains "compound START_COMMAND ran through a shell" "$(cat "$P/dev.log")" '"GET / HTTP/1.1" 200'
+
+  out="$(bash "$ENGINE" stop 2>&1)"; rc=$?
+  expect_eq "stop (grandchild) exit code" "$rc" "0"
+  sleep 1
+  if curl -sf "http://127.0.0.1:$FREE_PORT2" >/dev/null 2>&1; then fail "grandchild server actually stopped"; else ok "grandchild server actually stopped"; fi
+  expect_eq "no server process left behind" "$(pgrep -f "http.server $FREE_PORT2" | wc -l | tr -d ' ')" "0"
 else
   echo "  skip python3 not available — HTTP server case not run"
 fi

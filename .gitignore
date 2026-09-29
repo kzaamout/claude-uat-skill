@@ -3,3 +3,10 @@
 # Per-project local skill state — only config.md.example is tracked
 .claude/skills/webapp-uat/config.md
 .claude/skills/webapp-uat/discovered-environment.md
+
+# Per-machine Claude Code permission overrides
+.claude/settings.local.json
+
+# What scripts/dev.sh start writes, should anyone run the reference engine here
+dev.log
+.webapp-uat.pid

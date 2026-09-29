@@ -116,7 +116,7 @@ get_highest_from_specs() {
 # Function to clean and format a branch name
 clean_branch_name() {
     local name="$1"
-    echo "$name" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-//' | sed 's/-$//'
+    echo "$name" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed -E 's/-+/-/g' | sed 's/^-//' | sed 's/-$//'
 }
 
 # Resolve repository root using common.sh functions which prioritize .specify
@@ -152,7 +152,7 @@ generate_branch_name() {
         if ! echo "$word" | grep -qiE "$stop_words"; then
             if [ ${#word} -ge 3 ]; then
                 meaningful_words+=("$word")
-            elif echo "$description" | grep -q "\b${word^^}\b"; then
+            elif echo "$description" | grep -q "\b$(printf '%s' "$word" | tr '[:lower:]' '[:upper:]')\b"; then
                 # Keep short words if they appear as uppercase in original (likely acronyms)
                 meaningful_words+=("$word")
             fi

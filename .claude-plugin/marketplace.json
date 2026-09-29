@@ -7,7 +7,6 @@
       "name": "webapp-uat",
       "source": "./",
       "skills": ["./.claude/skills/webapp-uat"],
-      "strict": false,
       "description": "Runs automated end-user acceptance testing against your web app in a real Chrome window."
     }
   ]
